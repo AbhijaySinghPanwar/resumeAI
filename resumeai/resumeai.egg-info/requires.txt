@@ -1,0 +1,3 @@
+pdfplumber
+rapidfuzz
+python-dateutil

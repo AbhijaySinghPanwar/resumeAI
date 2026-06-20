@@ -1,0 +1,108 @@
+"""
+backend/main.py — FastAPI server for ResumeAI Parser v7.0.0
+Endpoints:
+  POST /api/parse        — upload PDF or plain text, returns full parse result
+  POST /api/score        — score a parsed result against a JD
+  POST /api/export       — export to greenhouse / lever / workday / csv
+  GET  /api/health       — health check
+"""
+
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+
+import time
+import json
+from typing import Optional
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from resumeai.pipeline import ResumeParser
+from resumeai.ats.gate import ATSGate
+from resumeai.ats.scorer import ResumeScorer
+from resumeai.ats.exporters import (
+    to_generic_json, to_greenhouse, to_lever, to_workday, to_csv_row
+)
+
+app = FastAPI(title="ResumeAI API", version="7.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+parser  = ResumeParser(strict_schema=False, include_debug=True)
+gate    = ATSGate()
+scorer  = ResumeScorer()
+
+
+# ── Health ────────────────────────────────────────────────────────────────────
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok", "version": "7.0.0"}
+
+
+# ── Parse ─────────────────────────────────────────────────────────────────────
+
+@app.post("/api/parse")
+async def parse_resume(
+    file: Optional[UploadFile] = File(None),
+    text: Optional[str]        = Form(None),
+):
+    if file and file.filename:
+        raw = await file.read()
+        if file.filename.lower().endswith(".pdf"):
+            result = parser.parse_pdf(raw)
+        else:
+            result = parser.parse_text(raw.decode("utf-8", errors="replace"))
+    elif text:
+        result = parser.parse_text(text)
+    else:
+        raise HTTPException(400, "Provide either a file upload or text field.")
+
+    gate_decision = gate.evaluate(result)
+
+    return {
+        "result":   result,
+        "gate":     gate_decision.to_dict(),
+    }
+
+
+# ── Score ─────────────────────────────────────────────────────────────────────
+
+class ScoreRequest(BaseModel):
+    parse_result: dict
+    job_description: str
+
+@app.post("/api/score")
+def score_resume(req: ScoreRequest):
+    report = scorer.score(req.parse_result, req.job_description)
+    return report.to_dict()
+
+
+# ── Export ────────────────────────────────────────────────────────────────────
+
+class ExportRequest(BaseModel):
+    parse_result: dict
+    format: str   # generic_json | greenhouse | lever | workday | csv
+
+@app.post("/api/export")
+def export_resume(req: ExportRequest):
+    fmt = req.format.lower()
+    r   = req.parse_result
+    if fmt == "greenhouse":
+        return to_greenhouse(r)
+    elif fmt == "lever":
+        return to_lever(r)
+    elif fmt == "workday":
+        return to_workday(r)
+    elif fmt == "csv":
+        return {"csv": to_csv_row(r)}
+    else:
+        return json.loads(to_generic_json(r, strip_debug=True))

@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeAI — Intelligent Resume Parser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Design Tokens ───────────────────────────────────────── */
+    :root {
+      --primary:   #4F46E5;
+      --secondary: #7C3AED;
+      --success:   #10B981;
+      --warning:   #F59E0B;
+      --danger:    #EF4444;
+      --bg:        #F8FAFC;
+      --surface:   #FFFFFF;
+      --text:      #0F172A;
+      --muted:     #64748B;
+      --border:    #E2E8F0;
+      --shadow-soft: 0 4px 20px -2px rgba(79,70,229,0.10);
+      --shadow-hover: 0 10px 25px -5px rgba(79,70,229,0.15), 0 8px 10px -6px rgba(79,70,229,0.10);
+      --shadow-btn:   0 4px 14px 0 rgba(79,70,229,0.30);
+    }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 800; font-size: 1.2rem; color: var(--text);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-btn);
+    }
+    .logo-icon svg { color: white; }
+    .logo span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-size: 0.65rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 99px; letter-spacing: 0.05em;
+    }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link {
+      color: var(--muted); font-size: 0.9rem; font-weight: 500;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--primary); }
+    .btn-nav {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-weight: 600; font-size: 0.875rem;
+      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
+      text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
+
+    /* ── Hero ────────────────────────────────────────────────── */
+    .hero {
+      position: relative; overflow: hidden;
+      padding: 5rem 0 4rem;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; z-index: 0;
+    }
+    .blob-1 { width: 500px; height: 500px; background: rgba(79,70,229,0.12); top: -100px; right: -100px; }
+    .blob-2 { width: 400px; height: 400px; background: rgba(124,58,237,0.10); bottom: -50px; left: -80px; }
+    .hero-inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: white; border: 1px solid var(--border);
+      border-radius: 99px; padding: 0.35rem 1rem 0.35rem 0.5rem;
+      font-size: 0.8rem; font-weight: 600; color: var(--primary);
+      margin-bottom: 1.5rem; box-shadow: var(--shadow-soft);
+    }
+    .hero-eyebrow-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.2)} }
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 800;
+      line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.25rem;
+    }
+    .grad-text {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p { font-size: 1.1rem; color: var(--muted); line-height: 1.7; margin-bottom: 2rem; max-width: 480px; }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-weight: 700; font-size: 0.95rem;
+      padding: 0.8rem 1.75rem; border-radius: 99px; border: none;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.4); }
+    .btn-secondary {
+      background: white; color: #334155; font-weight: 600; font-size: 0.95rem;
+      padding: 0.8rem 1.75rem; border-radius: 99px;
+      border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-secondary:hover { background: #F8FAFC; border-color: #CBD5E1; transform: translateY(-1px); }
+
+    /* hero stats */
+    .hero-stats { display: flex; gap: 2rem; margin-top: 2.5rem; }
+    .stat-item { }
+    .stat-num { font-size: 1.5rem; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+
+    /* hero visual */
+    .hero-visual { perspective: 2000px; }
+    .hero-card {
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-hover);
+      transform: rotateX(4deg) rotateY(-10deg);
+      transition: transform 0.4s ease; overflow: hidden;
+    }
+    .hero-card:hover { transform: rotateX(2deg) rotateY(-6deg); }
+    .card-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .card-header-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .card-header span { color: rgba(255,255,255,0.8); font-size: 0.8rem; font-weight: 600; margin-left: auto; }
+    .card-body { padding: 1.25rem; }
+    .parse-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0.75rem; border-radius: 10px; margin-bottom: 0.5rem;
+      background: #F8FAFC; border: 1px solid var(--border);
+    }
+    .parse-row-icon {
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(124,58,237,0.1));
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      color: var(--primary);
+    }
+    .parse-row-label { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+    .parse-row-value { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .parse-row-badge {
+      margin-left: auto; font-size: 0.65rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-blue  { background: #E0E7FF; color: #3730A3; }
+    .badge-purple{ background: #EDE9FE; color: #5B21B6; }
+    .score-bar-wrap { margin-top: 0.75rem; padding: 0.75rem; background: #F8FAFC; border-radius: 10px; border: 1px solid var(--border); }
+    .score-bar-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; display: flex; justify-content: space-between; }
+    .score-bar { height: 6px; background: #E2E8F0; border-radius: 99px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 1s ease; }
+
+    /* ── Section headings ─────────────────────────────────────── */
+    .section { padding: 5rem 0; }
+    .section-label {
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 0.75rem;
+    }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1rem; }
+    .section-sub { font-size: 1.05rem; color: var(--muted); max-width: 560px; line-height: 1.7; }
+
+    /* ── Upload Zone ──────────────────────────────────────────── */
+    #app { padding: 4rem 0; }
+    .app-header { text-align: center; margin-bottom: 3rem; }
+    .upload-card {
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft); overflow: hidden;
+    }
+    .upload-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: #F8FAFC;
+    }
+    .tab-btn {
+      flex: 1; padding: 0.9rem; font-size: 0.875rem; font-weight: 600;
+      border: none; background: none; cursor: pointer; color: var(--muted);
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: white; }
+    .tab-pane { display: none; padding: 2rem; }
+    .tab-pane.active { display: block; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed var(--border); border-radius: 16px;
+      padding: 3rem 2rem; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: #F8FAFC; position: relative;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary); background: rgba(79,70,229,0.03);
+    }
+    .drop-icon {
+      width: 60px; height: 60px; border-radius: 16px; margin: 0 auto 1rem;
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(124,58,237,0.1));
+      display: flex; align-items: center; justify-content: center; color: var(--primary);
+    }
+    .drop-zone h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
+    .drop-zone p { font-size: 0.85rem; color: var(--muted); }
+    .drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .file-chosen {
+      margin-top: 1rem; padding: 0.75rem 1rem; background: #EDE9FE;
+      border-radius: 10px; font-size: 0.85rem; font-weight: 600; color: var(--secondary);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* Text area */
+    textarea.resume-input {
+      width: 100%; min-height: 220px; padding: 1rem;
+      border: 1px solid var(--border); border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.875rem;
+      color: var(--text); resize: vertical; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.6;
+    }
+    textarea.resume-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.12);
+    }
+    textarea.resume-input::placeholder { color: #94A3B8; }
+
+    /* JD input */
+    .jd-section { margin-top: 1.5rem; }
+    .jd-label { font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.5rem; display: block; }
+    textarea.jd-input {
+      width: 100%; min-height: 100px; padding: 0.875rem;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem;
+      color: var(--text); resize: vertical; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; line-height: 1.6;
+    }
+    textarea.jd-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    textarea.jd-input::placeholder { color: #94A3B8; }
+
+    .parse-btn-wrap { margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; }
+
+    /* ── Loading ──────────────────────────────────────────────── */
+    .loading-state {
+      text-align: center; padding: 3rem 2rem;
+      display: none;
+    }
+    .spinner {
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 1rem;
+      border: 3px solid #E2E8F0;
+      border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state h3 { font-weight: 700; margin-bottom: 0.35rem; }
+    .loading-state p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Results ──────────────────────────────────────────────── */
+    #results { display: none; margin-top: 2.5rem; }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: gap;
+    }
+    .results-title { font-size: 1.3rem; font-weight: 800; }
+    .results-meta { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+    .results-actions { display: flex; gap: 0.75rem; }
+
+    /* Gate badge */
+    .gate-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 1rem; border-radius: 99px; font-size: 0.8rem; font-weight: 700;
+    }
+    .gate-pass { background: #D1FAE5; color: #065F46; }
+    .gate-fail { background: #FEE2E2; color: #991B1B; }
+
+    /* Results grid */
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .result-card {
+      background: white; border-radius: 16px;
+      border: 1px solid var(--border); box-shadow: var(--shadow-soft);
+      overflow: hidden; transition: all 0.2s;
+    }
+    .result-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .result-card.full { grid-column: 1 / -1; }
+    .rc-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .rc-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(124,58,237,0.1));
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); flex-shrink: 0;
+    }
+    .rc-title { font-size: 0.875rem; font-weight: 700; color: var(--text); }
+    .rc-count { margin-left: auto; font-size: 0.75rem; font-weight: 700; color: var(--muted); background: #F1F5F9; padding: 2px 8px; border-radius: 99px; }
+    .rc-body { padding: 1.25rem; }
+
+    /* Contact card */
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .contact-field { }
+    .cf-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+    .cf-value { font-size: 0.875rem; font-weight: 600; color: var(--text); word-break: break-word; }
+    .cf-value.empty { color: #CBD5E1; font-style: italic; font-weight: 400; }
+
+    /* Entry list (education, experience, leadership, certs) */
+    .entry-item {
+      padding: 0.875rem; border-radius: 12px; background: #F8FAFC;
+      border: 1px solid var(--border); margin-bottom: 0.75rem;
+    }
+    .entry-item:last-child { margin-bottom: 0; }
+    .entry-main { font-size: 0.875rem; font-weight: 700; color: var(--text); margin-bottom: 0.15rem; }
+    .entry-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .entry-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .entry-tag {
+      font-size: 0.68rem; font-weight: 600; padding: 2px 8px; border-radius: 99px;
+      background: #EDE9FE; color: var(--secondary);
+    }
+    .entry-tag.green { background: #D1FAE5; color: #065F46; }
+    .entry-tag.blue  { background: #DBEAFE; color: #1D4ED8; }
+    .bullet-list { margin-top: 0.5rem; padding-left: 1rem; }
+    .bullet-list li { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.2rem; }
+
+    /* Skills */
+    .skill-cat { margin-bottom: 1rem; }
+    .skill-cat-name { font-size: 0.75rem; font-weight: 700; color: var(--muted); margin-bottom: 0.5rem; }
+    .skill-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .skill-chip {
+      font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.75rem; border-radius: 99px;
+      background: white; border: 1px solid var(--border); color: #334155;
+      transition: all 0.2s;
+    }
+    .skill-chip:hover { border-color: var(--primary); color: var(--primary); background: rgba(79,70,229,0.04); }
+
+    /* Score card */
+    .score-section { }
+    .overall-score {
+      text-align: center; margin-bottom: 1.5rem; padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(79,70,229,0.05), rgba(124,58,237,0.05));
+      border-radius: 14px; border: 1px solid rgba(79,70,229,0.1);
+    }
+    .score-ring {
+      width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 0.75rem;
+      background: conic-gradient(var(--primary) 0% var(--pct, 0%), #E2E8F0 0%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .score-ring-inner {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: white; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; font-weight: 800; color: var(--primary);
+    }
+    .score-grade {
+      font-size: 1.5rem; font-weight: 800; color: var(--text); margin-bottom: 0.2rem;
+    }
+    .score-rec { font-size: 0.82rem; color: var(--muted); max-width: 260px; margin: 0 auto; }
+    .cat-scores { display: flex; flex-direction: column; gap: 0.75rem; }
+    .cat-row { }
+    .cat-row-header { display: flex; justify-content: space-between; margin-bottom: 0.3rem; }
+    .cat-row-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+    .cat-row-pct { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+    .cat-bar { height: 6px; background: #E2E8F0; border-radius: 99px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+    /* Sections empty state */
+    .empty-state {
+      text-align: center; padding: 2rem; color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* Anomaly alerts */
+    .anomaly-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .anomaly-item {
+      display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.75rem;
+      border-radius: 10px; font-size: 0.82rem;
+    }
+    .anomaly-error { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+    .anomaly-warning { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; }
+
+    /* Export */
+    .export-row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .export-btn {
+      flex: 1; min-width: 120px; padding: 0.65rem 1rem;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: white; font-size: 0.82rem; font-weight: 600; color: #334155;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem; justify-content: center;
+    }
+    .export-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(79,70,229,0.04); transform: translateY(-1px); }
+
+    /* Debug toggle */
+    .debug-toggle {
+      font-size: 0.78rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; display: flex; align-items: center; gap: 0.35rem;
+      background: none; border: none; margin-top: 0.5rem;
+      transition: color 0.2s;
+    }
+    .debug-toggle:hover { color: var(--primary); }
+    .debug-block {
+      margin-top: 0.75rem; padding: 1rem;
+      background: #0F172A; border-radius: 12px; overflow: auto;
+      max-height: 300px; display: none;
+    }
+    .debug-block pre { font-size: 0.72rem; color: #94A3B8; font-family: monospace; line-height: 1.6; }
+
+    /* ── Features strip ───────────────────────────────────────── */
+    .features { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .features-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; padding: 3rem 0; }
+    .feat-item { text-align: center; }
+    .feat-icon {
+      width: 48px; height: 48px; border-radius: 12px; margin: 0 auto 0.75rem;
+      background: linear-gradient(135deg, rgba(79,70,229,0.1), rgba(124,58,237,0.1));
+      display: flex; align-items: center; justify-content: center; color: var(--primary);
+    }
+    .feat-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .feat-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── How it works ─────────────────────────────────────────── */
+    .steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; margin-top: 3rem; }
+    .step-card {
+      background: white; border-radius: 20px; padding: 2rem;
+      border: 1px solid var(--border); box-shadow: var(--shadow-soft);
+      transition: all 0.2s; position: relative;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .step-num {
+      width: 40px; height: 40px; border-radius: 12px; margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; color: white;
+      box-shadow: 0 0 20px rgba(79,70,229,0.4);
+    }
+    .step-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .step-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── CTA ─────────────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, #312E81, #1E1B4B);
+      border-radius: 24px; padding: 4rem 3rem; text-align: center;
+      position: relative; overflow: hidden; margin: 3rem 0;
+    }
+    .cta-blob { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+    .cta-blob-1 { width: 300px; height: 300px; background: rgba(79,70,229,0.3); top: -80px; right: -40px; }
+    .cta-blob-2 { width: 250px; height: 250px; background: rgba(124,58,237,0.2); bottom: -60px; left: 0; }
+    .cta-section h2 { font-size: 2rem; font-weight: 800; color: white; margin-bottom: 1rem; position: relative; z-index: 1; }
+    .cta-section p { color: rgba(255,255,255,0.7); margin-bottom: 2rem; position: relative; z-index: 1; }
+    .btn-white {
+      background: white; color: var(--primary); font-weight: 700; font-size: 0.95rem;
+      padding: 0.85rem 2rem; border-radius: 99px; border: none; cursor: pointer;
+      transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      display: inline-flex; align-items: center; gap: 0.5rem; position: relative; z-index: 1;
+    }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    footer {
+      background: white; border-top: 1px solid var(--border);
+      padding: 2rem 0; margin-top: 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-copy { font-size: 0.82rem; color: var(--muted); }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-link { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: var(--primary); }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999;
+      background: #0F172A; color: white; padding: 0.875rem 1.25rem;
+      border-radius: 12px; font-size: 0.875rem; font-weight: 600;
+      display: flex; align-items: center; gap: 0.5rem;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      max-width: 340px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #065F46; }
+    .toast.error   { background: #991B1B; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .hero-inner { grid-template-columns: 1fr; }
+      .hero-visual { display: none; }
+      .results-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .hero { padding: 3rem 0 2.5rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .cta-section { padding: 2.5rem 1.5rem; }
+      .results-actions { flex-wrap: wrap; }
+      .nav-right .nav-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="container">
+    <div class="nav-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        Resume<span>AI</span>
+      </a>
+      <div class="nav-right">
+        <a href="#how" class="nav-link">How it works</a>
+        <a href="#app" class="nav-link">Try it</a>
+        <span class="nav-badge">v7.0.0</span>
+        <button class="btn-nav" onclick="scrollTo('#app')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Parse Resume
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-eyebrow">
+          <div class="hero-eyebrow-dot"></div>
+          Deterministic · Ownership-based · v7.0.0
+        </div>
+        <h1>Parse resumes that <span class="grad-text">actually work</span> in production</h1>
+        <p>No section bleeding. No silent failures. Every line belongs to exactly one section — guaranteed by architecture, not aliases.</p>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="document.querySelector('#app').scrollIntoView({behavior:'smooth'})">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Parse a Resume
+          </button>
+          <button class="btn-secondary" onclick="document.querySelector('#how').scrollIntoView({behavior:'smooth'})">
+            How it works
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item"><div class="stat-num">256</div><div class="stat-label">Tests passing</div></div>
+          <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">ATS formats</div></div>
+          <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Deterministic</div></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="card-header">
+            <div class="card-header-dot" style="background:#FF5F57"></div>
+            <div class="card-header-dot" style="background:#FFBD2E;margin-left:4px"></div>
+            <div class="card-header-dot" style="background:#28CA41;margin-left:4px"></div>
+            <span>resume_parse_result.json</span>
+          </div>
+          <div class="card-body">
+            <div class="parse-row">
+              <div class="parse-row-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div><div class="parse-row-label">Contact</div><div class="parse-row-value">Priya Sharma · priya@iit.ac.in</div></div>
+              <span class="parse-row-badge badge-green">✓</span>
+            </div>
+            <div class="parse-row">
+              <div class="parse-row-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+              <div><div class="parse-row-label">Education</div><div class="parse-row-value">B.Tech CS · IIT Bombay · 2021</div></div>
+              <span class="parse-row-badge badge-blue">2</span>
+            </div>
+            <div class="parse-row">
+              <div class="parse-row-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+              <div><div class="parse-row-label">Experience</div><div class="parse-row-value">Software Engineer · Infosys</div></div>
+              <span class="parse-row-badge badge-blue">3</span>
+            </div>
+            <div class="parse-row">
+              <div class="parse-row-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+              <div><div class="parse-row-label">Leadership</div><div class="parse-row-value">Tech Head · Coding Club IIT</div></div>
+              <span class="parse-row-badge badge-purple">✓</span>
+            </div>
+            <div class="score-bar-wrap">
+              <div class="score-bar-label"><span>JD Match Score</span><span style="color:var(--primary);font-weight:700">78%</span></div>
+              <div class="score-bar"><div class="score-bar-fill" style="width:78%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features strip ────────────────────────────────────────────────── -->
+<section class="features">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feat-item">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="feat-title">Ownership Engine</div>
+        <div class="feat-desc">Every line belongs to exactly one section. No bleeding by design.</div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="feat-title">Deterministic Output</div>
+        <div class="feat-desc">Same resume always produces identical JSON — across any number of runs.</div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="feat-title">ATS Integration</div>
+        <div class="feat-desc">Export to Greenhouse, Lever, Workday, or CSV in one click.</div>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div class="feat-title">Full Debug Layer</div>
+        <div class="feat-desc">Every parse failure is visible. Section transitions logged, anomalies flagged.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── App / Parser ──────────────────────────────────────────────────── -->
+<section id="app">
+  <div class="container">
+    <div class="app-header">
+      <span class="section-label">Try it now</span>
+      <h2 class="section-title">Upload a resume, get structured data</h2>
+      <p class="section-sub" style="margin:0 auto">Paste resume text or upload a PDF. Add a job description to get a match score instantly.</p>
+    </div>
+
+    <div class="upload-card">
+      <div class="upload-tabs">
+        <button class="tab-btn active" onclick="switchTab('text',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          Paste Text
+        </button>
+        <button class="tab-btn" onclick="switchTab('file',this)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload PDF
+        </button>
+      </div>
+
+      <!-- Text tab -->
+      <div id="tab-text" class="tab-pane active">
+        <textarea id="resume-text" class="resume-input" placeholder="Paste your resume text here...&#10;&#10;Example:&#10;Priya Sharma&#10;priya@email.com | +91-9876543210&#10;&#10;EDUCATION&#10;B.Tech Computer Science | IIT Bombay | 2017-2021&#10;&#10;EXPERIENCE&#10;Software Engineer | Infosys | 2021 - Present&#10;- Built RESTful APIs serving 50K daily users&#10;- Reduced latency by 35% via Redis caching&#10;&#10;SKILLS&#10;Python, Django, React, AWS, Docker"></textarea>
+        <div class="jd-section">
+          <label class="jd-label" for="jd-text">Job Description (optional — enables match scoring)</label>
+          <textarea id="jd-text" class="jd-input" placeholder="Paste the job description here to score this resume against it..."></textarea>
+        </div>
+        <div class="parse-btn-wrap">
+          <button class="btn-primary" onclick="parseResume()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Parse Resume
+          </button>
+          <button class="btn-secondary" onclick="loadExample()">Load example</button>
+        </div>
+      </div>
+
+      <!-- File tab -->
+      <div id="tab-file" class="tab-pane">
+        <div class="drop-zone" id="drop-zone" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <input type="file" accept=".pdf,.txt" onchange="onFileChange(event)" />
+          <div class="drop-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3>Drop your resume here</h3>
+          <p>Supports PDF and plain text files · Click to browse</p>
+        </div>
+        <div id="file-chosen" class="file-chosen" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span id="file-name">file.pdf</span>
+        </div>
+        <div class="jd-section">
+          <label class="jd-label" for="jd-file">Job Description (optional)</label>
+          <textarea id="jd-file" class="jd-input" placeholder="Paste job description here..."></textarea>
+        </div>
+        <div class="parse-btn-wrap">
+          <button class="btn-primary" onclick="parseResumeFile()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Parse Resume
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" id="loading">
+        <div class="spinner"></div>
+        <h3>Parsing your resume…</h3>
+        <p>Running ownership engine, extracting fields, validating schema</p>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+      <div class="results-header">
+        <div>
+          <div class="results-title">Parse Results</div>
+          <div class="results-meta" id="results-meta"></div>
+        </div>
+        <div class="results-actions">
+          <span id="gate-badge" class="gate-badge"></span>
+          <button class="btn-secondary" onclick="copyJson()" style="padding:0.5rem 1rem;font-size:0.82rem">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy JSON
+          </button>
+          <button class="btn-secondary" onclick="clearResults()" style="padding:0.5rem 1rem;font-size:0.82rem">Clear</button>
+        </div>
+      </div>
+
+      <div class="results-grid" id="results-grid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ───────────────────────────────────────────────────── -->
+<section class="section" id="how" style="background:white;border-top:1px solid var(--border)">
+  <div class="container">
+    <span class="section-label">Architecture</span>
+    <h2 class="section-title">Four phases, zero guessing</h2>
+    <p class="section-sub">Unlike regex-based parsers that accumulate aliases until they collapse, ResumeAI uses a principled ownership model.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Section Ownership Engine</div>
+        <div class="step-desc">Every line is assigned to exactly one section via a deterministic state machine. An unrecognized header closes the previous section immediately — no content can bleed through.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Field Extraction</div>
+        <div class="step-desc">Isolated extractors per section consume only their own lines. The education extractor never touches certifications. No shared state means no cross-contamination.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Schema Contract v7.0.0</div>
+        <div class="step-desc">All arrays always exist. All objects always exist. The debug block is always present. Every parse result is validated against the same contract — no silent failures.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-title">ATS Integration</div>
+        <div class="step-desc">Results flow through a version-enforcing gate before ATS submission. Export to Greenhouse, Lever, Workday, or CSV. Score against a job description with a weighted match report.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">05</div>
+        <div class="step-title">Full Debug Layer</div>
+        <div class="step-desc">Every section transition, every ownership decision, every normalization applied is logged. Anomalies are auto-detected. Parser failures are never invisible.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">06</div>
+        <div class="step-title">256 Tests, All Passing</div>
+        <div class="step-desc">Structural invariant tests, adversarial fixtures, determinism tests, and regression tests named after documented production failures — not just clean ASCII input.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────────────────────── -->
+<div class="container">
+  <div class="cta-section">
+    <div class="cta-blob cta-blob-1"></div>
+    <div class="cta-blob cta-blob-2"></div>
+    <h2>Ready to parse resumes that <em>actually work</em>?</h2>
+    <p>Drop a resume above and see structured JSON in seconds.</p>
+    <button class="btn-white" onclick="document.querySelector('#app').scrollIntoView({behavior:'smooth'})">
+      Try it now
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-copy">© 2025 ResumeAI Parser v7.0.0 · Built with FastAPI + Python</div>
+      <div class="footer-links">
+        <a href="#app" class="footer-link">Try it</a>
+        <a href="#how" class="footer-link">How it works</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ── Toast ──────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Config ──────────────────────────────────────────────────────────── */
+const API_BASE = 'http://localhost:8000';
+
+/* ── State ───────────────────────────────────────────────────────────── */
+let lastResult   = null;
+let selectedFile = null;
+let activeTab    = 'text';
+
+/* ── Tab switching ───────────────────────────────────────────────────── */
+function switchTab(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+/* ── File handling ───────────────────────────────────────────────────── */
+function onDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
+function onDragLeave()  { document.getElementById('drop-zone').classList.remove('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f) setFile(f);
+}
+function onFileChange(e) { const f = e.target.files[0]; if (f) setFile(f); }
+function setFile(f) {
+  selectedFile = f;
+  document.getElementById('file-name').textContent = f.name;
+  document.getElementById('file-chosen').style.display = 'flex';
+}
+
+/* ── Load example ────────────────────────────────────────────────────── */
+function loadExample() {
+  document.getElementById('resume-text').value = `Priya Sharma
+priya.sharma@email.com | +91-9876543210 | linkedin.com/in/priyasharma | Bangalore, India
+
+SUMMARY
+Results-driven software engineer with 3 years of experience in full-stack development.
+
+EDUCATION
+B.Tech in Computer Science
+IIT Bombay | 2017 - 2021 | CGPA: 8.7/10
+
+EXPERIENCE
+Software Engineer | Infosys Ltd | Bangalore | Jun 2021 - Present
+- Developed RESTful APIs using Python and Django serving 50K daily users
+- Reduced latency by 35% through Redis caching implementation
+- Led migration from monolith to microservices architecture
+
+Intern | Wipro Technologies | Mumbai | May 2020 - Jul 2020
+- Built data pipeline using Apache Kafka and PySpark
+
+PROJECTS
+Resume Parser
+- Built NLP-based resume parser using Python and spaCy
+- Deployed on AWS EC2 with Docker containerization
+
+SKILLS
+Languages: Python, Java, JavaScript
+Frameworks: Django, React, Node.js
+Databases: MySQL, MongoDB, Redis
+Tools: Docker, Git, AWS
+
+CERTIFICATIONS
+AWS Certified Solutions Architect | Amazon | 2022
+Google Cloud Professional Data Engineer | Google | 2023
+
+LEADERSHIP
+Technical Head | Coding Club IIT Bombay | 2019 - 2021
+- Organized 5 hackathons with 500+ participants
+- Mentored 30+ junior students in competitive programming`;
+
+  document.getElementById('jd-text').value = `We are looking for a Software Engineer with:
+- 2+ years Python experience
+- Django or Flask framework
+- AWS and Docker skills
+- React frontend experience
+- Bachelor's degree in Computer Science
+- AWS certification preferred`;
+}
+
+/* ── Parse (text) ────────────────────────────────────────────────────── */
+async function parseResume() {
+  const text = document.getElementById('resume-text').value.trim();
+  const jd   = document.getElementById('jd-text').value.trim();
+  if (!text) { showToast('Please paste resume text first.', 'error'); return; }
+  await doParseAndScore({ text }, jd);
+}
+
+/* ── Parse (file) ────────────────────────────────────────────────────── */
+async function parseResumeFile() {
+  if (!selectedFile) { showToast('Please select a file first.', 'error'); return; }
+  const jd = document.getElementById('jd-file').value.trim();
+  const fd = new FormData();
+  fd.append('file', selectedFile);
+  await doParseAndScore({ formData: fd }, jd);
+}
+
+/* ── Core parse + score flow ─────────────────────────────────────────── */
+async function doParseAndScore(source, jd) {
+  showLoading(true);
+  hideResults();
+
+  try {
+    // Parse
+    let parseRes;
+    if (source.formData) {
+      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', body: source.formData });
+    } else {
+      const fd = new FormData();
+      fd.append('text', source.text);
+      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', body: fd });
+    }
+
+    if (!parseRes.ok) {
+      const err = await parseRes.json().catch(() => ({}));
+      throw new Error(err.detail || `Server error ${parseRes.status}`);
+    }
+
+    const data = await parseRes.json();
+    lastResult = data.result;
+
+    // Score if JD provided
+    let scoreData = null;
+    if (jd) {
+      const scoreRes = await fetch(`${API_BASE}/api/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parse_result: lastResult, job_description: jd }),
+      });
+      if (scoreRes.ok) scoreData = await scoreRes.json();
+    }
+
+    showLoading(false);
+    renderResults(lastResult, data.gate, scoreData);
+
+  } catch (e) {
+    showLoading(false);
+    showToast('Parse failed: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+/* ── Render results ──────────────────────────────────────────────────── */
+function renderResults(r, gate, score) {
+  const grid = document.getElementById('results-grid');
+  grid.innerHTML = '';
+
+  // Meta
+  const meta = r.metadata || {};
+  document.getElementById('results-meta').textContent =
+    `${meta.total_lines_processed || '?'} lines · ${meta.parse_duration_ms || '?'}ms · ${(meta.sections_detected||[]).length} sections`;
+
+  // Gate badge
+  const gb = document.getElementById('gate-badge');
+  if (gate) {
+    gb.className = 'gate-badge ' + (gate.passed ? 'gate-pass' : 'gate-fail');
+    gb.textContent = gate.passed ? '✓ ATS Gate Passed' : '✗ ATS Gate Blocked';
+  }
+
+  // Contact card
+  const c = r.contact || {};
+  grid.appendChild(makeCard('person', 'Contact', null, `
+    <div class="contact-grid">
+      ${cf('Name',      c.name)}
+      ${cf('Email',     c.email)}
+      ${cf('Phone',     c.phone)}
+      ${cf('Location',  c.location)}
+      ${cf('LinkedIn',  c.linkedin)}
+      ${cf('GitHub',    c.github)}
+    </div>
+  `));
+
+  // Education
+  const edu = r.education || [];
+  grid.appendChild(makeCard('graduation-cap', 'Education', edu.length, edu.length
+    ? edu.map(e => `
+      <div class="entry-item">
+        <div class="entry-main">${e.degree||'Degree unknown'} ${e.field_of_study ? '· '+e.field_of_study : ''}</div>
+        <div class="entry-sub">${e.institution||''} ${e.start_date||''} ${e.end_date ? '– '+e.end_date : ''} ${e.gpa ? '· GPA '+e.gpa : ''}</div>
+        ${e.honors&&e.honors.length ? `<div class="entry-tags">${e.honors.map(h=>`<span class="entry-tag green">${h}</span>`).join('')}</div>` : ''}
+      </div>`).join('')
+    : emptyState('No education detected')
+  ));
+
+  // Experience
+  const exp = r.experience || [];
+  grid.appendChild(makeCard('briefcase', 'Experience', exp.length, exp.length
+    ? exp.map(e => `
+      <div class="entry-item">
+        <div class="entry-main">${e.title||'Role'} ${e.company ? '· '+e.company : ''} ${e.is_current ? '<span class="entry-tag green">Current</span>' : ''}</div>
+        <div class="entry-sub">${e.location||''} ${e.start_date||''} ${e.end_date ? '– '+e.end_date : ''}</div>
+        ${e.bullets&&e.bullets.length ? `<ul class="bullet-list">${e.bullets.slice(0,3).map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
+      </div>`).join('')
+    : emptyState('No experience detected')
+  ));
+
+  // Projects
+  const proj = r.projects || [];
+  grid.appendChild(makeCard('folder', 'Projects', proj.length, proj.length
+    ? proj.map(p => `
+      <div class="entry-item">
+        <div class="entry-main">${p.name||'Project'}</div>
+        ${p.description ? `<div class="entry-sub">${p.description.slice(0,120)}</div>` : ''}
+        ${p.technologies&&p.technologies.length ? `<div class="entry-tags">${p.technologies.slice(0,8).map(t=>`<span class="entry-tag blue">${t}</span>`).join('')}</div>` : ''}
+      </div>`).join('')
+    : emptyState('No projects detected')
+  ));
+
+  // Leadership
+  const lead = r.leadership || [];
+  grid.appendChild(makeCard('star', 'Leadership', lead.length, lead.length
+    ? lead.map(l => `
+      <div class="entry-item">
+        <div class="entry-main">${l.role||'Role'} ${l.organization ? '· '+l.organization : ''}</div>
+        <div class="entry-sub">${l.start_date||''} ${l.end_date ? '– '+l.end_date : ''}</div>
+        ${l.bullets&&l.bullets.length ? `<ul class="bullet-list">${l.bullets.slice(0,2).map(b=>`<li>${b}</li>`).join('')}</ul>` : ''}
+      </div>`).join('')
+    : emptyState('No leadership detected')
+  ));
+
+  // Certifications
+  const certs = r.certifications || [];
+  grid.appendChild(makeCard('award', 'Certifications', certs.length, certs.length
+    ? certs.map(c2 => `
+      <div class="entry-item">
+        <div class="entry-main">${c2.name||'Certification'}</div>
+        <div class="entry-sub">${c2.issuer||''} ${c2.date ? '· '+c2.date : ''}</div>
+        ${c2.credential_id ? `<div class="entry-tags"><span class="entry-tag">ID: ${c2.credential_id}</span></div>` : ''}
+      </div>`).join('')
+    : emptyState('No certifications detected')
+  ));
+
+  // Skills
+  const sk = r.skills || {};
+  const cats = sk.categories || [];
+  const flat = sk.flat_list || [];
+  const skillHtml = cats.length
+    ? cats.map(cat => `
+        <div class="skill-cat">
+          <div class="skill-cat-name">${cat.category}</div>
+          <div class="skill-chips">${(cat.skills||[]).map(s=>`<span class="skill-chip">${s}</span>`).join('')}</div>
+        </div>`).join('')
+    : flat.length
+      ? `<div class="skill-chips">${flat.map(s=>`<span class="skill-chip">${s}</span>`).join('')}</div>`
+      : emptyState('No skills detected');
+
+  const skillCard = makeCard('zap', 'Skills', flat.length || null, skillHtml);
+  skillCard.classList.add('full');
+  grid.appendChild(skillCard);
+
+  // Score card
+  if (score) {
+    const scoreCard = makeCard('trending-up', 'JD Match Score', null, renderScore(score));
+    scoreCard.classList.add('full');
+    grid.appendChild(scoreCard);
+    // Animate bars
+    setTimeout(() => {
+      document.querySelectorAll('.cat-bar-fill[data-pct]').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    }, 100);
+  }
+
+  // Anomalies
+  const anomalies = (r.debug||{}).anomalies || [];
+  if (anomalies.length) {
+    const anomCard = makeCard('alert-triangle', 'Anomalies', anomalies.length, `
+      <div class="anomaly-list">
+        ${anomalies.map(a => `
+          <div class="anomaly-item ${a.severity==='error'?'anomaly-error':'anomaly-warning'}">
+            <span>${a.severity==='error'?'⚠':'ℹ'}</span>
+            <span><strong>${a.type}</strong> — ${a.detail}</span>
+          </div>`).join('')}
+      </div>
+    `);
+    anomCard.classList.add('full');
+    grid.appendChild(anomCard);
+  }
+
+  // Export card
+  const exportCard = makeCard('download', 'Export', null, `
+    <div class="export-row">
+      <button class="export-btn" onclick="exportAs('generic_json')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        JSON
+      </button>
+      <button class="export-btn" onclick="exportAs('greenhouse')">🌿 Greenhouse</button>
+      <button class="export-btn" onclick="exportAs('lever')">⚡ Lever</button>
+      <button class="export-btn" onclick="exportAs('workday')">🏢 Workday</button>
+      <button class="export-btn" onclick="exportAs('csv')">📊 CSV</button>
+    </div>
+    <button class="debug-toggle" onclick="toggleDebug(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-4"/><polyline points="16 2 12 6 8 2"/><line x1="12" y1="6" x2="12" y2="13"/></svg>
+      Show debug output
+    </button>
+    <div class="debug-block" id="debug-block">
+      <pre>${JSON.stringify(r.debug || {}, null, 2)}</pre>
+    </div>
+  `);
+  exportCard.classList.add('full');
+  grid.appendChild(exportCard);
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderScore(s) {
+  const pct = Math.round(s.overall_score);
+  const deg = Math.round(pct * 3.6);
+  return `
+    <div class="overall-score">
+      <div class="score-ring" style="--pct:${pct}%; background: conic-gradient(var(--primary) ${deg}deg, #E2E8F0 0deg)">
+        <div class="score-ring-inner">${pct}</div>
+      </div>
+      <div class="score-grade">Grade: ${s.grade}</div>
+      <div class="score-rec">${s.recommendation}</div>
+    </div>
+    <div class="cat-scores">
+      ${(s.category_scores||[]).map(c => `
+        <div class="cat-row">
+          <div class="cat-row-header">
+            <span class="cat-row-name">${cap(c.category)}</span>
+            <span class="cat-row-pct">${Math.round(c.score)}%</span>
+          </div>
+          <div class="cat-bar"><div class="cat-bar-fill" data-pct="${Math.round(c.score)}" style="width:0%"></div></div>
+        </div>`).join('')}
+    </div>
+    ${s.matched_skills&&s.matched_skills.length ? `
+      <div style="margin-top:1rem">
+        <div class="skill-cat-name" style="margin-bottom:0.5rem">Matched Skills</div>
+        <div class="skill-chips">${s.matched_skills.map(sk=>`<span class="skill-chip" style="border-color:#10B981;color:#065F46">${sk}</span>`).join('')}</div>
+      </div>` : ''}
+    ${s.missing_skills&&s.missing_skills.length ? `
+      <div style="margin-top:0.75rem">
+        <div class="skill-cat-name" style="margin-bottom:0.5rem">Missing Skills</div>
+        <div class="skill-chips">${s.missing_skills.slice(0,10).map(sk=>`<span class="skill-chip" style="border-color:#EF4444;color:#991B1B">${sk}</span>`).join('')}</div>
+      </div>` : ''}
+  `;
+}
+
+/* ── Card builder ─────────────────────────────────────────────────────── */
+const ICON_MAP = {
+  'person': '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  'graduation-cap': '<path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>',
+  'briefcase': '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  'folder': '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  'award': '<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>',
+  'zap': '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  'trending-up': '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',
+  'alert-triangle': '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+};
+
+function makeCard(iconKey, title, count, bodyHtml) {
+  const el = document.createElement('div');
+  el.className = 'result-card';
+  el.innerHTML = `
+    <div class="rc-header">
+      <div class="rc-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_MAP[iconKey]||''}</svg>
+      </div>
+      <span class="rc-title">${title}</span>
+      ${count !== null && count !== undefined ? `<span class="rc-count">${count}</span>` : ''}
+    </div>
+    <div class="rc-body">${bodyHtml}</div>
+  `;
+  return el;
+}
+
+function cf(label, value) {
+  return `<div class="contact-field">
+    <div class="cf-label">${label}</div>
+    <div class="cf-value ${!value?'empty':''}">${value || 'Not found'}</div>
+  </div>`;
+}
+function emptyState(msg) { return `<div class="empty-state">${msg}</div>`; }
+function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+
+/* ── Export ───────────────────────────────────────────────────────────── */
+async function exportAs(fmt) {
+  if (!lastResult) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/export`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parse_result: lastResult, format: fmt }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Export failed');
+    const content = fmt === 'csv' ? data.csv : JSON.stringify(data, null, 2);
+    const ext = fmt === 'csv' ? 'csv' : 'json';
+    downloadFile(content, `resume_${fmt}.${ext}`, fmt === 'csv' ? 'text/csv' : 'application/json');
+    showToast(`Exported as ${fmt.toUpperCase()}`, 'success');
+  } catch (e) {
+    showToast('Export failed: ' + e.message, 'error');
+  }
+}
+
+function downloadFile(content, name, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  a.click();
+}
+
+/* ── Copy JSON ───────────────────────────────────────────────────────── */
+function copyJson() {
+  if (!lastResult) return;
+  navigator.clipboard.writeText(JSON.stringify(lastResult, null, 2))
+    .then(() => showToast('JSON copied to clipboard', 'success'))
+    .catch(() => showToast('Copy failed', 'error'));
+}
+
+/* ── Debug toggle ────────────────────────────────────────────────────── */
+function toggleDebug(btn) {
+  const block = document.getElementById('debug-block');
+  const open  = block.style.display === 'block';
+  block.style.display = open ? 'none' : 'block';
+  btn.querySelector('span') && (btn.textContent = (open ? 'Show' : 'Hide') + ' debug output');
+}
+
+/* ── Clear results ───────────────────────────────────────────────────── */
+function clearResults() {
+  lastResult = null;
+  hideResults();
+  document.getElementById('resume-text').value = '';
+  document.getElementById('jd-text').value = '';
+}
+
+/* ── UI helpers ───────────────────────────────────────────────────────── */
+function showLoading(show) {
+  document.getElementById('loading').style.display = show ? 'block' : 'none';
+  const card = document.querySelector('.upload-card');
+  card.querySelector('.upload-tabs').style.display    = show ? 'none' : 'flex';
+  card.querySelector('#tab-' + activeTab).style.display = show ? 'none' : 'block';
+}
+function hideResults() { document.getElementById('results').style.display = 'none'; }
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>
