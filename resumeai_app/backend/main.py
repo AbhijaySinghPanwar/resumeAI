@@ -67,10 +67,23 @@ async def parse_resume(
         raise HTTPException(400, "Provide either a file upload or text field.")
 
     gate_decision = gate.evaluate(result)
+    
+    # Calculate deterministic ATS Score
+    from resumeai.scoring.ats_scorer import ATSScorer
+    ats_score_result = ATSScorer().score(result)
+
+    # DUMP TO DISK FOR AUDITING
+    import json
+    with open("latest_parse_payload.json", "w", encoding="utf-8") as f:
+        json.dump({
+            "result": result,
+            "ats_score": ats_score_result
+        }, f, indent=2)
 
     return {
         "result":   result,
         "gate":     gate_decision.to_dict(),
+        "ats_score": ats_score_result,
     }
 
 
