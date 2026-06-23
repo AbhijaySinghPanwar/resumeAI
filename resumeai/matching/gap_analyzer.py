@@ -1,85 +1,142 @@
 """
-matching/gap_analyzer.py — Skill Gap Analyzer for Phase 2.
+matching/gap_analyzer.py — Skill Gap Analyzer v2.
 
-Computes matched_skills, missing_skills, recommended_skills
-given a parsed resume and parsed JD.
+Extracts skills from ALL resume sections:
+  - skills.flat_list and skills.categories
+  - projects: technologies array + text scan
+  - experience: bullets text scan
+  - certifications: name + issuer scan
+  - leadership: bullets + descriptions
+  - summary
+
+Uses the same CANONICAL_SKILLS dictionary as the JD parser for consistency.
+Fuzzy matching (rapidfuzz) handles aliases: DSA → Data Structures.
 """
 from __future__ import annotations
 
 from typing import Dict, Any, List, Set
-from rapidfuzz import fuzz, process as rfprocess
+from rapidfuzz import fuzz
 
 from .schemas import SkillGapResult
-from .jd_parser import SKILL_NORMALIZATION
+from .jd_parser import extract_skills_from_text, normalize_skill, _ALIAS_TO_CANONICAL
 
 
-# ── Normalization helpers ─────────────────────────────────────────────────────
+# ── Normalize helper ─────────────────────────────────────────────────────────
 
-def _normalize(skill: str) -> str:
-    """Lowercase + normalize a skill string."""
-    key = skill.strip().lower()
-    return SKILL_NORMALIZATION.get(key, skill.strip()).lower()
+def _norm(skill: str) -> str:
+    """Lowercase + canonical lookup."""
+    return normalize_skill(skill).lower()
 
 
-def _extract_resume_skills(parsed_resume: Dict[str, Any]) -> Set[str]:
+# ── Unified resume skill extractor ───────────────────────────────────────────
+
+def extract_all_resume_skills(parsed_resume: Dict[str, Any]) -> Set[str]:
     """
-    Extract all skills from the resume dict.
-    Sources: skills.flat_list, skills.categories, projects (tech arrays + text),
-             experience (bullets), summary.
-    """
-    raw_skills: Set[str] = set()
+    Extract ALL canonical skills from a parsed resume dict.
 
-    # Primary: skills section
+    Sources (in priority order):
+    1. skills.flat_list + skills.categories
+    2. projects: technologies[] + name + description + bullets
+    3. experience: bullets + description + title
+    4. certifications: name + issuer
+    5. leadership: bullets + description
+    6. summary
+    """
+    found: Set[str] = set()
+
+    # ── 1. Skills section ─────────────────────────────────────────────────
     skills_sec = parsed_resume.get("skills", {})
-    flat = skills_sec.get("flat_list", [])
-    for s in flat:
-        raw_skills.add(s.strip())
+    for s in skills_sec.get("flat_list", []):
+        canonical = normalize_skill(s)
+        if canonical:
+            found.add(canonical)
+        # Also scan the string itself for compound skills
+        for c in extract_skills_from_text(s):
+            found.add(c)
 
-    cats = skills_sec.get("categories", [])
-    for cat in cats:
+    for cat in skills_sec.get("categories", []):
         for s in cat.get("skills", []):
-            raw_skills.add(s.strip())
+            canonical = normalize_skill(s)
+            if canonical:
+                found.add(canonical)
+            for c in extract_skills_from_text(s):
+                found.add(c)
 
-    # Secondary: projects technologies array + scan text
-    from .jd_parser import _extract_skills_from_text
+    # ── 2. Projects ───────────────────────────────────────────────────────
     for proj in parsed_resume.get("projects", []):
+        # Technologies array
         for t in proj.get("technologies", []):
-            raw_skills.add(t.strip())
-        # Scan project text
-        proj_text = " ".join([
+            canonical = normalize_skill(t)
+            found.add(canonical)
+        # Full text scan of project content
+        proj_text = " ".join(filter(None, [
             proj.get("name", ""),
             proj.get("description", ""),
             " ".join(proj.get("bullets", [])),
-        ])
-        for skill in _extract_skills_from_text(proj_text):
-            raw_skills.add(skill)
+            " ".join(proj.get("technologies", [])),
+        ]))
+        for c in extract_skills_from_text(proj_text):
+            found.add(c)
 
-    # Tertiary: experience bullets
+    # ── 3. Experience ─────────────────────────────────────────────────────
     for exp in parsed_resume.get("experience", []):
-        exp_text = " ".join(exp.get("bullets", []))
-        for skill in _extract_skills_from_text(exp_text):
-            raw_skills.add(skill)
+        exp_text = " ".join(filter(None, [
+            exp.get("title", ""),
+            exp.get("description", ""),
+            " ".join(exp.get("bullets", [])),
+        ]))
+        for c in extract_skills_from_text(exp_text):
+            found.add(c)
 
-    # Summary scan
+    # ── 4. Certifications ─────────────────────────────────────────────────
+    for cert in parsed_resume.get("certifications", []):
+        cert_text = " ".join(filter(None, [
+            cert.get("name", ""),
+            cert.get("issuer", ""),
+            cert.get("description", ""),
+        ]))
+        for c in extract_skills_from_text(cert_text):
+            found.add(c)
+
+    # ── 5. Leadership ─────────────────────────────────────────────────────
+    for lead in parsed_resume.get("leadership", []):
+        lead_text = " ".join(filter(None, [
+            lead.get("role", ""),
+            lead.get("organization", ""),
+            " ".join(lead.get("bullets", [])),
+        ]))
+        for c in extract_skills_from_text(lead_text):
+            found.add(c)
+
+    # ── 6. Summary ────────────────────────────────────────────────────────
     summary = parsed_resume.get("summary", "") or ""
-    for skill in _extract_skills_from_text(summary):
-        raw_skills.add(skill)
+    if summary:
+        for c in extract_skills_from_text(summary):
+            found.add(c)
 
-    return raw_skills
+    # Remove None/empty
+    found.discard("")
+    found.discard(None)
+    return found
 
 
-def _fuzzy_match(skill: str, candidates: Set[str], threshold: int = 82) -> bool:
+def _fuzzy_match_skill(jd_skill: str, resume_skills_norm: Set[str], threshold: int = 82) -> bool:
     """
-    Return True if skill fuzzy-matches any candidate above threshold.
-    Uses token_sort_ratio for robustness against word-order differences.
+    Check if a JD skill fuzzy-matches any resume skill above threshold.
+    Also checks canonical normalization both ways.
     """
-    if not candidates:
-        return False
-    skill_norm = skill.lower().strip()
-    for cand in candidates:
-        ratio = fuzz.token_sort_ratio(skill_norm, cand.lower().strip())
-        if ratio >= threshold:
+    jd_norm = _norm(jd_skill)
+
+    # Exact canonical match first
+    if jd_norm in resume_skills_norm:
+        return True
+
+    # Fuzzy match
+    for rs in resume_skills_norm:
+        score = fuzz.token_sort_ratio(jd_norm, rs)
+        if score >= threshold:
             return True
+
     return False
 
 
@@ -92,12 +149,11 @@ def generate_skill_gap(
 
     Args:
         parsed_resume: Dict from ResumeParser.parse_*()
-        parsed_jd: ParsedJD object or dict with required_skills, preferred_skills
+        parsed_jd: ParsedJD object or dict
 
     Returns:
-        SkillGapResult with matched_skills, missing_skills, recommended_skills
+        SkillGapResult with matched_skills, missing_skills, recommended_skills, match_percentage
     """
-    # Normalize JD input
     if hasattr(parsed_jd, "required_skills"):
         required = list(parsed_jd.required_skills)
         preferred = list(parsed_jd.preferred_skills)
@@ -105,29 +161,23 @@ def generate_skill_gap(
         required = parsed_jd.get("required_skills", [])
         preferred = parsed_jd.get("preferred_skills", [])
 
-    # Extract all resume skills
-    resume_skills = _extract_resume_skills(parsed_resume)
-    resume_skills_normalized = {_normalize(s) for s in resume_skills}
+    # Extract ALL resume skills from all sections
+    resume_skills_raw = extract_all_resume_skills(parsed_resume)
+    resume_skills_norm = {_norm(s) for s in resume_skills_raw}
 
     matched: List[str] = []
     missing: List[str] = []
 
     for jd_skill in required:
-        jd_norm = _normalize(jd_skill)
-        # Exact match first
-        if jd_norm in resume_skills_normalized:
-            matched.append(jd_skill)
-        # Fuzzy match fallback
-        elif _fuzzy_match(jd_norm, resume_skills_normalized):
+        if _fuzzy_match_skill(jd_skill, resume_skills_norm):
             matched.append(jd_skill)
         else:
             missing.append(jd_skill)
 
-    # Recommended: preferred skills that are also missing
+    # Recommended: preferred skills that are also missing from resume
     recommended: List[str] = []
     for pref_skill in preferred:
-        pref_norm = _normalize(pref_skill)
-        if pref_norm not in resume_skills_normalized and not _fuzzy_match(pref_norm, resume_skills_normalized):
+        if not _fuzzy_match_skill(pref_skill, resume_skills_norm):
             recommended.append(pref_skill)
 
     total = len(required)

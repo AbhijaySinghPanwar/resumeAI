@@ -21,9 +21,11 @@ class MatchResult(BaseModel):
     missing_skills: List[str]
     recommended_skills: List[str]
     recommended_learning: List["RoadmapItem"]
+    debug_info: Optional[Dict] = Field(None, description="Full scoring trace for debugging")
 
     def to_dict(self) -> dict:
         return self.model_dump()
+
 
 
 class RoadmapItem(BaseModel):
