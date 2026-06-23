@@ -1140,22 +1140,26 @@ function renderMatchDashboard(d) {
 
   /* Card 2 — Component breakdown */
   const compColor = v => v>=80?'#10B981':v>=60?'#3B82F6':v>=40?'#F59E0B':'#EF4444';
+  const wMap = (d.debug_info && d.debug_info.weights) || {skills:'40%', semantic:'30%', experience:'15%', education:'15%'};
   const comps = [
-    {key:'skills',     icon:'🛠', label:'Skill Match',       w:'40%'},
-    {key:'semantic',   icon:'🧠', label:'Semantic Relevance', w:'30%'},
-    {key:'experience', icon:'💼', label:'Experience Fit',     w:'15%'},
-    {key:'education',  icon:'🎓', label:'Education Fit',      w:'15%'},
+    {key:'skills',     icon:'🛠', label:'Skill Match',       w: wMap.skills},
+    {key:'semantic',   icon:'🧠', label:'Semantic Relevance', w: wMap.semantic},
+    {key:'experience', icon:'💼', label:'Experience Fit',     w: wMap.experience},
+    {key:'education',  icon:'🎓', label:'Education Fit',      w: wMap.education},
   ];
   const c2 = document.createElement('div');
   c2.className = 'match-components';
   c2.innerHTML = `<div class="mc-title">Component Breakdown</div>` +
     comps.map(c => {
-      const v = Math.round(cs[c.key]||0);
-      const col = compColor(v);
+      const rawVal = cs[c.key];
+      const isNA = rawVal === null || rawVal === undefined;
+      const v = isNA ? 0 : Math.round(rawVal);
+      const col = isNA ? '#9CA3AF' : compColor(v);
+      const displayVal = isNA ? 'N/A' : `${v}%`;
       return `<div class="mc-row">
         <div class="mc-row-header">
           <span class="mc-name">${c.icon} ${c.label} <span style="color:var(--muted);font-weight:400">(${c.w})</span></span>
-          <span class="mc-pct" style="color:${col}">${v}%</span>
+          <span class="mc-pct" style="color:${col}">${displayVal}</span>
         </div>
         <div class="mc-bar"><div class="mc-bar-fill" data-val="${v}" style="width:0%;background:${col}"></div></div>
       </div>`;

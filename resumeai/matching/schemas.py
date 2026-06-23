@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 
 class ComponentScores(BaseModel):
-    skills: float = Field(..., description="Skill overlap score 0-100")
+    skills: Optional[float] = Field(None, description="Skill overlap score 0-100. None if no skills extracted.")
     semantic: float = Field(..., description="Semantic similarity score 0-100")
     experience: float = Field(..., description="Experience alignment score 0-100")
     education: float = Field(..., description="Education alignment score 0-100")

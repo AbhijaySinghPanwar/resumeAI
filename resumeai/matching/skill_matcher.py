@@ -35,18 +35,20 @@ def _score_to_grade(score: int) -> str:
 
 # ── Component 1: Skill Match (40%) ────────────────────────────────────────────
 
+from typing import Dict, Any, List, Optional
+
 def _compute_skill_score(
     parsed_resume: Dict[str, Any],
     parsed_jd: ParsedJD,
     debug: Dict,
-) -> float:
-    """Skill overlap score 0-100 with partial credit for preferred."""
+) -> Optional[float]:
+    """Skill overlap score 0-100 with partial credit for preferred. Returns None if JD has no skills."""
     required = list(parsed_jd.required_skills)
     preferred = list(parsed_jd.preferred_skills)
 
     if not required and not preferred:
-        debug["skill_match_note"] = "No skills specified in JD — neutral 60"
-        return 60.0
+        debug["skill_match_note"] = "No skills extracted from JD — skill match is N/A."
+        return None
 
     gap = generate_skill_gap(parsed_resume, parsed_jd)
     matched_count = len(gap.matched_skills)
@@ -57,9 +59,10 @@ def _compute_skill_score(
     # Preferred bonus (up to +15)
     pref_bonus = 0.0
     if preferred:
-        resume_norm = {_norm(s) for s in extract_all_resume_skills(parsed_resume)}
-        from .gap_analyzer import _fuzzy_match_skill
-        pref_matched = sum(1 for s in preferred if _fuzzy_match_skill(s, resume_norm))
+        resume_skills_raw = extract_all_resume_skills(parsed_resume)
+        resume_norm = {_norm(s) for s in resume_skills_raw}
+        from .gap_analyzer import _is_match
+        pref_matched = sum(1 for s in preferred if _is_match(s, resume_skills_raw, resume_norm))
         pref_bonus = (pref_matched / len(preferred)) * 15
         base = min(100.0, base + pref_bonus)
 
@@ -281,12 +284,40 @@ class SkillMatcher:
         edu_score    = _compute_education_score(parsed_resume, parsed_jd)
 
         # ── Weighted overall ──────────────────────────────────────────────
-        overall = (
-            skill_score  * self.WEIGHTS["skills"]
-            + sem_score  * self.WEIGHTS["semantic"]
-            + exp_score  * self.WEIGHTS["experience"]
-            + edu_score  * self.WEIGHTS["education"]
-        )
+        if skill_score is None:
+            active_wt = self.WEIGHTS["semantic"] + self.WEIGHTS["experience"] + self.WEIGHTS["education"]
+            overall = (
+                sem_score  * self.WEIGHTS["semantic"]
+                + exp_score  * self.WEIGHTS["experience"]
+                + edu_score  * self.WEIGHTS["education"]
+            ) / active_wt
+            
+            w_skills = "0%"
+            w_semantic = f"{(self.WEIGHTS['semantic']/active_wt)*100:.0f}%"
+            w_experience = f"{(self.WEIGHTS['experience']/active_wt)*100:.0f}%"
+            w_education = f"{(self.WEIGHTS['education']/active_wt)*100:.0f}%"
+            
+            c_skills = None
+            c_semantic = round((sem_score * self.WEIGHTS["semantic"]) / active_wt, 1)
+            c_experience = round((exp_score * self.WEIGHTS["experience"]) / active_wt, 1)
+            c_education = round((edu_score * self.WEIGHTS["education"]) / active_wt, 1)
+        else:
+            overall = (
+                skill_score  * self.WEIGHTS["skills"]
+                + sem_score  * self.WEIGHTS["semantic"]
+                + exp_score  * self.WEIGHTS["experience"]
+                + edu_score  * self.WEIGHTS["education"]
+            )
+            w_skills = f"{self.WEIGHTS['skills']*100:.0f}%"
+            w_semantic = f"{self.WEIGHTS['semantic']*100:.0f}%"
+            w_experience = f"{self.WEIGHTS['experience']*100:.0f}%"
+            w_education = f"{self.WEIGHTS['education']*100:.0f}%"
+            
+            c_skills = round(skill_score * self.WEIGHTS["skills"], 1)
+            c_semantic = round(sem_score * self.WEIGHTS["semantic"], 1)
+            c_experience = round(exp_score * self.WEIGHTS["experience"], 1)
+            c_education = round(edu_score * self.WEIGHTS["education"], 1)
+
         overall = int(round(min(100.0, max(0.0, overall))))
 
         # ── Roadmap ───────────────────────────────────────────────────────
@@ -299,21 +330,21 @@ class SkillMatcher:
             "resume_skills":      resume_skills_all,
             "matched_skills":     gap.matched_skills,
             "missing_skills":     gap.missing_skills,
-            "skill_match_score":  debug.get("skill_match_score", skill_score),
+            "skill_match_score":  skill_score if skill_score is not None else "N/A",
             "semantic_similarity": debug.get("semantic_similarity", sem_score),
             "experience_score":   exp_score,
             "education_score":    edu_score,
             "weights": {
-                "skills":     f"{self.WEIGHTS['skills']*100:.0f}%",
-                "semantic":   f"{self.WEIGHTS['semantic']*100:.0f}%",
-                "experience": f"{self.WEIGHTS['experience']*100:.0f}%",
-                "education":  f"{self.WEIGHTS['education']*100:.0f}%",
+                "skills":     w_skills,
+                "semantic":   w_semantic,
+                "experience": w_experience,
+                "education":  w_education,
             },
             "weighted_contributions": {
-                "skills":     round(skill_score * self.WEIGHTS["skills"], 1),
-                "semantic":   round(sem_score   * self.WEIGHTS["semantic"], 1),
-                "experience": round(exp_score   * self.WEIGHTS["experience"], 1),
-                "education":  round(edu_score   * self.WEIGHTS["education"], 1),
+                "skills":     c_skills if c_skills is not None else "N/A",
+                "semantic":   c_semantic,
+                "experience": c_experience,
+                "education":  c_education,
             },
             "final_match_score":  overall,
             "semantic_note":      debug.get("semantic_note", ""),
