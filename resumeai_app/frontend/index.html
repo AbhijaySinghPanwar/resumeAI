@@ -507,6 +507,94 @@
     .toast.success { background: #065F46; }
     .toast.error   { background: #991B1B; }
 
+    /* ── Job Match Dashboard (Phase 2) ───────────────────────── */
+    #match-section { margin-top: 2.5rem; display: none; }
+    .match-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;
+    }
+    .match-title { font-size: 1.3rem; font-weight: 800; }
+    .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+    .match-score-card {
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft); padding: 2rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .match-ring-wrap { position: relative; width: 130px; height: 130px; margin: 0 auto 1rem; }
+    .match-ring-svg { width: 130px; height: 130px; transform: rotate(-90deg); }
+    .match-ring-bg { fill: none; stroke: #E2E8F0; stroke-width: 10; }
+    .match-ring-fill {
+      fill: none; stroke-width: 10; stroke-linecap: round;
+      transition: stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .match-ring-text {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .match-score-num { font-size: 2.1rem; font-weight: 900; }
+    .match-score-lbl { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    .match-grade { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .match-grade-label { font-size: 0.85rem; color: var(--muted); }
+
+    .match-components {
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft); padding: 1.5rem;
+    }
+    .mc-title { font-size: 0.875rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+    .mc-row { margin-bottom: 1rem; }
+    .mc-row:last-child { margin-bottom: 0; }
+    .mc-row-header { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
+    .mc-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .mc-pct { font-size: 0.82rem; font-weight: 700; }
+    .mc-bar { height: 8px; background: #E2E8F0; border-radius: 99px; overflow: hidden; }
+    .mc-bar-fill { height: 100%; border-radius: 99px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+    .match-skills-card {
+      grid-column: 1 / -1;
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft); overflow: hidden;
+    }
+    .msc-cols { display: grid; grid-template-columns: 1fr 1fr; }
+    .msc-col { padding: 1.25rem; }
+    .msc-col:first-child { border-right: 1px solid var(--border); }
+    .msc-col-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.75rem; }
+    .msc-col-title.green { color: #065F46; }
+    .msc-col-title.red   { color: #991B1B; }
+    .msc-col-title.purple{ color: #5B21B6; }
+    .chips-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .chip { font-size: 0.78rem; font-weight: 600; padding: 0.3rem 0.8rem; border-radius: 99px; white-space: nowrap; }
+    .chip-match  { background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; }
+    .chip-miss   { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+    .chip-rec    { background: #EDE9FE; color: #5B21B6; border: 1px solid #DDD6FE; }
+
+    .match-roadmap-card {
+      grid-column: 1 / -1;
+      background: white; border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft); padding: 1.5rem;
+    }
+    .rm-title { font-size: 0.875rem; font-weight: 700; margin-bottom: 1rem; color: var(--text); }
+    .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.85rem; }
+    .roadmap-item {
+      background: #F8FAFC; border: 1px solid var(--border); border-radius: 14px;
+      padding: 1rem; transition: all 0.2s;
+    }
+    .roadmap-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); border-color: var(--primary); }
+    .ri-skill { font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.4rem; }
+    .ri-rec { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; line-height: 1.4; }
+    .ri-meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .ri-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+    .ri-type-certification { background: #DBEAFE; color: #1D4ED8; }
+    .ri-type-course  { background: #FEF3C7; color: #92400E; }
+    .ri-type-project { background: #D1FAE5; color: #065F46; }
+    .ri-type-book    { background: #EDE9FE; color: #5B21B6; }
+    .ri-time { font-size: 0.72rem; color: var(--muted); }
+    .ri-link { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; font-weight: 600; color: var(--primary); text-decoration: none; }
+    .ri-link:hover { text-decoration: underline; }
+
+    .match-loading { grid-column: 1/-1; padding: 3rem; text-align: center; }
+
     /* ── Responsive ──────────────────────────────────────────── */
     @media (max-width: 1024px) {
       .hero-inner { grid-template-columns: 1fr; }
@@ -514,6 +602,9 @@
       .results-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2,1fr); }
       .steps-grid { grid-template-columns: 1fr; }
+      .match-grid { grid-template-columns: 1fr; }
+      .msc-cols { grid-template-columns: 1fr; }
+      .msc-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     }
     @media (max-width: 640px) {
       .hero { padding: 3rem 0 2.5rem; }
@@ -726,7 +817,6 @@
           <div class="results-meta" id="results-meta"></div>
         </div>
         <div class="results-actions">
-          <span id="gate-badge" class="gate-badge"></span>
           <button class="btn-secondary" onclick="copyJson()" style="padding:0.5rem 1rem;font-size:0.82rem">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copy JSON
@@ -736,6 +826,18 @@
       </div>
 
       <div class="results-grid" id="results-grid"></div>
+
+      <!-- ── Phase 2: Job Match Analysis ──────────────────────── -->
+      <div id="match-section">
+        <div class="match-header">
+          <div>
+            <div class="match-title">🎯 Job Match Analysis</div>
+            <div id="match-jd-title" style="font-size:0.85rem;color:var(--muted);margin-top:0.2rem"></div>
+          </div>
+          <span id="match-status-badge" style="font-size:0.75rem;font-weight:700;padding:0.3rem 0.8rem;border-radius:99px"></span>
+        </div>
+        <div class="match-grid" id="match-grid"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -916,9 +1018,10 @@ async function parseResumeFile() {
 async function doParseAndScore(source, jd) {
   showLoading(true);
   hideResults();
+  document.getElementById('match-section').style.display = 'none';
 
   try {
-    // Parse
+    // 1. Parse resume
     let parseRes;
     if (source.formData) {
       parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', body: source.formData });
@@ -935,8 +1038,9 @@ async function doParseAndScore(source, jd) {
 
     const data = await parseRes.json();
     lastResult = data.result;
+    const atsScore = data.ats_score;
 
-    // Score if JD provided
+    // 2. Legacy JD score card (uses old ATS scorer)
     let scoreData = null;
     if (jd) {
       const scoreRes = await fetch(`${API_BASE}/api/score`, {
@@ -948,7 +1052,10 @@ async function doParseAndScore(source, jd) {
     }
 
     showLoading(false);
-    renderResults(lastResult, data.gate, scoreData);
+    renderResults(lastResult, data.gate, atsScore, scoreData);
+
+    // 3. Phase 2: Job Match Analysis — async, shows below results
+    if (jd) runMatchAnalysis(lastResult, jd);
 
   } catch (e) {
     showLoading(false);
@@ -957,8 +1064,167 @@ async function doParseAndScore(source, jd) {
   }
 }
 
+/* ── Phase 2: Match Analysis ─────────────────────────────────────────── */
+async function runMatchAnalysis(parseResult, jd) {
+  const sec   = document.getElementById('match-section');
+  const grid  = document.getElementById('match-grid');
+  const badge = document.getElementById('match-status-badge');
+
+  sec.style.display = 'block';
+  badge.textContent = '⏳ Analyzing…';
+  badge.style.cssText = 'background:#F1F5F9;color:#475569;font-size:0.75rem;font-weight:700;padding:0.3rem 0.9rem;border-radius:99px';
+  grid.innerHTML = `<div class="match-loading">
+    <div class="spinner" style="margin:0 auto 1rem"></div>
+    <div style="font-size:0.875rem;font-weight:600;color:var(--muted)">Running AI-powered match analysis…</div>
+  </div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/match`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parse_result: parseResult, job_description: jd }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || `Match API error ${res.status}`);
+    }
+    const d = await res.json();
+    renderMatchDashboard(d);
+
+    const sc = d.match_score;
+    badge.textContent = `Match: ${sc}%  ${d.match_grade}`;
+    const bg = sc>=80?'#D1FAE5':sc>=60?'#FEF3C7':'#FEE2E2';
+    const fg = sc>=80?'#065F46':sc>=60?'#92400E':'#991B1B';
+    badge.style.cssText = `background:${bg};color:${fg};font-size:0.75rem;font-weight:700;padding:0.3rem 0.9rem;border-radius:99px`;
+
+    if (d.parsed_jd && d.parsed_jd.title)
+      document.getElementById('match-jd-title').textContent = 'Position: ' + d.parsed_jd.title;
+
+    sec.scrollIntoView({ behavior:'smooth', block:'start' });
+    showToast(`Match complete — ${sc}% match!`, 'success');
+  } catch(e) {
+    grid.innerHTML = `<div class="match-loading" style="color:#991B1B">⚠ Match analysis failed: ${e.message}</div>`;
+    badge.textContent = 'Analysis failed';
+    badge.style.cssText = 'background:#FEE2E2;color:#991B1B;font-size:0.75rem;font-weight:700;padding:0.3rem 0.9rem;border-radius:99px';
+    console.error('Match error:', e);
+  }
+}
+
+function renderMatchDashboard(d) {
+  const grid  = document.getElementById('match-grid');
+  grid.innerHTML = '';
+  const sc    = d.match_score;
+  const cs    = d.component_scores || {};
+  const ringC = sc>=80?'#10B981':sc>=70?'#3B82F6':sc>=55?'#F59E0B':'#EF4444';
+  const R=57, circ = 2*Math.PI*R;
+  const offset = circ - (sc/100)*circ;
+
+  /* Card 1 — Score ring */
+  const c1 = document.createElement('div');
+  c1.className = 'match-score-card';
+  c1.innerHTML = `
+    <div class="match-ring-wrap">
+      <svg class="match-ring-svg" viewBox="0 0 130 130">
+        <circle class="match-ring-bg" cx="65" cy="65" r="${R}"/>
+        <circle class="match-ring-fill" id="mring" cx="65" cy="65" r="${R}"
+          stroke="${ringC}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+      </svg>
+      <div class="match-ring-text">
+        <div class="match-score-num" id="mnum" style="color:${ringC}">0%</div>
+        <div class="match-score-lbl">Match</div>
+      </div>
+    </div>
+    <div class="match-grade" style="color:${ringC}">${d.match_grade}</div>
+    <div class="match-grade-label">${sc>=80?'Strong Match 🎉':sc>=60?'Good Match 👍':sc>=40?'Partial Match ⚠':'Low Match — Focus on Gaps 📚'}</div>`;
+  grid.appendChild(c1);
+
+  /* Card 2 — Component breakdown */
+  const compColor = v => v>=80?'#10B981':v>=60?'#3B82F6':v>=40?'#F59E0B':'#EF4444';
+  const comps = [
+    {key:'skills',     icon:'🛠', label:'Skill Match',       w:'40%'},
+    {key:'semantic',   icon:'🧠', label:'Semantic Relevance', w:'30%'},
+    {key:'experience', icon:'💼', label:'Experience Fit',     w:'15%'},
+    {key:'education',  icon:'🎓', label:'Education Fit',      w:'15%'},
+  ];
+  const c2 = document.createElement('div');
+  c2.className = 'match-components';
+  c2.innerHTML = `<div class="mc-title">Component Breakdown</div>` +
+    comps.map(c => {
+      const v = Math.round(cs[c.key]||0);
+      const col = compColor(v);
+      return `<div class="mc-row">
+        <div class="mc-row-header">
+          <span class="mc-name">${c.icon} ${c.label} <span style="color:var(--muted);font-weight:400">(${c.w})</span></span>
+          <span class="mc-pct" style="color:${col}">${v}%</span>
+        </div>
+        <div class="mc-bar"><div class="mc-bar-fill" data-val="${v}" style="width:0%;background:${col}"></div></div>
+      </div>`;
+    }).join('');
+  grid.appendChild(c2);
+
+  /* Card 3 — Skills chips */
+  const matched = d.matched_skills||[], missing = d.missing_skills||[], rec = d.recommended_skills||[];
+  const c3 = document.createElement('div');
+  c3.className = 'match-skills-card';
+  c3.innerHTML = `<div class="msc-cols">
+    <div class="msc-col">
+      <div class="msc-col-title green">✓ Matched Skills (${matched.length})</div>
+      <div class="chips-row">${matched.length
+        ? matched.map(s=>`<span class="chip chip-match">${s}</span>`).join('')
+        : '<span style="color:var(--muted);font-size:0.82rem">None detected</span>'}</div>
+    </div>
+    <div class="msc-col">
+      <div class="msc-col-title red">✗ Missing Skills (${missing.length})</div>
+      <div class="chips-row">${missing.length
+        ? missing.map(s=>`<span class="chip chip-miss">${s}</span>`).join('')
+        : '<span style="color:#065F46;font-size:0.82rem">No gaps — great fit! 🎉</span>'}</div>
+      ${rec.length?`<div style="margin-top:1rem">
+        <div class="msc-col-title purple" style="margin-bottom:0.5rem">★ Recommended to learn (${rec.length})</div>
+        <div class="chips-row">${rec.map(s=>`<span class="chip chip-rec">${s}</span>`).join('')}</div>
+      </div>`:''}
+    </div>
+  </div>`;
+  grid.appendChild(c3);
+
+  /* Card 4 — Roadmap */
+  const roadmap = d.recommended_learning||[];
+  if (roadmap.length) {
+    const c4 = document.createElement('div');
+    c4.className = 'match-roadmap-card';
+    c4.innerHTML = `<div class="rm-title">📚 Personalized Learning Roadmap</div>
+      <div class="roadmap-grid">${roadmap.map(item => {
+        const tc = `ri-type-${(item.resource_type||'course').replace(/\s+/g,'-')}`;
+        return `<div class="roadmap-item">
+          <div class="ri-skill">${item.skill}</div>
+          <div class="ri-rec">${item.recommendation}</div>
+          <div class="ri-meta">
+            <span class="ri-badge ${tc}">${item.resource_type||'course'}</span>
+            ${item.difficulty?`<span class="ri-time">${item.difficulty}</span>`:''}
+            ${item.estimated_time?`<span class="ri-time">⏱ ${item.estimated_time}</span>`:''}
+          </div>
+          ${item.url?`<a class="ri-link" href="${item.url}" target="_blank" rel="noopener">Start Learning →</a>`:''}
+        </div>`;
+      }).join('')}</div>`;
+    grid.appendChild(c4);
+  }
+
+  /* Animate ring + counter + bars */
+  requestAnimationFrame(() => {
+    const ring = document.getElementById('mring');
+    if (ring) ring.style.strokeDashoffset = offset;
+    const numEl = document.getElementById('mnum');
+    if (numEl) {
+      let cur=0;
+      const step = Math.max(1, Math.ceil(sc/60));
+      const t = setInterval(() => { cur=Math.min(cur+step,sc); numEl.textContent=cur+'%'; if(cur>=sc) clearInterval(t); }, 25);
+    }
+    document.querySelectorAll('.mc-bar-fill[data-val]').forEach(el => { el.style.width = el.dataset.val+'%'; });
+    document.querySelectorAll('.cat-bar-fill[data-pct]').forEach(el => { el.style.width = el.dataset.pct+'%'; });
+  });
+}
+
 /* ── Render results ──────────────────────────────────────────────────── */
-function renderResults(r, gate, score) {
+function renderResults(r, gate, atsScore, score) {
   const grid = document.getElementById('results-grid');
   grid.innerHTML = '';
 
@@ -967,11 +1233,11 @@ function renderResults(r, gate, score) {
   document.getElementById('results-meta').textContent =
     `${meta.total_lines_processed || '?'} lines · ${meta.parse_duration_ms || '?'}ms · ${(meta.sections_detected||[]).length} sections`;
 
-  // Gate badge
-  const gb = document.getElementById('gate-badge');
-  if (gate) {
-    gb.className = 'gate-badge ' + (gate.passed ? 'gate-pass' : 'gate-fail');
-    gb.textContent = gate.passed ? '✓ ATS Gate Passed' : '✗ ATS Gate Blocked';
+  // ATS Score Dashboard
+  if (atsScore) {
+    const atsCard = makeCard('trending-up', 'ATS Score Dashboard', null, renderAtsScore(atsScore));
+    atsCard.classList.add('full');
+    grid.appendChild(atsCard);
   }
 
   // Contact card
@@ -1119,6 +1385,110 @@ function renderResults(r, gate, score) {
 
   document.getElementById('results').style.display = 'block';
   document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderAtsScore(s) {
+  if (!s) return '';
+  const pct = Math.round(s.overall_score);
+  const deg = Math.round(pct * 3.6);
+  
+  let color = 'var(--primary)';
+  if (pct >= 90) color = '#10B981'; // Green
+  else if (pct >= 80) color = '#3B82F6'; // Blue
+  else if (pct >= 70) color = '#6366f1'; // Indigo
+  else if (pct >= 60) color = '#F59E0B'; // Orange
+  else color = '#EF4444'; // Red
+
+  const fresherBadge = s.candidate_type === 'FRESHER' 
+    ? `<span style="background:#DBEAFE; color:#1E40AF; padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.7rem; font-weight:bold; vertical-align:middle; margin-left:0.5rem">FRESHER MODE</span>` 
+    : `<span style="background:#F1F5F9; color:#475569; padding:0.2rem 0.5rem; border-radius:1rem; font-size:0.7rem; font-weight:bold; vertical-align:middle; margin-left:0.5rem">${s.candidate_type}</span>`;
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem">
+      <div class="overall-score" style="background: white; border-color: ${color}40; margin:0; flex:1; max-width: 48%;">
+        <div class="score-ring" style="--pct:${pct}%; background: conic-gradient(${color} ${deg}deg, #E2E8F0 0deg)">
+          <div class="score-ring-inner" style="color: ${color}">${pct}</div>
+        </div>
+        <div class="score-grade" style="font-size:1.4rem; margin-top:0.5rem; color:${color}">Tier: ${s.resume_tier} ${fresherBadge}</div>
+        <div class="score-rec" style="margin-top:0.25rem">Resume Completeness: <strong>${s.resume_completeness}%</strong></div>
+      </div>
+
+      <div class="overall-score" style="background: #F8FAFC; border-color: #CBD5E1; margin:0; flex:1; max-width: 48%; padding:1.5rem;">
+        <h4 style="margin:0 0 0.5rem 0; font-size:0.9rem; color:#334155; text-align:center; text-transform:uppercase; letter-spacing:1px;">Recruiter Readiness</h4>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #0F172A; text-align:center">${s.recruiter_readiness}</div>
+        <div style="text-align:center; font-size: 0.85rem; font-weight: 600; color: #475569; margin-top:0.25rem">${s.readiness_band}</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+      <!-- Breakdown -->
+      <div class="cat-scores">
+        <h4 style="margin-bottom:0.75rem; font-size:0.85rem; color:var(--text)">ATS Score Breakdown</h4>
+        ${Object.entries(s.breakdown).map(([k, v]) => {
+          let max = v.max;
+          let score = v.score;
+          if (max === 0) return '';
+          return `
+          <div class="cat-row">
+            <div class="cat-row-header">
+              <span class="cat-row-name">${cap(k)}</span>
+              <span class="cat-row-pct">${score}/${max}</span>
+            </div>
+            <div class="cat-bar"><div class="cat-bar-fill" data-pct="${(score/max)*100}" style="width:0%; background: ${color}"></div></div>
+          </div>`;
+        }).join('')}
+        
+        ${s.bonus_breakdown && Object.keys(s.bonus_breakdown).length > 0 ? `
+        <div style="margin-top: 1rem;">
+          <h4 style="margin-bottom:0.75rem; font-size:0.85rem; color:var(--text)">Bonus Points</h4>
+          ${Object.entries(s.bonus_breakdown).map(([k, v]) => `
+            <div class="cat-row">
+              <div class="cat-row-header">
+                <span class="cat-row-name" style="color:#059669">${cap(k.replace(/_/g, ' '))}</span>
+                <span class="cat-row-pct" style="color:#059669">+${v}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        ` : ''}
+      </div>
+
+      <!-- Feedback -->
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        
+        <div style="display:flex; gap:1rem;">
+          <div style="flex:1; background:#F0FDF4; border:1px solid #BBF7D0; padding:0.75rem; border-radius:0.5rem">
+            <div style="font-size:0.7rem; color:#166534; font-weight:bold; text-transform:uppercase; margin-bottom:0.25rem">Strongest Section</div>
+            <div style="font-size:0.9rem; color:#14532D; font-weight:bold">${s.strongest_section.name} <span style="font-weight:normal">(${s.strongest_section.score}/${s.strongest_section.max_score})</span></div>
+          </div>
+          <div style="flex:1; background:#FEF2F2; border:1px solid #FECACA; padding:0.75rem; border-radius:0.5rem">
+            <div style="font-size:0.7rem; color:#991B1B; font-weight:bold; text-transform:uppercase; margin-bottom:0.25rem">Weakest Section</div>
+            <div style="font-size:0.9rem; color:#7F1D1D; font-weight:bold">${s.weakest_section.name} <span style="font-weight:normal">(${s.weakest_section.score}/${s.weakest_section.max_score})</span></div>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-bottom:0.5rem; font-size:0.85rem; color:#065F46; display:flex; align-items:center; gap:0.4rem;">
+             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Top Strengths
+          </h4>
+          <ul style="list-style:none; font-size:0.8rem; color:var(--muted); display:flex; flex-direction:column; gap:0.3rem; padding-left:0;">
+            ${(s.strengths || []).map(x => `<li>✓ ${x}</li>`).join('')}
+          </ul>
+        </div>
+        
+        <div>
+          <h4 style="margin-bottom:0.5rem; font-size:0.85rem; color:#92400E; display:flex; align-items:center; gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Top Risks & Improvements
+          </h4>
+          <ul style="list-style:none; font-size:0.8rem; color:var(--muted); display:flex; flex-direction:column; gap:0.3rem; padding-left:0;">
+            ${(s.risks || []).map(x => `<li style="color:#B45309">⚠ ${x}</li>`).join('')}
+            ${(s.improvements || []).map(x => `<li>💡 ${x}</li>`).join('')}
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  `;
 }
 
 function renderScore(s) {
