@@ -606,6 +606,81 @@
       .msc-cols { grid-template-columns: 1fr; }
       .msc-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     }
+    /* ── AI Features Banner ──────────────────────────────── */
+    .ai-features-section {
+      padding: 4rem 0;
+      position: relative;
+    }
+    .ai-features-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .ai-features-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.12));
+      border: 1px solid rgba(79,70,229,0.25);
+      color: var(--primary);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.35rem 1rem; border-radius: 99px;
+      margin-bottom: 1rem;
+    }
+    .ai-features-header h2 {
+      font-size: clamp(1.6rem, 4vw, 2.5rem); font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 0.75rem;
+    }
+    .ai-features-header p { color: var(--muted); font-size: 1rem; max-width: 520px; margin: 0 auto; }
+    .ai-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .ai-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem 1.75rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex; flex-direction: column; gap: 1rem;
+      transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .ai-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(79,70,229,0.04), rgba(124,58,237,0.04));
+      opacity: 0; transition: opacity 0.25s;
+    }
+    .ai-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .ai-card:hover::before { opacity: 1; }
+    .ai-card-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    }
+    .ai-card-title { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+    .ai-card-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.65; flex: 1; }
+    .ai-card-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .ai-card-pill {
+      font-size: 0.72rem; font-weight: 600;
+      background: rgba(79,70,229,0.08);
+      color: var(--primary);
+      padding: 0.2rem 0.6rem; border-radius: 99px;
+    }
+    .ai-card-cta {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.875rem; font-weight: 700;
+      color: var(--primary);
+      margin-top: auto;
+    }
+    .ai-card-cta svg { transition: transform 0.2s; }
+    .ai-card:hover .ai-card-cta svg { transform: translateX(4px); }
+
     @media (max-width: 640px) {
       .hero { padding: 3rem 0 2.5rem; }
       .features-grid { grid-template-columns: 1fr; }
@@ -613,6 +688,7 @@
       .cta-section { padding: 2.5rem 1.5rem; }
       .results-actions { flex-wrap: wrap; }
       .nav-right .nav-link { display: none; }
+      .ai-cards-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -885,6 +961,74 @@
   </div>
 </section>
 
+<!-- ── AI Features ──────────────────────────────────────────────────────── -->
+<section class="ai-features-section">
+  <div class="container">
+    <div class="ai-features-header">
+      <div class="ai-features-badge">✨ Phase 3 — New AI Tools</div>
+      <h2>Meet Your AI Resume Assistant</h2>
+      <p>Go beyond parsing. Use AI to craft recruiter-winning bullets, supercharge project descriptions, and prepare for any interview.</p>
+    </div>
+    <div class="ai-cards-grid">
+
+      <!-- Bullet Improver -->
+      <a href="ai_assistant.html" class="ai-card">
+        <div class="ai-card-icon">⚡</div>
+        <div>
+          <div class="ai-card-title">Bullet Improver</div>
+          <div class="ai-card-desc">Paste any resume bullet and instantly get 3 AI-optimized variants — ATS-friendly, professionally polished, and ultra-concise.</div>
+        </div>
+        <div class="ai-card-pills">
+          <span class="ai-card-pill">ATS Optimized</span>
+          <span class="ai-card-pill">Professional</span>
+          <span class="ai-card-pill">Concise</span>
+        </div>
+        <span class="ai-card-cta">
+          Try Bullet Improver
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </a>
+
+      <!-- Project Enhancer -->
+      <a href="ai_assistant.html#tab-project" onclick="localStorage.setItem('ai_tab','project')" class="ai-card">
+        <div class="ai-card-icon">🚀</div>
+        <div>
+          <div class="ai-card-title">Project Enhancer</div>
+          <div class="ai-card-desc">Transform a rough project description into ATS-optimized, technically rich, and recruiter-friendly versions in one click.</div>
+        </div>
+        <div class="ai-card-pills">
+          <span class="ai-card-pill">ATS Optimized</span>
+          <span class="ai-card-pill">Technical</span>
+          <span class="ai-card-pill">Recruiter View</span>
+        </div>
+        <span class="ai-card-cta">
+          Try Project Enhancer
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </a>
+
+      <!-- Interview Prep -->
+      <a href="interview_prep.html" class="ai-card">
+        <div class="ai-card-icon">🎤</div>
+        <div>
+          <div class="ai-card-title">Interview Prep</div>
+          <div class="ai-card-desc">Get a personalized set of technical, project deep-dive, and behavioral questions tailored to your resume and target JD.</div>
+        </div>
+        <div class="ai-card-pills">
+          <span class="ai-card-pill">Technical Qs</span>
+          <span class="ai-card-pill">Project Qs</span>
+          <span class="ai-card-pill">Behavioral Qs</span>
+        </div>
+        <span class="ai-card-cta">
+          Start Interview Prep
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
 <!-- ── CTA ────────────────────────────────────────────────────────────── -->
 <div class="container">
   <div class="cta-section">
@@ -907,6 +1051,8 @@
       <div class="footer-links">
         <a href="#app" class="footer-link">Try it</a>
         <a href="#how" class="footer-link">How it works</a>
+        <a href="ai_assistant.html" class="footer-link">✨ AI Assistant</a>
+        <a href="interview_prep.html" class="footer-link">🎤 Interview Prep</a>
       </div>
     </div>
   </div>

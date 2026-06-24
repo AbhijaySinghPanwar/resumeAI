@@ -358,6 +358,15 @@ async function checkAIStatus() {
 }
 checkAIStatus();
 
+// Auto-switch tab if navigated from the dashboard's Project Enhancer card
+(function() {
+  const savedTab = localStorage.getItem('ai_tab');
+  if (savedTab) {
+    localStorage.removeItem('ai_tab');
+    switchTab(savedTab);
+  }
+})();
+
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
