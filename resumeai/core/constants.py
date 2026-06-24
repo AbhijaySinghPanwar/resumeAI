@@ -7,7 +7,7 @@ No aliases live anywhere else in the codebase.
 """
 
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List
 
 PARSER_VERSION = "7.0.0"
 
