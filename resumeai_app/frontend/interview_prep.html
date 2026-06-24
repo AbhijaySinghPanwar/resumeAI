@@ -277,9 +277,9 @@ async function checkAIStatus() {
     const r = await fetch(`${API}/ai/status`);
     const d = await r.json();
     const badge = document.getElementById('aiStatusBadge');
-    if (d.gemini_available) {
+    if (d.available) {
       badge.className = 'ai-status-badge ready';
-      badge.innerHTML = '<span class="status-dot dot-green"></span> Gemini Ready';
+      badge.innerHTML = `<span class="status-dot dot-green"></span> ${d.active_model.split('/')[1] || 'Gemini Ready'}`;
     } else {
       badge.className = 'ai-status-badge fallback';
       badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';

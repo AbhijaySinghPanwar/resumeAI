@@ -296,11 +296,11 @@ def generate_interview_questions(req: InterviewRequest):
 
 @app.get("/ai/status")
 def ai_status():
-    """Check Gemini API availability."""
-    return {
-        "gemini_available": _gemini.is_available,
-        "model": _gemini.MODEL_NAME,
-        "message": "Ready" if _gemini.is_available else (
-            "GEMINI_API_KEY not set — fallback responses will be used"
-        ),
-    }
+    """
+    Check Gemini API availability and report the active model.
+
+    Returns:
+        { "available": true,  "active_model": "models/gemini-2.5-flash" }
+        { "available": false, "active_model": null }
+    """
+    return _gemini.status_dict()

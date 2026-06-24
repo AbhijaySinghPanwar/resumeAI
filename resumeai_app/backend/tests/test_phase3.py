@@ -256,8 +256,8 @@ class TestAIEndpoints:
         resp = client.get("/ai/status")
         assert resp.status_code == 200
         data = resp.json()
-        assert "gemini_available" in data
-        assert "model" in data
+        assert "available" in data
+        assert "active_model" in data
 
     def test_improve_bullet_endpoint_empty_bullet(self, client):
         resp = client.post("/ai/improve-bullet", json={"bullet": "", "context": "experience"})
