@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interview Prep — ResumeAI</title>
+  <meta name="description" content="AI-powered personalized interview question generator. Get tailored technical, project, and behavioral questions based on your resume and target JD."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0A0B14;
+      --surface:   #111220;
+      --surface2:  #181929;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #6C63FF;
+      --accent2:   #A78BFA;
+      --green:     #10B981;
+      --amber:     #F59E0B;
+      --blue:      #3B82F6;
+      --pink:      #EC4899;
+      --muted:     #6B7280;
+      --text:      #F9FAFB;
+      --text-dim:  #9CA3AF;
+      --radius:    14px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.6;}
+
+    /* ── NAV ── */
+    nav{
+      position:sticky;top:0;z-index:100;
+      background:rgba(10,11,20,0.85);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      padding:0 2rem;height:64px;
+      display:flex;align-items:center;gap:2rem;
+    }
+    .nav-logo{
+      font-size:1.3rem;font-weight:800;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-decoration:none;
+    }
+    .nav-links{display:flex;gap:1.5rem;margin-left:auto;}
+    .nav-links a{
+      color:var(--text-dim);text-decoration:none;font-size:.9rem;font-weight:500;
+      transition:color .2s;padding:.3rem .6rem;border-radius:8px;
+    }
+    .nav-links a:hover{color:var(--text);background:var(--surface);}
+    .nav-links a.active{color:var(--accent);}
+
+    .ai-status-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      font-size:.78rem;font-weight:600;padding:.3rem .8rem;border-radius:100px;
+      margin-left:.5rem;
+    }
+    .ai-status-badge.ready{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+    .ai-status-badge.fallback{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
+    .status-dot{width:7px;height:7px;border-radius:50%;}
+    .dot-green{background:var(--green);box-shadow:0 0 6px var(--green);}
+    .dot-amber{background:var(--amber);}
+
+    /* ── HERO ── */
+    .hero{text-align:center;padding:4rem 2rem 2rem;}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);
+      color:var(--accent2);font-size:.8rem;font-weight:600;
+      padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;
+    }
+    .hero h1{
+      font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;margin-bottom:1rem;
+      background:linear-gradient(135deg,#fff 40%,var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hero p{color:var(--text-dim);font-size:1.1rem;max-width:600px;margin:0 auto 2rem;}
+
+    /* ── LAYOUT ── */
+    .page{max-width:900px;margin:0 auto;padding:2rem;}
+
+    .card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:2rem;margin-bottom:1.5rem;
+    }
+    .card-title{font-size:1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem;}
+
+    label{display:block;font-size:.85rem;font-weight:600;color:var(--text-dim);margin-bottom:.5rem;}
+    textarea{
+      width:100%;
+      background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+      color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;
+      padding:.85rem 1rem;resize:vertical;min-height:140px;transition:border-color .2s;
+    }
+    textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
+    input{
+      width:100%;
+      background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+      color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;
+      padding:.85rem 1rem;transition:border-color .2s;
+    }
+    input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
+
+    .form-hint{font-size:.8rem;color:var(--muted);margin-top:.4rem;}
+
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:linear-gradient(135deg,var(--accent),#8B5CF6);
+      color:#fff;border:none;border-radius:10px;
+      padding:.85rem 1.8rem;font-size:.95rem;font-weight:700;
+      cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
+      margin-top:1rem;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.4);}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    /* ── LOADING ── */
+    .loading{
+      display:none;align-items:center;gap:.75rem;
+      color:var(--accent2);font-size:.9rem;font-weight:500;margin-top:1rem;
+    }
+    .loading.visible{display:flex;}
+    .spinner{
+      width:20px;height:20px;border:2px solid rgba(108,99,255,.3);
+      border-top-color:var(--accent);border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── QUESTIONS ── */
+    .results{display:none;margin-top:1.5rem;}
+    .results.visible{display:block;}
+
+    .q-section{margin-bottom:2rem;}
+    .q-section-title{
+      font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      display:flex;align-items:center;gap:.5rem;
+      padding:.4rem .9rem;border-radius:8px;margin-bottom:1rem;
+      width:fit-content;
+    }
+    .q-tech{background:rgba(59,130,246,.12);color:#60A5FA;}
+    .q-project{background:rgba(16,185,129,.12);color:var(--green);}
+    .q-behavioral{background:rgba(236,72,153,.12);color:#F472B6;}
+
+    .q-list{display:flex;flex-direction:column;gap:.75rem;}
+    .q-item{
+      background:var(--surface2);border:1px solid var(--border);
+      border-radius:12px;padding:1rem 1.25rem;
+      display:flex;gap:1rem;align-items:flex-start;
+      transition:border-color .2s;
+    }
+    .q-item:hover{border-color:rgba(108,99,255,.25);}
+    .q-num{
+      font-size:.8rem;font-weight:700;color:var(--muted);
+      min-width:22px;padding-top:.1rem;
+    }
+    .q-text{font-size:.92rem;line-height:1.65;flex:1;}
+    .q-actions{display:flex;gap:.5rem;margin-top:.5rem;}
+    .q-copy-btn{
+      background:none;border:1px solid var(--border);border-radius:6px;
+      color:var(--muted);font-size:.78rem;padding:.25rem .6rem;
+      cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
+    }
+    .q-copy-btn:hover{color:var(--text);border-color:rgba(108,99,255,.4);}
+
+    /* ── ALERT ── */
+    .alert{
+      border-radius:10px;padding:1rem 1.25rem;font-size:.88rem;margin-top:1rem;
+      display:flex;align-items:flex-start;gap:.75rem;
+    }
+    .alert-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;}
+    .alert-info{background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);color:var(--accent2);}
+
+    /* ── PASTE ── */
+    .paste-hint{
+      background:rgba(108,99,255,.06);border:1px dashed rgba(108,99,255,.2);
+      border-radius:10px;padding:1rem;
+      font-size:.85rem;color:var(--text-dim);text-align:center;margin-top:.75rem;
+    }
+
+    footer{
+      text-align:center;padding:2rem;
+      color:var(--muted);font-size:.82rem;
+      border-top:1px solid var(--border);margin-top:4rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">✦ ResumeAI</a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="ai_assistant.html">AI Assistant</a>
+    <a href="interview_prep.html" class="active">Interview Prep</a>
+  </div>
+  <span id="aiStatusBadge" class="ai-status-badge fallback">
+    <span class="status-dot dot-amber"></span> Checking…
+  </span>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">🎤 AI Interview Coach</div>
+  <h1>Interview Prep</h1>
+  <p>Get personalized technical, project, and behavioral questions tailored to your exact resume and target job description.</p>
+</div>
+
+<div class="page">
+
+  <!-- Input Card -->
+  <div class="card">
+    <div class="card-title">📋 Your Information</div>
+
+    <div style="margin-bottom:1.25rem;">
+      <label for="resumeJsonInput">Resume Data (JSON)</label>
+      <textarea id="resumeJsonInput" style="min-height:120px;font-family:monospace;font-size:.82rem;"
+        placeholder='Paste your parsed resume JSON here. You can get this from the Dashboard after uploading your resume. Example: {"contact":{"name":"..."},"skills":{"flat_list":[...]},"projects":[...],...}'></textarea>
+      <div class="form-hint">Tip: Parse your resume on the <a href="index.html" style="color:var(--accent)">Dashboard</a>, then copy the parse result JSON here.</div>
+    </div>
+
+    <div>
+      <label for="jdInput">Job Description</label>
+      <textarea id="jdInput" style="min-height:160px;"
+        placeholder="Paste the full job description here. The more detail, the more personalized your interview questions will be.&#10;&#10;Example:&#10;We are looking for a Python Backend Engineer to build scalable REST APIs..."></textarea>
+    </div>
+
+    <button class="btn" id="generateBtn" onclick="generateQuestions()">
+      🎯 Generate Interview Questions
+    </button>
+
+    <div class="loading" id="interviewLoading">
+      <div class="spinner"></div>
+      Generating personalized questions with AI…
+    </div>
+
+    <div id="interviewError"></div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="interviewResults">
+
+    <!-- Technical -->
+    <div class="q-section">
+      <div class="q-section-title q-tech">⚙️ Technical Questions</div>
+      <div class="q-list" id="technicalList"></div>
+    </div>
+
+    <!-- Project -->
+    <div class="q-section">
+      <div class="q-section-title q-project">🚀 Project Deep-Dive Questions</div>
+      <div class="q-list" id="projectList"></div>
+    </div>
+
+    <!-- Behavioral -->
+    <div class="q-section">
+      <div class="q-section-title q-behavioral">🧠 Behavioral Questions</div>
+      <div class="q-list" id="behavioralList"></div>
+    </div>
+
+    <!-- Print tip -->
+    <div class="paste-hint">
+      💡 Pro tip: Copy all questions and practice answering each one out loud using the STAR method (Situation, Task, Action, Result).
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  ResumeAI Phase 3 — Interview Prep &nbsp;·&nbsp; Powered by Gemini 1.5 Flash
+</footer>
+
+<script>
+const API = 'http://localhost:8000';
+
+async function checkAIStatus() {
+  try {
+    const r = await fetch(`${API}/ai/status`);
+    const d = await r.json();
+    const badge = document.getElementById('aiStatusBadge');
+    if (d.gemini_available) {
+      badge.className = 'ai-status-badge ready';
+      badge.innerHTML = '<span class="status-dot dot-green"></span> Gemini Ready';
+    } else {
+      badge.className = 'ai-status-badge fallback';
+      badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
+    }
+  } catch (_) {}
+}
+checkAIStatus();
+
+function showAlert(id, msg, type = 'error') {
+  document.getElementById(id).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    setTimeout(() => btn.textContent = '⎘ Copy', 1800);
+  });
+}
+
+function renderQuestions(containerId, questions) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  if (!questions || !questions.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;padding:.5rem">No questions generated for this category.</div>';
+    return;
+  }
+  questions.forEach((q, i) => {
+    const item = document.createElement('div');
+    item.className = 'q-item';
+    item.innerHTML = `
+      <span class="q-num">${i + 1}.</span>
+      <div style="flex:1">
+        <div class="q-text">${q}</div>
+        <div class="q-actions">
+          <button class="q-copy-btn" onclick="copyText(${JSON.stringify(q)}, this)">⎘ Copy</button>
+        </div>
+      </div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+async function generateQuestions() {
+  const rawResume = document.getElementById('resumeJsonInput').value.trim();
+  const jd        = document.getElementById('jdInput').value.trim();
+
+  if (!rawResume) { showAlert('interviewError', 'Please paste your resume JSON. Parse your resume on the Dashboard first.'); return; }
+  if (!jd)        { showAlert('interviewError', 'Please paste a job description.'); return; }
+
+  let resume_data;
+  try {
+    const parsed = JSON.parse(rawResume);
+    // Accept either raw parse result or {result: {...}} wrapper from /api/parse
+    resume_data = parsed.result || parsed;
+  } catch (_) {
+    showAlert('interviewError', 'Invalid JSON. Please paste a valid resume JSON object.');
+    return;
+  }
+
+  clearAlert('interviewError');
+  document.getElementById('interviewResults').classList.remove('visible');
+  document.getElementById('interviewLoading').classList.add('visible');
+  document.getElementById('generateBtn').disabled = true;
+
+  try {
+    const r = await fetch(`${API}/ai/interview-questions`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({resume_data, job_description: jd}),
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const d = await r.json();
+    renderQuestions('technicalList',  d.technical_questions);
+    renderQuestions('projectList',    d.project_questions);
+    renderQuestions('behavioralList', d.behavioral_questions);
+    document.getElementById('interviewResults').classList.add('visible');
+    document.getElementById('interviewResults').scrollIntoView({behavior:'smooth', block:'start'});
+  } catch (err) {
+    showAlert('interviewError', `Error: ${err.message}`);
+  } finally {
+    document.getElementById('interviewLoading').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = false;
+  }
+}
+</script>
+</body>
+</html>

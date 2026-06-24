@@ -181,3 +181,126 @@ def match_resume(req: MatchRequest):
     except Exception as e:
         raise HTTPException(500, f"Matching engine error: {str(e)}")
 
+
+# ── Phase 3: AI Services ───────────────────────────────────────────────────────
+
+import logging
+
+# Ensure the backend directory is on sys.path so 'services' is importable
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
+from services.gemini_service import GeminiService
+from services.bullet_improver import BulletImprover
+from services.project_enhancer import ProjectEnhancer
+from services.interview_generator import InterviewGenerator
+
+logging.basicConfig(level=logging.INFO)
+
+_gemini   = GeminiService()
+_bullet   = BulletImprover(_gemini)
+_enhancer = ProjectEnhancer(_gemini)
+_interview = InterviewGenerator(_gemini)
+
+
+# ── Pydantic models ───────────────────────────────────────────────────────────
+
+class BulletRequest(BaseModel):
+    bullet: str
+    context: str = "experience"   # "project" | "experience"
+
+class BulletResponse(BaseModel):
+    ats_version: str
+    professional_version: str
+    concise_version: str
+
+class ProjectRequest(BaseModel):
+    project_name: str
+    description: str
+
+class ProjectResponse(BaseModel):
+    ats_version: str
+    technical_version: str
+    recruiter_version: str
+
+class InterviewRequest(BaseModel):
+    resume_data: dict
+    job_description: str
+
+class InterviewResponse(BaseModel):
+    technical_questions: list
+    project_questions: list
+    behavioral_questions: list
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
+@app.post("/ai/improve-bullet", response_model=BulletResponse)
+def improve_bullet(req: BulletRequest):
+    """
+    Rewrite a resume bullet into ATS-optimized, professional, and concise variants.
+    """
+    if not req.bullet or not req.bullet.strip():
+        raise HTTPException(400, "bullet must not be empty")
+    try:
+        result = _bullet.improve(req.bullet, req.context)
+        return BulletResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc))
+    except Exception as exc:
+        raise HTTPException(500, f"Bullet improver error: {str(exc)}")
+
+
+@app.post("/ai/enhance-project", response_model=ProjectResponse)
+def enhance_project(req: ProjectRequest):
+    """
+    Rewrite a project description into ATS, technical, and recruiter variants.
+    """
+    if not req.project_name or not req.project_name.strip():
+        raise HTTPException(400, "project_name must not be empty")
+    if not req.description or not req.description.strip():
+        raise HTTPException(400, "description must not be empty")
+    try:
+        result = _enhancer.enhance(req.project_name, req.description)
+        return ProjectResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc))
+    except Exception as exc:
+        raise HTTPException(500, f"Project enhancer error: {str(exc)}")
+
+
+@app.post("/ai/interview-questions", response_model=InterviewResponse)
+def generate_interview_questions(req: InterviewRequest):
+    """
+    Generate personalized technical, project, and behavioral interview questions.
+    """
+    if not req.resume_data:
+        raise HTTPException(400, "resume_data must not be empty")
+    if not req.job_description or not req.job_description.strip():
+        raise HTTPException(400, "job_description must not be empty")
+    try:
+        result = _interview.generate(req.resume_data, req.job_description)
+        return InterviewResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc))
+    except Exception as exc:
+        raise HTTPException(500, f"Interview generator error: {str(exc)}")
+
+
+@app.get("/ai/status")
+def ai_status():
+    """Check Gemini API availability."""
+    return {
+        "gemini_available": _gemini.is_available,
+        "model": _gemini.MODEL_NAME,
+        "message": "Ready" if _gemini.is_available else (
+            "GEMINI_API_KEY not set — fallback responses will be used"
+        ),
+    }

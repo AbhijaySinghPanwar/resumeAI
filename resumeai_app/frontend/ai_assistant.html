@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Resume Assistant — ResumeAI</title>
+  <meta name="description" content="AI-powered resume bullet improver and project description enhancer. Transform your resume into an ATS-winning document."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0A0B14;
+      --surface:   #111220;
+      --surface2:  #181929;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #6C63FF;
+      --accent2:   #A78BFA;
+      --green:     #10B981;
+      --amber:     #F59E0B;
+      --red:       #EF4444;
+      --muted:     #6B7280;
+      --text:      #F9FAFB;
+      --text-dim:  #9CA3AF;
+      --radius:    14px;
+      --shadow:    0 4px 32px rgba(0,0,0,0.5);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Inter',sans-serif;
+      min-height:100vh;
+      line-height:1.6;
+    }
+
+    /* ── NAV ── */
+    nav{
+      position:sticky;top:0;z-index:100;
+      background:rgba(10,11,20,0.85);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border);
+      padding:0 2rem;
+      height:64px;
+      display:flex;align-items:center;gap:2rem;
+    }
+    .nav-logo{
+      font-size:1.3rem;font-weight:800;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-decoration:none;
+    }
+    .nav-links{display:flex;gap:1.5rem;margin-left:auto;}
+    .nav-links a{
+      color:var(--text-dim);text-decoration:none;font-size:.9rem;font-weight:500;
+      transition:color .2s;padding:.3rem .6rem;border-radius:8px;
+    }
+    .nav-links a:hover{color:var(--text);background:var(--surface);}
+    .nav-links a.active{color:var(--accent);}
+
+    /* ── HERO ── */
+    .hero{
+      text-align:center;
+      padding:4rem 2rem 2rem;
+    }
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);
+      color:var(--accent2);font-size:.8rem;font-weight:600;
+      padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;
+    }
+    .hero h1{
+      font-size:clamp(2rem,5vw,3.2rem);font-weight:800;
+      line-height:1.15;margin-bottom:1rem;
+      background:linear-gradient(135deg,#fff 40%,var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .hero p{color:var(--text-dim);font-size:1.1rem;max-width:600px;margin:0 auto 2rem;}
+
+    /* ── LAYOUT ── */
+    .page{max-width:1100px;margin:0 auto;padding:2rem;}
+    .tabs{
+      display:flex;gap:.75rem;margin-bottom:2rem;
+      border-bottom:1px solid var(--border);padding-bottom:1rem;
+    }
+    .tab-btn{
+      background:none;border:none;cursor:pointer;
+      color:var(--text-dim);font-size:.95rem;font-weight:600;
+      padding:.6rem 1.4rem;border-radius:100px;
+      transition:all .2s;font-family:'Inter',sans-serif;
+    }
+    .tab-btn:hover{color:var(--text);background:var(--surface);}
+    .tab-btn.active{
+      color:var(--accent);
+      background:rgba(108,99,255,.12);
+      border:1px solid rgba(108,99,255,.3);
+    }
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    /* ── CARD ── */
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:2rem;
+      margin-bottom:1.5rem;
+    }
+    .card-title{
+      font-size:1rem;font-weight:700;margin-bottom:1.2rem;
+      display:flex;align-items:center;gap:.6rem;
+    }
+    .card-title .icon{font-size:1.2rem;}
+
+    /* ── FORM ── */
+    label{display:block;font-size:.85rem;font-weight:600;color:var(--text-dim);margin-bottom:.5rem;}
+    textarea,input,select{
+      width:100%;
+      background:var(--surface2);
+      border:1px solid var(--border);
+      border-radius:10px;
+      color:var(--text);
+      font-family:'Inter',sans-serif;
+      font-size:.9rem;
+      padding:.85rem 1rem;
+      transition:border-color .2s;
+      resize:vertical;
+    }
+    textarea:focus,input:focus,select:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(108,99,255,.15);
+    }
+    textarea{min-height:120px;}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:640px){.form-row{grid-template-columns:1fr;}}
+
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:linear-gradient(135deg,var(--accent),#8B5CF6);
+      color:#fff;border:none;border-radius:10px;
+      padding:.85rem 1.8rem;font-size:.95rem;font-weight:700;
+      cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
+      margin-top:1rem;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.4);}
+    .btn:active{transform:translateY(0);}
+    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    /* ── LOADING ── */
+    .loading{
+      display:none;align-items:center;gap:.75rem;
+      color:var(--accent2);font-size:.9rem;font-weight:500;
+      margin-top:1rem;
+    }
+    .loading.visible{display:flex;}
+    .spinner{
+      width:20px;height:20px;
+      border:2px solid rgba(108,99,255,.3);
+      border-top-color:var(--accent);
+      border-radius:50%;
+      animation:spin .8s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── RESULTS ── */
+    .results{display:none;margin-top:1.5rem;}
+    .results.visible{display:block;}
+    .variant-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;}
+    .variant-card{
+      background:var(--surface2);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:1.25rem;
+      position:relative;
+      transition:border-color .2s;
+    }
+    .variant-card:hover{border-color:rgba(108,99,255,.4);}
+    .variant-label{
+      font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      margin-bottom:.75rem;
+      display:inline-flex;align-items:center;gap:.4rem;
+      padding:.25rem .7rem;border-radius:6px;
+    }
+    .label-ats{background:rgba(16,185,129,.12);color:var(--green);}
+    .label-pro{background:rgba(108,99,255,.12);color:var(--accent2);}
+    .label-concise{background:rgba(245,158,11,.12);color:var(--amber);}
+    .label-tech{background:rgba(59,130,246,.12);color:#60A5FA;}
+    .label-recruiter{background:rgba(236,72,153,.12);color:#F472B6;}
+    .variant-text{
+      font-size:.92rem;line-height:1.65;color:var(--text);
+      word-break:break-word;
+    }
+    .copy-btn{
+      position:absolute;top:.75rem;right:.75rem;
+      background:none;border:none;cursor:pointer;
+      color:var(--muted);font-size:.8rem;
+      padding:.3rem .6rem;border-radius:6px;
+      transition:all .2s;
+    }
+    .copy-btn:hover{color:var(--text);background:rgba(255,255,255,.06);}
+
+    /* ── ALERT ── */
+    .alert{
+      border-radius:10px;padding:1rem 1.25rem;
+      font-size:.88rem;margin-top:1rem;
+      display:flex;align-items:flex-start;gap:.75rem;
+    }
+    .alert-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;}
+    .alert-info{background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);color:var(--accent2);}
+
+    /* ── GEMINI STATUS BADGE ── */
+    .ai-status-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      font-size:.78rem;font-weight:600;padding:.3rem .8rem;border-radius:100px;
+      margin-left:auto;
+    }
+    .ai-status-badge.ready{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+    .ai-status-badge.fallback{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
+    .status-dot{width:7px;height:7px;border-radius:50%;}
+    .dot-green{background:var(--green);box-shadow:0 0 6px var(--green);}
+    .dot-amber{background:var(--amber);}
+
+    /* ── FOOTER ── */
+    footer{
+      text-align:center;padding:2rem;
+      color:var(--muted);font-size:.82rem;
+      border-top:1px solid var(--border);margin-top:4rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">✦ ResumeAI</a>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="ai_assistant.html" class="active">AI Assistant</a>
+    <a href="interview_prep.html">Interview Prep</a>
+  </div>
+  <span id="aiStatusBadge" class="ai-status-badge fallback">
+    <span class="status-dot dot-amber"></span> Checking…
+  </span>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">✨ Powered by Gemini 1.5 Flash</div>
+  <h1>AI Resume Assistant</h1>
+  <p>Transform every bullet point and project description into ATS-winning, recruiter-approved content — in seconds.</p>
+</div>
+
+<div class="page">
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('bullet')">⚡ Bullet Improver</button>
+    <button class="tab-btn" onclick="switchTab('project')">🚀 Project Enhancer</button>
+  </div>
+
+  <!-- ── Bullet Improver Panel ── -->
+  <div class="tab-panel active" id="tab-bullet">
+    <div class="card">
+      <div class="card-title"><span class="icon">⚡</span> Resume Bullet Improver</div>
+      <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:1.5rem;">
+        Paste any resume bullet and get 3 AI-optimized variants: ATS-friendly, professionally polished, and ultra-concise.
+      </p>
+
+      <label for="bulletInput">Original Bullet Point</label>
+      <textarea id="bulletInput" placeholder="e.g. Worked on the backend of the company website to fix some bugs and add new features"></textarea>
+
+      <div style="margin-top:1rem;">
+        <label for="bulletContext">Context</label>
+        <select id="bulletContext">
+          <option value="experience">Work Experience</option>
+          <option value="project">Project</option>
+        </select>
+      </div>
+
+      <button class="btn" id="bulletBtn" onclick="improveBullet()">
+        ✨ Improve Bullet
+      </button>
+
+      <div class="loading" id="bulletLoading">
+        <div class="spinner"></div>
+        Generating AI-powered variants…
+      </div>
+
+      <div id="bulletError"></div>
+
+      <div class="results" id="bulletResults">
+        <div class="variant-grid" id="bulletGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Project Enhancer Panel ── -->
+  <div class="tab-panel" id="tab-project">
+    <div class="card">
+      <div class="card-title"><span class="icon">🚀</span> Project Description Enhancer</div>
+      <p style="color:var(--text-dim);font-size:.9rem;margin-bottom:1.5rem;">
+        Enter your project name and description to get ATS-optimized, technically rich, and recruiter-friendly versions.
+      </p>
+
+      <div class="form-row">
+        <div>
+          <label for="projectName">Project Name</label>
+          <input type="text" id="projectName" placeholder="e.g. SkillSwap Platform"/>
+        </div>
+        <div>
+          <!-- spacer -->
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <label for="projectDesc">Project Description</label>
+        <textarea id="projectDesc" placeholder="e.g. Built a peer-to-peer skill exchange platform using FastAPI and React. Users can offer and request skill sessions."></textarea>
+      </div>
+
+      <button class="btn" id="projectBtn" onclick="enhanceProject()">
+        ✨ Enhance Description
+      </button>
+
+      <div class="loading" id="projectLoading">
+        <div class="spinner"></div>
+        Generating AI-powered descriptions…
+      </div>
+
+      <div id="projectError"></div>
+
+      <div class="results" id="projectResults">
+        <div class="variant-grid" id="projectGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  ResumeAI Phase 3 — AI Resume Assistant &nbsp;·&nbsp; Powered by Gemini 1.5 Flash
+</footer>
+
+<script>
+const API = 'http://localhost:8000';
+
+// ── Check Gemini status on load ───────────────────────────────────────────────
+async function checkAIStatus() {
+  try {
+    const r = await fetch(`${API}/ai/status`);
+    const d = await r.json();
+    const badge = document.getElementById('aiStatusBadge');
+    if (d.gemini_available) {
+      badge.className = 'ai-status-badge ready';
+      badge.innerHTML = '<span class="status-dot dot-green"></span> Gemini Ready';
+    } else {
+      badge.className = 'ai-status-badge fallback';
+      badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
+      showAlert('bulletError', '⚠ GEMINI_API_KEY is not set. Using smart fallback responses. Set the key in your environment to enable full AI generation.', 'info');
+    }
+  } catch (_) {}
+}
+checkAIStatus();
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['bullet','project'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// ── Error / alert ─────────────────────────────────────────────────────────────
+function showAlert(id, msg, type='error') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+
+// ── Copy to clipboard ─────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '⎘ Copy', 1800);
+  });
+}
+
+// ── Variant card builder ──────────────────────────────────────────────────────
+function buildVariantCard(label, labelClass, text) {
+  const card = document.createElement('div');
+  card.className = 'variant-card';
+  card.innerHTML = `
+    <span class="variant-label ${labelClass}">${label}</span>
+    <button class="copy-btn" onclick="copyText(this.closest('.variant-card').querySelector('.variant-text').textContent, this)">⎘ Copy</button>
+    <p class="variant-text">${text}</p>
+  `;
+  return card;
+}
+
+// ── Bullet Improver ───────────────────────────────────────────────────────────
+async function improveBullet() {
+  const bullet  = document.getElementById('bulletInput').value.trim();
+  const context = document.getElementById('bulletContext').value;
+  if (!bullet) { showAlert('bulletError', 'Please enter a bullet point.'); return; }
+
+  clearAlert('bulletError');
+  document.getElementById('bulletResults').classList.remove('visible');
+  document.getElementById('bulletLoading').classList.add('visible');
+  document.getElementById('bulletBtn').disabled = true;
+
+  try {
+    const r = await fetch(`${API}/ai/improve-bullet`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({bullet, context}),
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const d = await r.json();
+    const grid = document.getElementById('bulletGrid');
+    grid.innerHTML = '';
+    grid.appendChild(buildVariantCard('🎯 ATS Optimized',   'label-ats',     d.ats_version));
+    grid.appendChild(buildVariantCard('💼 Professional',    'label-pro',     d.professional_version));
+    grid.appendChild(buildVariantCard('⚡ Concise',         'label-concise', d.concise_version));
+    document.getElementById('bulletResults').classList.add('visible');
+  } catch (err) {
+    showAlert('bulletError', `Error: ${err.message}`);
+  } finally {
+    document.getElementById('bulletLoading').classList.remove('visible');
+    document.getElementById('bulletBtn').disabled = false;
+  }
+}
+
+// ── Project Enhancer ──────────────────────────────────────────────────────────
+async function enhanceProject() {
+  const project_name = document.getElementById('projectName').value.trim();
+  const description  = document.getElementById('projectDesc').value.trim();
+  if (!project_name) { showAlert('projectError', 'Please enter a project name.'); return; }
+  if (!description)  { showAlert('projectError', 'Please enter a project description.'); return; }
+
+  clearAlert('projectError');
+  document.getElementById('projectResults').classList.remove('visible');
+  document.getElementById('projectLoading').classList.add('visible');
+  document.getElementById('projectBtn').disabled = true;
+
+  try {
+    const r = await fetch(`${API}/ai/enhance-project`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({project_name, description}),
+    });
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.detail || `HTTP ${r.status}`);
+    }
+    const d = await r.json();
+    const grid = document.getElementById('projectGrid');
+    grid.innerHTML = '';
+    grid.appendChild(buildVariantCard('🎯 ATS Optimized',   'label-ats',      d.ats_version));
+    grid.appendChild(buildVariantCard('🔧 Technical',       'label-tech',     d.technical_version));
+    grid.appendChild(buildVariantCard('🤝 Recruiter View',  'label-recruiter', d.recruiter_version));
+    document.getElementById('projectResults').classList.add('visible');
+  } catch (err) {
+    showAlert('projectError', `Error: ${err.message}`);
+  } finally {
+    document.getElementById('projectLoading').classList.remove('visible');
+    document.getElementById('projectBtn').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
