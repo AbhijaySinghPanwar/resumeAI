@@ -217,13 +217,13 @@ async def parse_resume(
                 user_id=current_user.id,
                 filename=filename,
                 parsed_json=result,
-                ats_score=ats_score_result.get("score"),
+                ats_score=ats_score_result.get("overall_score"),
             )
             ReportRepository(db).create_ats(
                 resume_id=resume.id,
-                ats_score=ats_score_result.get("score", 0),
+                ats_score=ats_score_result.get("overall_score", 0),
                 ats_breakdown=ats_score_result.get("breakdown", {}),
-                suggestions=ats_score_result.get("suggestions", []),
+                suggestions=ats_score_result.get("improvements", []),
             )
             saved_resume_id = resume.id
             logger.info("Auto-saved resume: id=%d user_id=%d", resume.id, current_user.id)

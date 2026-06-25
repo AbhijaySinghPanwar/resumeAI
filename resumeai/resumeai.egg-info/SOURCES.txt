@@ -21,6 +21,13 @@ extractors/leadership.py
 extractors/projects.py
 extractors/skills.py
 extractors/summary.py
+matching/__init__.py
+matching/embedding_engine.py
+matching/gap_analyzer.py
+matching/jd_parser.py
+matching/roadmap_generator.py
+matching/schemas.py
+matching/skill_matcher.py
 resumeai.egg-info/PKG-INFO
 resumeai.egg-info/SOURCES.txt
 resumeai.egg-info/dependency_links.txt
@@ -33,6 +40,7 @@ scoring/scoring_rules.py
 tests/__init__.py
 tests/test_ats_scoring.py
 tests/test_fresher_calibration.py
+tests/test_matching.py
 tests/test_regressions.py
 tests/adversarial/__init__.py
 tests/adversarial/test_adversarial.py

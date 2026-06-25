@@ -1345,11 +1345,11 @@ async function doParseAndScore(source, jd) {
     // 1. Parse resume
     let parseRes;
     if (source.formData) {
-      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', body: source.formData });
+      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers: authHeaders(), body: source.formData });
     } else {
       const fd = new FormData();
       fd.append('text', source.text);
-      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', body: fd });
+      parseRes = await fetch(`${API_BASE}/api/parse`, { method:'POST', headers: authHeaders(), body: fd });
     }
 
     if (!parseRes.ok) {
@@ -1376,7 +1376,7 @@ async function doParseAndScore(source, jd) {
     renderResults(lastResult, data.gate, atsScore, scoreData);
 
     // 3. Phase 2: Job Match Analysis — async, shows below results
-    if (jd) runMatchAnalysis(lastResult, jd);
+    if (jd) runMatchAnalysis(lastResult, jd, data.saved_resume_id);
 
   } catch (e) {
     showLoading(false);
@@ -1386,7 +1386,7 @@ async function doParseAndScore(source, jd) {
 }
 
 /* ── Phase 2: Match Analysis ─────────────────────────────────────────── */
-async function runMatchAnalysis(parseResult, jd) {
+async function runMatchAnalysis(parseResult, jd, resumeId = null) {
   const sec   = document.getElementById('match-section');
   const grid  = document.getElementById('match-grid');
   const badge = document.getElementById('match-status-badge');
@@ -1400,10 +1400,14 @@ async function runMatchAnalysis(parseResult, jd) {
   </div>`;
 
   try {
+    const bodyPayload = { parse_result: parseResult, job_description: jd };
+    if (resumeId) bodyPayload.resume_id = resumeId;
+    
+    const headers = { 'Content-Type': 'application/json', ...authHeaders() };
     const res = await fetch(`${API_BASE}/api/match`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ parse_result: parseResult, job_description: jd }),
+      headers: headers,
+      body: JSON.stringify(bodyPayload),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

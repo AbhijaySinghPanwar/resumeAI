@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Resume History — TalentLens AI</title>
-  <meta name="description" content="View and manage all your uploaded resumes, ATS scores, and reports in one place." />
+  <meta name="description" content="Manage your uploaded resumes, ATS scores, and reports." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -13,19 +13,24 @@
     html { scroll-behavior: smooth; }
 
     :root {
-      --primary:   #4F46E5;
-      --secondary: #7C3AED;
+      --primary:   #000000;
+      --secondary: #333333;
+      --accent:    #4F46E5;
+      --accent-hover: #4338CA;
       --success:   #10B981;
       --warning:   #F59E0B;
       --danger:    #EF4444;
-      --bg:        #F8FAFC;
+      --bg:        #FAFAFA;
       --surface:   #FFFFFF;
-      --text:      #0F172A;
-      --muted:     #64748B;
-      --border:    #E2E8F0;
-      --shadow-soft: 0 4px 20px -2px rgba(79,70,229,0.10);
-      --shadow-hover: 0 10px 25px -5px rgba(79,70,229,0.15);
-      --shadow-btn:   0 4px 14px 0 rgba(79,70,229,0.30);
+      --text:      #111827;
+      --muted:     #6B7280;
+      --border:    #E5E7EB;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
     }
 
     body {
@@ -34,1194 +39,821 @@
       color: var(--text);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* ── Nav ─────────────────────────────────────────────────── */
-    nav {
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav-inner {
-      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 64px;
-    }
-    .logo {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-weight: 800; font-size: 1.2rem; color: var(--text);
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--shadow-btn); font-size: 1rem; color: white;
-    }
-    .logo span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .nav-right { display: flex; align-items: center; gap: 1rem; }
-    .nav-link { color: var(--muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
-    .nav-link:hover { color: var(--primary); }
-    .nav-badge {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-size: 0.75rem; font-weight: 700;
-      padding: 4px 12px; border-radius: 99px;
-    }
-    .btn-nav {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-weight: 600; font-size: 0.875rem;
-      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
-      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
-    }
-    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
-
-    /* ── Page Header ─────────────────────────────────────────── */
-    .page-header {
-      background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #1E0A2B 100%);
-      padding: 3rem 0 2rem; position: relative; overflow: hidden;
-    }
-    .page-header::before {
-      content: ''; position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
-    .page-header-blob {
-      position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none;
-    }
-    .page-header-blob-1 {
-      width: 400px; height: 400px;
-      background: rgba(79,70,229,0.25); top: -100px; right: -50px;
-    }
-    .page-header-blob-2 {
-      width: 300px; height: 300px;
-      background: rgba(124,58,237,0.20); bottom: -80px; left: 10%;
-    }
-    .page-header-inner {
-      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
-      position: relative; z-index: 1;
-    }
-    .page-breadcrumb {
-      font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 0.75rem;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .page-breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
-    .page-breadcrumb a:hover { color: rgba(255,255,255,0.7); }
-    .page-title {
-      font-size: 2.2rem; font-weight: 800; color: white;
-      margin-bottom: 0.5rem; letter-spacing: -0.02em;
-    }
-    .page-title .grad { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .page-subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.5); }
-
-    /* ── Stats Bar ───────────────────────────────────────────── */
-    .stats-bar {
-      display: flex; gap: 1.5rem; margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    .stat-chip {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px; padding: 0.75rem 1.25rem;
-      display: flex; align-items: center; gap: 0.75rem;
-      backdrop-filter: blur(10px);
-      transition: background 0.2s;
-    }
-    .stat-chip:hover { background: rgba(255,255,255,0.12); }
-    .stat-chip-icon {
-      width: 36px; height: 36px; border-radius: 9px;
-      background: linear-gradient(135deg, rgba(79,70,229,0.4), rgba(124,58,237,0.4));
-      display: flex; align-items: center; justify-content: center; font-size: 1rem;
-    }
-    .stat-chip-num { font-size: 1.5rem; font-weight: 800; color: white; line-height: 1; }
-    .stat-chip-label { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 600; }
-
-    /* ── Main Content ────────────────────────────────────────── */
-    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
-    .content-section { padding: 2.5rem 0 4rem; }
-
-    /* ── Toolbar ─────────────────────────────────────────────── */
-    .toolbar {
-      display: flex; gap: 1rem; align-items: center;
-      margin-bottom: 1.75rem; flex-wrap: wrap;
-    }
-    .search-wrap { position: relative; flex: 1; min-width: 220px; }
-    .search-icon {
-      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-      color: var(--muted); font-size: 0.9rem; pointer-events: none;
-    }
-    .search-input {
-      width: 100%;
-      background: white; border: 1px solid var(--border);
-      border-radius: 12px; padding: 0.7rem 1rem 0.7rem 2.5rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.9rem; color: var(--text); outline: none;
-      transition: all 0.2s; box-shadow: var(--shadow-soft);
-    }
-    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
-    .search-input::placeholder { color: #94A3B8; }
-
-    .sort-select {
-      background: white; border: 1px solid var(--border);
-      border-radius: 12px; padding: 0.7rem 1rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.875rem; color: var(--text);
-      outline: none; cursor: pointer;
-      box-shadow: var(--shadow-soft); transition: all 0.2s;
-      min-width: 160px;
-    }
-    .sort-select:focus { border-color: var(--primary); }
-
-    /* ── Resume Cards Grid ───────────────────────────────────── */
-    .resumes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .resume-card {
-      background: white; border-radius: 18px;
-      border: 1px solid var(--border); box-shadow: var(--shadow-soft);
-      overflow: hidden; transition: all 0.25s;
-      display: flex; flex-direction: column;
-      animation: fadeUp 0.4s ease both;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: none; }
-    }
-    .resume-card:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-hover);
-      border-color: rgba(79,70,229,0.2);
-    }
-
-    .rc-header {
-      background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
-      padding: 1.1rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: flex-start; gap: 0.75rem;
-    }
-    .rc-file-icon {
-      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem; color: white; box-shadow: var(--shadow-btn);
-    }
-    .rc-file-info { flex: 1; min-width: 0; }
-    .rc-filename {
-      font-size: 0.9rem; font-weight: 700; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: 0.2rem;
-    }
-    .rc-date { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
-
-    .rc-body { padding: 1.1rem 1.25rem; flex: 1; }
-    .rc-metrics {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 0.75rem; margin-bottom: 1rem;
-    }
-    .metric-item { text-align: center; }
-    .metric-val {
-      font-size: 1.4rem; font-weight: 800; color: var(--text);
-      line-height: 1;
-    }
-    .metric-label { font-size: 0.68rem; color: var(--muted); font-weight: 600; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    /* ATS Score badge */
-    .ats-badge {
-      display: inline-flex; align-items: center;
-      font-size: 1.1rem; font-weight: 800; padding: 0.2rem 0.75rem;
-      border-radius: 99px; line-height: 1;
-    }
-    .ats-green  { background: #D1FAE5; color: #065F46; }
-    .ats-amber  { background: #FEF3C7; color: #92400E; }
-    .ats-red    { background: #FEE2E2; color: #991B1B; }
-    .ats-none   { background: #F1F5F9; color: var(--muted); }
-
-    .rc-footer { padding: 0.9rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
-    .btn-action {
-      flex: 1; padding: 0.55rem 0.5rem; border-radius: 9px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.78rem; font-weight: 700; cursor: pointer;
-      border: none; transition: all 0.18s; text-align: center;
-    }
-    .btn-view {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; box-shadow: var(--shadow-btn);
-    }
-    .btn-view:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,0.4); }
-    .btn-delete {
-      background: #FEE2E2; color: #991B1B;
-      border: 1px solid rgba(239,68,68,0.2);
-    }
-    .btn-delete:hover { background: #FECACA; transform: translateY(-1px); }
-
-    /* ── Empty State ─────────────────────────────────────────── */
-    .empty-state {
-      text-align: center; padding: 5rem 2rem;
-      background: white; border-radius: 20px;
-      border: 2px dashed var(--border);
-    }
-    .empty-icon {
-      font-size: 4rem; margin-bottom: 1rem;
-      animation: bounce 2s ease-in-out infinite;
-    }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    .empty-state h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .empty-state p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; font-size: 0.9rem; padding: 0.7rem 1.5rem;
-      border-radius: 99px; border: none; cursor: pointer;
-      box-shadow: var(--shadow-btn); transition: all 0.2s; text-decoration: none;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.4); }
-
-    /* ── Pagination ──────────────────────────────────────────── */
-    .pagination {
-      display: flex; align-items: center; justify-content: center;
-      gap: 0.5rem; margin-top: 2.5rem; flex-wrap: wrap;
-    }
-    .page-btn {
-      padding: 0.55rem 1rem; border-radius: 10px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
-      border: 1px solid var(--border); background: white;
-      color: var(--muted); cursor: pointer; transition: all 0.18s;
-    }
-    .page-btn:hover { border-color: var(--primary); color: var(--primary); }
-    .page-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; border-color: transparent; box-shadow: var(--shadow-btn);
-    }
-    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .page-info { font-size: 0.85rem; color: var(--muted); padding: 0 0.5rem; font-weight: 600; }
-
-    /* ── Loading ─────────────────────────────────────────────── */
-    .loading-overlay {
-      text-align: center; padding: 5rem 2rem;
-    }
-    .spinner {
-      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 1.25rem;
-      border: 3px solid #E2E8F0;
-      border-top-color: var(--primary);
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-overlay h3 { font-weight: 700; margin-bottom: 0.35rem; }
-    .loading-overlay p { color: var(--muted); font-size: 0.9rem; }
-
-    /* ── Modal ───────────────────────────────────────────────── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(15,23,42,0.6);
-      backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 1.5rem; opacity: 0; pointer-events: none;
-      transition: opacity 0.25s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: white; border-radius: 24px;
-      width: 100%; max-width: 760px; max-height: 88vh;
-      overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-      transform: translateY(20px) scale(0.97);
-      transition: transform 0.25s;
-    }
-    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
-    .modal-header {
-      position: sticky; top: 0; background: white;
-      padding: 1.5rem 1.75rem 1rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      z-index: 10;
-    }
-    .modal-title { font-size: 1.2rem; font-weight: 800; }
-    .modal-close {
-      background: #F1F5F9; border: none; cursor: pointer;
-      width: 32px; height: 32px; border-radius: 8px;
-      font-size: 1rem; color: var(--muted); transition: all 0.2s;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .modal-close:hover { background: #E2E8F0; color: var(--text); }
-    .modal-body { padding: 1.75rem; }
-
-    /* Modal sections */
-    .modal-section { margin-bottom: 1.75rem; }
-    .modal-section-title {
-      font-size: 0.8rem; font-weight: 700; color: var(--primary);
-      text-transform: uppercase; letter-spacing: 0.07em;
-      margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
-    }
-    .modal-section-title::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
-    }
-    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .detail-field { }
-    .detail-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
-    .detail-value { font-size: 0.9rem; font-weight: 600; color: var(--text); word-break: break-word; }
-    .detail-value.empty { color: #CBD5E1; font-style: italic; font-weight: 400; }
-
-    .tag-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .tag {
-      font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 99px;
-      background: #EDE9FE; color: var(--secondary);
-    }
-
-    .report-card-mini {
-      background: #F8FAFC; border: 1px solid var(--border);
-      border-radius: 12px; padding: 0.875rem 1rem;
-      margin-bottom: 0.75rem;
-    }
-    .report-card-mini:last-child { margin-bottom: 0; }
-    .rcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
-    .rcm-title { font-size: 0.875rem; font-weight: 700; }
-    .rcm-date  { font-size: 0.72rem; color: var(--muted); }
-
-    /* ── Toast ───────────────────────────────────────────────── */
-    .toast {
-      position: fixed; bottom: 2rem; right: 2rem; z-index: 600;
-      background: #0F172A; color: white;
-      padding: 0.875rem 1.25rem; border-radius: 12px;
-      font-size: 0.875rem; font-weight: 600;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s;
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { border-left: 3px solid var(--success); }
-    .toast.error   { border-left: 3px solid var(--danger); }
-
-    /* ── Confirm dialog ──────────────────────────────────────── */
-    .confirm-overlay {
-      position: fixed; inset: 0; z-index: 550;
-      background: rgba(15,23,42,0.7); backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-    }
-    .confirm-overlay.open { opacity: 1; pointer-events: all; }
-    .confirm-box {
-      background: white; border-radius: 20px; padding: 2rem;
-      max-width: 400px; width: 100%;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-      transform: scale(0.94); transition: transform 0.2s;
-      text-align: center;
-    }
-    .confirm-overlay.open .confirm-box { transform: scale(1); }
-    .confirm-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-    .confirm-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .confirm-msg { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
-    .confirm-actions { display: flex; gap: 0.75rem; }
-    .btn-cancel {
-      flex: 1; padding: 0.7rem; border-radius: 10px;
-      background: #F1F5F9; color: var(--muted);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .btn-cancel:hover { background: var(--border); }
-    .btn-danger {
-      flex: 1; padding: 0.7rem; border-radius: 10px;
-      background: var(--danger); color: white;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
-      transition: all 0.2s; box-shadow: 0 4px 12px rgba(239,68,68,0.3);
-    }
-    .btn-danger:hover { background: #DC2626; transform: translateY(-1px); }
-
-    @media (max-width: 768px) {
-      .resumes-grid { grid-template-columns: 1fr; }
-      .detail-grid  { grid-template-columns: 1fr; }
-      .stats-bar { gap: 0.75rem; }
-      .page-title { font-size: 1.6rem; }
-    }
-  
-
-    
-        /* Modern Navbar CSS - Light/White */
+    /* ── Navbar (SaaS Style) ─────────────────────────────────────────── */
     .navbar {
       position: sticky; top: 0; z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      transition: all 0.3s ease;
-      padding: 0; height: 70px;
-    }
-    .navbar.scrolled {
-      background: rgba(255, 255, 255, 1);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      height: 64px;
     }
     .nav-inner {
-      display: flex; justify-content: space-between; align-items: center;
-      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 100%;
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; justify-content: space-between; align-items: center; height: 100%;
     }
-    .nav-left { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
     .logo {
       font-size: 1.25rem; font-weight: 800; color: var(--text); text-decoration: none;
       display: flex; align-items: center; gap: 0.5rem;
     }
-    .logo svg { color: var(--primary); }
-    .logo span {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .btn-back {
-      display: flex; align-items: center; gap: 0.4rem; color: var(--muted);
-      text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem;
-      border-radius: 8px; transition: all 0.2s; background: white; border: 1px solid var(--border);
-    }
-    .btn-back:hover { color: var(--primary); border-color: var(--primary); background: rgba(79,70,229,0.05); }
-    
-    .nav-right { display: flex; align-items: center; gap: 2rem; }
     .nav-links { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    
     .nav-link {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      position: relative;
-      padding: 1.5rem 0; /* to center it vertically in 70px */
-      transition: color 0.2s ease;
-      display: flex; align-items: center;
+      color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;
+      height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
     }
-    .nav-link:hover { color: var(--primary); }
-    .nav-link::after {
-      content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
-      background: var(--primary); transition: width 0.2s ease; border-radius: 2px 2px 0 0;
-    }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    .nav-link.active { color: var(--text); font-weight: 600; }
+    .nav-link:hover, .nav-link.active { color: var(--text); border-bottom-color: var(--text); }
     
-    .auth-buttons { display: flex; align-items: center; gap: 1rem; }
-    .login-link { padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.2s; color: var(--muted); text-decoration: none; font-weight: 600;}
-    .login-link:hover { background: rgba(0,0,0,0.05); color: var(--text); }
-    .signup-btn {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 8px;
-      font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .signup-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
-
-    /* Profile Dropdown */
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
     .profile-dropdown { position: relative; }
     .profile-btn {
-      background: white; color: var(--text);
-      border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 20px;
-      font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-      transition: background 0.2s;
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+      padding: 0.4rem 1rem; border-radius: 99px; font-weight: 600; font-size: 0.85rem;
+      cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;
     }
-    .profile-btn:hover { background: rgba(0,0,0,0.02); border-color: #cbd5e1; }
+    .profile-btn:hover { background: var(--border); }
     .profile-menu {
-      position: absolute; top: calc(100% + 1rem); right: 0;
-      background: white; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 220px;
-      opacity: 0; visibility: hidden; transform: translateY(-10px);
-      transition: all 0.2s; z-index: 1000;
+      position: absolute; top: calc(100% + 0.5rem); right: 0;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg); width: 220px;
+      opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s; z-index: 1000;
     }
     .profile-dropdown:hover .profile-menu { opacity: 1; visibility: visible; transform: translateY(0); }
     .profile-header { padding: 1rem; border-bottom: 1px solid var(--border); }
-    .profile-header strong { display: block; color: var(--text); font-size: 0.95rem; }
+    .profile-header strong { display: block; color: var(--text); font-size: 0.9rem; }
     .profile-header small { color: var(--muted); font-size: 0.8rem; }
     .profile-item {
       display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
       border: none; background: none; color: var(--text); text-decoration: none;
-      font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
+      font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
     }
-    .profile-item:hover { background: rgba(79,70,229,0.05); color: var(--primary); }
-    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; }
-    .logout-btn:hover { background: rgba(239,68,68,0.05); color: var(--danger); }
+    .profile-item:hover { background: var(--bg); color: var(--text); }
+    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-md) var(--radius-md); }
+    .logout-btn:hover { background: #FEF2F2; }
 
-    /* Responsive Navbar */
-    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
-    @media (max-width: 768px) {
-      .nav-links, .auth-buttons, .profile-dropdown { display: none; }
-      .nav-right { flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background: white; border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-      .nav-right.show { display: flex; }
-      .mobile-menu-btn { display: block; }
+    /* ── Header ─────────────────────────────────────────────── */
+    .dashboard-header {
+      padding: 2.5rem 0 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+    .header-content { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; }
+    .header-title h1 { font-size: 1.75rem; font-weight: 800; color: var(--text); margin-bottom: 0.25rem; letter-spacing: -0.02em; }
+    .header-title p { font-size: 0.9rem; color: var(--muted); }
+    
+    .btn-primary {
+      background: var(--primary); color: white; padding: 0.6rem 1.25rem;
+      border-radius: var(--radius-md); font-weight: 600; font-size: 0.85rem;
+      border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;
+      transition: all 0.2s; text-decoration: none; box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover { background: var(--secondary); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+
+    /* ── Stats Cards ─────────────────────────────────────────── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem;
+      display: flex; align-items: flex-start; gap: 1rem;
+      box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-md);
+      background: #F3F4F6; display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; color: var(--text); flex-shrink: 0;
+    }
+    .stat-info { flex: 1; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; }
+
+    /* ── Main Toolbar ────────────────────────────────────────── */
+    .main-content { padding: 2rem 0 4rem; flex: 1; }
+    .toolbar {
+      display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center; flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1; min-width: 260px; position: relative;
+    }
+    .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1rem; }
+    .search-input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      padding: 0.6rem 1rem 0.6rem 2.5rem; border-radius: var(--radius-md);
+      font-family: inherit; font-size: 0.9rem; color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+    
+    .sort-select {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 0.6rem 1rem; border-radius: var(--radius-md);
+      font-family: inherit; font-size: 0.85rem; font-weight: 500; color: var(--text);
+      cursor: pointer; min-width: 180px; transition: border-color 0.2s;
+    }
+    .sort-select:focus { outline: none; border-color: var(--accent); }
+
+    /* ── Resume Cards Grid ───────────────────────────────────── */
+    .resumes-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;
     }
     
-    /* ── Toasts ───────────────────────────────────────── */
-    .toast-container {
-      position: fixed; top: 20px; right: 20px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 10px;
+    .resume-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-sm); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      display: flex; flex-direction: column; position: relative;
+      animation: fadeIn 0.4s ease-out forwards;
     }
-    .toast {
-      background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid var(--primary);
-      display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem;
-      animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-      opacity: 0; transform: translateX(100%);
-    }
-    .toast.success { border-left-color: #10B981; }
-    .toast.error { border-left-color: #EF4444; }
-    @keyframes toast-in { to { opacity: 1; transform: translateX(0); } }
-    @keyframes toast-out { to { opacity: 0; transform: translateX(100%); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .resume-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #D1D5DB; }
 
-</style>
+    .rc-header {
+      padding: 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .rc-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-md);
+      background: #F3F4F6; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; flex-shrink: 0;
+    }
+    .rc-title-area { flex: 1; min-width: 0; }
+    .rc-filename {
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem;
+    }
+    .rc-date { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+    
+    .rc-body { padding: 1.25rem; flex: 1; }
+    .rc-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .metric-group { display: flex; flex-direction: column; gap: 0.25rem; }
+    .metric-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-val { font-size: 0.95rem; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 0.5rem; }
+    
+    .badge { padding: 0.2rem 0.5rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-yellow { background: #FEF3C7; color: #92400E; }
+    .badge-red { background: #FEE2E2; color: #991B1B; }
+    .badge-gray { background: #F3F4F6; color: var(--muted); }
+
+    .rc-footer {
+      padding: 1rem 1.25rem; border-top: 1px solid var(--border); background: var(--bg);
+      display: flex; gap: 0.75rem;
+    }
+    .btn-card {
+      flex: 1; padding: 0.5rem; border-radius: var(--radius-md);
+      font-size: 0.8rem; font-weight: 600; font-family: inherit;
+      border: 1px solid transparent; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    }
+    .btn-view { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .btn-view:hover { background: #F3F4F6; }
+    .btn-delete { background: transparent; color: var(--muted); }
+    .btn-delete:hover { color: var(--danger); background: #FEF2F2; }
+
+    /* ── States ──────────────────────────────────────────────── */
+    .skeleton-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); height: 260px;
+      padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem;
+    }
+    .skeleton-el {
+      background: #E5E7EB; border-radius: 4px;
+      background-image: linear-gradient(90deg, #E5E7EB 0px, #F3F4F6 40px, #E5E7EB 80px);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite linear;
+    }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    
+    .state-card {
+      background: var(--surface); border: 1px dashed var(--border);
+      border-radius: var(--radius-lg); padding: 4rem 2rem;
+      text-align: center; margin-top: 1rem;
+    }
+    .state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .state-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text); }
+    .state-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; max-width: 400px; margin-inline: auto; }
+
+    /* ── Modals ──────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(17,24,39,0.7); backdrop-filter: blur(4px);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    
+    .modal {
+      background: var(--surface); border-radius: var(--radius-xl); width: 100%; max-width: 800px;
+      max-height: 90vh; display: flex; flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+      transform: scale(0.95) translateY(10px); transition: transform 0.25s ease;
+    }
+    .modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+    
+    .modal-header {
+      padding: 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 1.25rem; font-weight: 800; color: var(--text); }
+    .btn-close {
+      background: var(--bg); border: none; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted);
+      transition: background 0.2s, color 0.2s; font-size: 1.1rem;
+    }
+    .btn-close:hover { background: #E5E7EB; color: var(--text); }
+    
+    .modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; }
+    
+    .modal-footer {
+      padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg);
+      display: flex; justify-content: flex-end; gap: 0.75rem; border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    }
+
+    /* Modal Content Styles */
+    .detail-section { margin-bottom: 2rem; }
+    .detail-section h4 { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .info-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .info-label { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+    .info-value { font-size: 0.95rem; font-weight: 500; color: var(--text); word-break: break-word; }
+    
+    .tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag { background: var(--bg); border: 1px solid var(--border); padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.8rem; font-weight: 500; }
+    
+    .report-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 0.75rem; }
+    .report-card-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+
+    /* Delete Confirm Modal */
+    #confirmModal { max-width: 400px; text-align: center; }
+    #confirmModal .modal-body { padding: 2rem; }
+    .confirm-icon-wrapper { width: 64px; height: 64px; background: #FEE2E2; color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; margin: 0 auto 1.25rem; }
+    .confirm-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .confirm-text { font-size: 0.9rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .confirm-actions { display: flex; gap: 1rem; }
+    .btn-confirm-cancel { flex: 1; padding: 0.75rem; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-md); font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-confirm-cancel:hover { background: var(--bg); }
+    .btn-confirm-delete { flex: 1; padding: 0.75rem; border: none; background: var(--danger); color: white; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-confirm-delete:hover { background: #DC2626; }
+
+    /* ── Toasts ──────────────────────────────────────────────── */
+    .toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
+    .toast {
+      background: var(--text); color: white; padding: 0.8rem 1.25rem; border-radius: var(--radius-md);
+      font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem;
+      box-shadow: var(--shadow-lg); pointer-events: auto;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .toast.error { border-left: 4px solid var(--danger); }
+    .toast.success { border-left: 4px solid var(--success); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .header-content { flex-direction: column; align-items: flex-start; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .resumes-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <div class="nav-left" id="navLeft">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-inner">
       <a href="index.html" class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        TalentLens<span>AI</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        TalentLens AI
       </a>
+      <div class="nav-right" id="navRight">
+        <!-- Injected via JS -->
+      </div>
     </div>
-    <button class="mobile-menu-btn" onclick="document.getElementById('navRight').classList.toggle('show')">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <div class="nav-right" id="navRight"></div>
-  </div>
-</nav>
+  </nav>
 
-<!-- Page Header -->
-<header class="page-header" role="banner">
-  <div class="page-header-blob page-header-blob-1" aria-hidden="true"></div>
-  <div class="page-header-blob page-header-blob-2" aria-hidden="true"></div>
-  <div class="page-header-inner">
-    <nav class="navbar">
-  <div class="nav-inner">
-    <div class="nav-left" id="navLeft">
-      <a href="index.html" class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        TalentLens<span>AI</span>
-      </a>
-    </div>
-    <button class="mobile-menu-btn" onclick="document.getElementById('navRight').classList.toggle('show')">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <div class="nav-right" id="navRight"></div>
-  </div>
-</nav>
-    <h1 class="page-title">📂 Resume <span class="grad">History</span></h1>
-    <p class="page-subtitle">All your uploaded resumes, ATS scores, and reports in one place.</p>
-
-    <div class="stats-bar" id="statsBar" role="region" aria-label="Summary statistics">
-      <div class="stat-chip">
-        <div class="stat-chip-icon" aria-hidden="true">📄</div>
-        <div>
-          <div class="stat-chip-num" id="totalResumes">—</div>
-          <div class="stat-chip-label">Total Resumes</div>
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-title">
+          <h1>Resume History</h1>
+          <p>Manage all uploaded resumes, ATS reports, and job match analyses.</p>
         </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-chip-icon" aria-hidden="true">📊</div>
-        <div>
-          <div class="stat-chip-num" id="totalAts">—</div>
-          <div class="stat-chip-label">ATS Reports</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-chip-icon" aria-hidden="true">🎯</div>
-        <div>
-          <div class="stat-chip-num" id="totalJd">—</div>
-          <div class="stat-chip-label">JD Reports</div>
-        </div>
-      </div>
-      <div class="stat-chip">
-        <div class="stat-chip-icon" aria-hidden="true">⭐</div>
-        <div>
-          <div class="stat-chip-num" id="avgScore">—</div>
-          <div class="stat-chip-label">Avg ATS Score</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- Main Content -->
-<main class="content-section" id="mainContent" role="main">
-  <div class="container">
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">🔍</span>
-        <input
-          class="search-input"
-          type="search"
-          id="searchInput"
-          placeholder="Search by filename…"
-          aria-label="Search resumes"
-        />
-      </div>
-      <select class="sort-select" id="sortSelect" aria-label="Sort resumes">
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-        <option value="score_high">Highest ATS Score</option>
-        <option value="score_low">Lowest ATS Score</option>
-      </select>
-    </div>
-
-    <!-- Content area -->
-    <div id="contentArea">
-      <div class="loading-overlay" id="loadingState" aria-live="polite">
-        <div class="spinner" aria-hidden="true"></div>
-        <h3>Loading your resumes…</h3>
-        <p>Fetching your resume history</p>
-      </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination" id="paginationControls" role="navigation" aria-label="Pagination" style="display:none"></div>
-  </div>
-</main>
-
-<!-- Detail Modal -->
-<div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 class="modal-title" id="modalTitle">Resume Details</h2>
-      <button class="modal-close" id="closeModal" aria-label="Close modal">✕</button>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-
-<!-- Confirm Delete Dialog -->
-<div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
-  <div class="confirm-box">
-    <div class="confirm-icon" aria-hidden="true">🗑️</div>
-    <h3 class="confirm-title" id="confirmTitle">Delete Resume?</h3>
-    <p class="confirm-msg" id="confirmMsg">This action cannot be undone. All associated reports will also be deleted.</p>
-    <div class="confirm-actions">
-      <button class="btn-cancel" id="confirmCancel">Cancel</button>
-      <button class="btn-danger" id="confirmDelete">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<script>
-  const API = 'http://localhost:8000';
-
-  /* ── Auth helpers ─────────────────────────────────────────── */
-  function getToken() { return localStorage.getItem('auth_token'); }
-  function getUser() {
-    const u = localStorage.getItem('auth_user');
-    return u ? JSON.parse(u) : null;
-  }
-  function logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    window.location.href = 'login.html';
-  }
-  function authHeaders() {
-    const token = getToken();
-    return token
-      ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-      : { 'Content-Type': 'application/json' };
-  }
-
-  /* ── Auth guard ───────────────────────────────────────────── */
-  if (!getToken()) { window.location.href = 'login.html'; }
-
-  /* ── Render Nav ───────────────────────────────────────────── */
-  
-
-// ── Navbar & Toast Logic ──────────────────────────────────────────────────
-const API = 'http://localhost:8000';
-
-function getToken() { return localStorage.getItem('auth_token'); }
-function getUser()  {
-  const u = localStorage.getItem('auth_user');
-  return u ? JSON.parse(u) : null;
-}
-function doLogout() {
-  const token = getToken();
-  if (token) {
-    fetch(`${API}/auth/logout`, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    }).catch(() => {});
-  }
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('auth_user');
-  window.location.href = 'login.html';
-}
-
-function showToast(message, type='success') {
-  let container = document.getElementById('toast-container');
-  if(!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = type === 'success' ? `✅ ${message}` : `❌ ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.animation = 'toast-out 0.3s ease forwards';
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-function renderNav() {
-  const user = getUser();
-  const navRight = document.getElementById('navRight');
-  const navLeft = document.getElementById('navLeft');
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-  const isActive = (path) => currentPath === path ? 'active' : '';
-
-  if (navLeft) {
-    if (currentPath !== 'index.html') {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
+        <a href="index.html" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Upload New Resume
         </a>
-        <a href="index.html" class="btn-back">← Back to Home</a>
-      `;
-    } else {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
-        </a>
-      `;
-    }
-  }
-
-  if (!navRight) return;
-
-  if (user) {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Dashboard</a>
-        <a href="history.html" class="nav-link ${isActive('history.html')}">History</a>
-        <a href="reports.html" class="nav-link ${isActive('reports.html')}">Reports</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
       </div>
-      <div class="profile-dropdown">
-        <button class="nav-badge profile-btn">
-          <span>👤 ${user.name.split(' ')[0]} ▼</span>
-        </button>
-        <div class="profile-menu">
-          <div class="profile-header">
-            <strong>${user.name}</strong>
-            <small>${user.email}</small>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📄</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statTotal">-</div>
+            <div class="stat-label">Total Resumes</div>
           </div>
-          <a href="index.html" class="profile-item">Dashboard</a>
-          <a href="history.html" class="profile-item">History</a>
-          <a href="reports.html" class="profile-item">Reports</a>
-          <button class="profile-item logout-btn" onclick="doLogout()">Logout</button>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statAvgAts">-</div>
+            <div class="stat-label">Avg ATS Score</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statAvgJd">-</div>
+            <div class="stat-label">Avg JD Match</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statReports">-</div>
+            <div class="stat-label">Saved Reports</div>
+          </div>
         </div>
       </div>
-    `;
-  } else {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Home</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" class="nav-link">GitHub</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <div class="toolbar">
+        <div class="search-box">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by filename, job title, date..." autocomplete="off">
+        </div>
+        <select id="sortSelect" class="sort-select">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="score_high">Highest ATS Score</option>
+          <option value="jd_high">Highest JD Match</option>
+          <option value="updated">Recently Updated</option>
+          <option value="alpha">Alphabetical</option>
+        </select>
       </div>
-      <div class="auth-buttons">
-        <a href="login.html" class="login-link">Login</a>
-        <button class="btn-nav signup-btn" onclick="window.location.href='signup.html'">Sign Up</button>
+
+      <div id="contentArea">
+        <!-- Rendered via JS -->
       </div>
-    `;
-  }
-}
-renderNav();
+      
+    </div>
+  </main>
 
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.navbar');
-  if (nav && window.scrollY > 10) {
-    nav.classList.add('scrolled');
-  } else if(nav) {
-    nav.classList.remove('scrolled');
-  }
-});
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Resume Details</h2>
+        <button class="btn-close" onclick="closeModal('detailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="detailModalBody">
+        <!-- Injected via JS -->
+      </div>
+      <div class="modal-footer" id="detailModalFooter">
+        <button class="btn-primary" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" onclick="closeModal('detailModal')">Close</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Confirm Delete Modal -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-body" style="text-align: center; padding: 2rem;">
+        <div class="confirm-icon-wrapper">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+        </div>
+        <h3 class="confirm-title">Delete Resume?</h3>
+        <p class="confirm-text">This action cannot be undone. All associated reports will be permanently deleted.</p>
+        <div class="confirm-actions">
+          <button class="btn-confirm-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+          <button class="btn-confirm-delete" id="btnConfirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
-  /* ── State ───────────────────────────────────────────────── */
-  let currentPage = 1;
-  let totalPages  = 1;
-  let totalCount  = 0;
-  let searchQuery = '';
-  let sortOrder   = 'newest';
-  let deleteTargetId = null;
-  const PAGE_SIZE = 9;
+  <script>
+    const API = 'http://localhost:8000';
+    let allResumes = [];
+    let deleteTargetId = null;
+    let searchTimer = null;
 
-  /* ── Toast ───────────────────────────────────────────────── */
-  function showToast(msg, type = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
-    toast.className = 'toast show ' + type;
-    setTimeout(() => { toast.className = 'toast'; }, 3500);
-  }
-
-  /* ── ATS badge ───────────────────────────────────────────── */
-  function atsBadge(score) {
-    if (score == null) return `<span class="ats-badge ats-none">N/A</span>`;
-    const cls = score >= 75 ? 'ats-green' : score >= 50 ? 'ats-amber' : 'ats-red';
-    return `<span class="ats-badge ${cls}">${score}</span>`;
-  }
-
-  /* ── Render cards ────────────────────────────────────────── */
-  function renderCards(resumes) {
-    if (!resumes || resumes.length === 0) {
-      return `
-        <div class="empty-state" role="status">
-          <div class="empty-icon">📭</div>
-          <h3>No Resumes Found</h3>
-          <p>${searchQuery ? 'No resumes match your search. Try a different query.' : 'You haven\'t uploaded any resumes yet. Get started on your dashboard!'}</p>
-          <a href="index.html" class="btn-primary">Upload Your First Resume →</a>
-        </div>`;
+    // --- Authentication & Navigation ---
+    function getToken() { return localStorage.getItem('auth_token'); }
+    function getUser() { const u = localStorage.getItem('auth_user'); return u ? JSON.parse(u) : null; }
+    
+    function doLogout() {
+      const token = getToken();
+      if (token) fetch(`${API}/auth/logout`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(() => {});
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = 'login.html';
     }
 
-    return `<div class="resumes-grid">` + resumes.map((r, idx) => `
-      <article class="resume-card" style="animation-delay:${idx * 0.05}s" aria-label="Resume: ${r.filename || 'Untitled'}">
-        <div class="rc-header">
-          <div class="rc-file-icon" aria-hidden="true">📄</div>
-          <div class="rc-file-info">
-            <div class="rc-filename" title="${r.filename || 'Untitled'}">${r.filename || 'Untitled Resume'}</div>
-            <div class="rc-date">${formatDate(r.uploaded_at || r.created_at)}</div>
+    function renderNav() {
+      const user = getUser();
+      const navRight = document.getElementById('navRight');
+      if (user && getToken() && getToken() !== 'undefined') {
+        navRight.innerHTML = `
+          <div class="nav-links">
+            <a href="index.html" class="nav-link">Dashboard</a>
+            <a href="history.html" class="nav-link active">History</a>
           </div>
-        </div>
-        <div class="rc-body">
-          <div class="rc-metrics">
-            <div class="metric-item">
-              <div class="metric-val">${atsBadge(r.ats_score)}</div>
-              <div class="metric-label">ATS Score</div>
-            </div>
-            <div class="metric-item">
-              <div class="metric-val">${r.ats_report_count ?? 0}</div>
-              <div class="metric-label">ATS Reports</div>
-            </div>
-            <div class="metric-item">
-              <div class="metric-val">${r.jd_report_count ?? 0}</div>
-              <div class="metric-label">JD Reports</div>
+          <div class="profile-dropdown">
+            <button class="profile-btn">
+              <span>👤 ${user.name.split(' ')[0]}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="profile-menu">
+              <div class="profile-header">
+                <strong>${user.name}</strong>
+                <small>${user.email}</small>
+              </div>
+              <button class="profile-item logout-btn" onclick="doLogout()">Log out</button>
             </div>
           </div>
-        </div>
-        <div class="rc-footer">
-          <button class="btn-action btn-view" id="viewBtn_${r.id}" onclick="openDetail('${r.id}')">
-            👁 View Details
-          </button>
-          <button class="btn-action btn-delete" id="deleteBtn_${r.id}" onclick="confirmDelete('${r.id}', '${(r.filename||'').replace(/'/g,"\\'")}')">
-            🗑 Delete
-          </button>
-        </div>
-      </article>
-    `).join('') + `</div>`;
-  }
-
-  /* ── Pagination ──────────────────────────────────────────── */
-  function renderPagination() {
-    const container = document.getElementById('paginationControls');
-    if (totalPages <= 1) { container.style.display = 'none'; return; }
-    container.style.display = 'flex';
-
-    let html = `
-      <button class="page-btn" id="prevPage" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled aria-disabled="true"' : ''}>← Prev</button>
-    `;
-    for (let p = 1; p <= totalPages; p++) {
-      if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
-        html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" id="pageBtn_${p}" onclick="goPage(${p})" aria-current="${p === currentPage ? 'page' : 'false'}">${p}</button>`;
-      } else if (Math.abs(p - currentPage) === 2) {
-        html += `<span class="page-info">…</span>`;
+        `;
+      } else {
+        navRight.innerHTML = `
+          <a href="login.html" class="btn-primary">Sign In</a>
+        `;
       }
     }
-    html += `
-      <button class="page-btn" id="nextPage" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled aria-disabled="true"' : ''}>Next →</button>
-      <span class="page-info" aria-live="polite">Page ${currentPage} of ${totalPages} (${totalCount} total)</span>
-    `;
-    container.innerHTML = html;
-  }
 
-  function goPage(p) {
-    if (p < 1 || p > totalPages) return;
-    currentPage = p;
-    loadResumes();
-  }
-
-  /* ── Date formatter ──────────────────────────────────────── */
-  function formatDate(iso) {
-    if (!iso) return '—';
-    try {
-      return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-    } catch { return iso; }
-  }
-
-  /* ── Load resumes ────────────────────────────────────────── */
-  async function loadResumes() {
-    const contentArea = document.getElementById('contentArea');
-    contentArea.innerHTML = `
-      <div class="loading-overlay" aria-live="polite">
-        <div class="spinner" aria-hidden="true"></div>
-        <h3>Loading your resumes…</h3>
-        <p>Fetching your resume history</p>
-      </div>`;
-    document.getElementById('paginationControls').style.display = 'none';
-
-    try {
-      const params = new URLSearchParams({
-        page: currentPage,
-        page_size: PAGE_SIZE
-      });
-      if (searchQuery) params.set('search', searchQuery);
-      if (sortOrder)   params.set('sort', sortOrder);
-
-      const res = await fetch(`${API}/history/resumes?${params}`, {
-        headers: authHeaders()
-      });
-
-      if (res.status === 401) { logout(); return; }
-      if (!res.ok) throw new Error('Failed to fetch resumes');
-
-      const data = await res.json();
-
-      const resumes = data.resumes || data.items || data || [];
-      totalCount    = data.total || resumes.length;
-      totalPages    = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-
-      /* Update stats */
-      document.getElementById('totalResumes').textContent = data.total_count ?? totalCount;
-      if (data.total_ats_reports != null) document.getElementById('totalAts').textContent = data.total_ats_reports;
-      if (data.total_jd_reports != null)  document.getElementById('totalJd').textContent  = data.total_jd_reports;
-      if (data.avg_ats_score != null)     document.getElementById('avgScore').textContent  = Math.round(data.avg_ats_score);
-
-      contentArea.innerHTML = renderCards(resumes);
-      renderPagination();
-
-    } catch (err) {
-      contentArea.innerHTML = `
-        <div class="empty-state" role="alert">
-          <div class="empty-icon">⚠️</div>
-          <h3>Error Loading Resumes</h3>
-          <p>${err.message || 'An unexpected error occurred.'}</p>
-          <button class="btn-primary" onclick="loadResumes()">Try Again</button>
-        </div>`;
+    // --- Toast Notifications ---
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
     }
-  }
 
-  /* ── Detail Modal ────────────────────────────────────────── */
-  async function openDetail(id) {
-    const overlay = document.getElementById('detailModal');
-    const body    = document.getElementById('modalBody');
-    body.innerHTML = `<div class="loading-overlay"><div class="spinner"></div><h3>Loading details…</h3></div>`;
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    try {
-      const res = await fetch(`${API}/history/resumes/${id}`, { headers: authHeaders() });
-      if (!res.ok) throw new Error('Failed to load resume details');
-      const r = await res.json();
-
-      const parsed = r.parsed_data || r.parsed || {};
-      const atsReports = r.ats_reports || [];
-      const jdReports  = r.jd_reports  || [];
-
-      body.innerHTML = `
-        <!-- Contact Info -->
-        <div class="modal-section">
-          <div class="modal-section-title">📋 Contact Information</div>
-          <div class="detail-grid">
-            <div class="detail-field"><div class="detail-label">Name</div><div class="detail-value ${!parsed.name ? 'empty' : ''}">${parsed.name || 'Not found'}</div></div>
-            <div class="detail-field"><div class="detail-label">Email</div><div class="detail-value ${!parsed.email ? 'empty' : ''}">${parsed.email || 'Not found'}</div></div>
-            <div class="detail-field"><div class="detail-label">Phone</div><div class="detail-value ${!parsed.phone ? 'empty' : ''}">${parsed.phone || 'Not found'}</div></div>
-            <div class="detail-field"><div class="detail-label">Location</div><div class="detail-value ${!parsed.location ? 'empty' : ''}">${parsed.location || 'Not found'}</div></div>
-            <div class="detail-field"><div class="detail-label">LinkedIn</div><div class="detail-value ${!parsed.linkedin ? 'empty' : ''}">${parsed.linkedin || 'Not found'}</div></div>
-            <div class="detail-field"><div class="detail-label">GitHub</div><div class="detail-value ${!parsed.github ? 'empty' : ''}">${parsed.github || 'Not found'}</div></div>
-          </div>
-        </div>
-
-        <!-- Skills -->
-        <div class="modal-section">
-          <div class="modal-section-title">🛠 Skills</div>
-          <div class="tag-cloud">
-            ${(parsed.skills || []).length > 0
-              ? parsed.skills.map(s => `<span class="tag">${s}</span>`).join('')
-              : '<span style="color:var(--muted);font-size:0.85rem;">No skills found</span>'}
-          </div>
-        </div>
-
-        <!-- ATS Reports -->
-        <div class="modal-section">
-          <div class="modal-section-title">📊 ATS Reports (${atsReports.length})</div>
-          ${atsReports.length === 0
-            ? '<p style="color:var(--muted);font-size:0.875rem;">No ATS reports for this resume.</p>'
-            : atsReports.map(a => `
-              <div class="report-card-mini">
-                <div class="rcm-header">
-                  <span class="rcm-title">ATS Analysis</span>
-                  <span class="rcm-date">${formatDate(a.created_at)}</span>
+    // --- UI States ---
+    function renderSkeletons() {
+      const area = document.getElementById('contentArea');
+      area.innerHTML = `
+        <div class="resumes-grid">
+          ${[1,2,3].map(() => `
+            <div class="skeleton-card">
+              <div style="display:flex; gap:1rem; margin-bottom: 1rem;">
+                <div class="skeleton-el" style="width:44px; height:44px; border-radius:8px;"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:0.5rem; justify-content:center;">
+                  <div class="skeleton-el" style="width:70%; height:16px;"></div>
+                  <div class="skeleton-el" style="width:40%; height:12px;"></div>
                 </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-                  ${atsBadge(a.score)}
-                  <span style="font-size:0.8rem;color:var(--muted);">${a.summary || ''}</span>
-                </div>
-              </div>`).join('')}
-        </div>
-
-        <!-- JD Reports -->
-        <div class="modal-section">
-          <div class="modal-section-title">🎯 JD Match Reports (${jdReports.length})</div>
-          ${jdReports.length === 0
-            ? '<p style="color:var(--muted);font-size:0.875rem;">No JD match reports for this resume.</p>'
-            : jdReports.map(j => `
-              <div class="report-card-mini">
-                <div class="rcm-header">
-                  <span class="rcm-title">${j.job_title || 'Job Match'}</span>
-                  <span class="rcm-date">${formatDate(j.created_at)}</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-                  ${atsBadge(j.match_score)}
-                  <span style="font-size:0.8rem;color:var(--muted);">Match Score</span>
-                </div>
-              </div>`).join('')}
+              </div>
+              <div class="skeleton-el" style="width:100%; height:60px; margin-bottom:auto;"></div>
+              <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+                <div class="skeleton-el" style="flex:1; height:36px; border-radius:8px;"></div>
+                <div class="skeleton-el" style="flex:1; height:36px; border-radius:8px;"></div>
+              </div>
+            </div>
+          `).join('')}
         </div>
       `;
-    } catch (err) {
-      body.innerHTML = `<p style="color:var(--danger);padding:2rem;text-align:center;">⚠ ${err.message}</p>`;
     }
-  }
 
-  function closeModal() {
-    const overlay = document.getElementById('detailModal');
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('closeModal').addEventListener('click', closeModal);
-  document.getElementById('detailModal').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeModal(); closeConfirm(); }
-  });
-
-  /* ── Confirm Delete ──────────────────────────────────────── */
-  function confirmDelete(id, filename) {
-    deleteTargetId = id;
-    document.getElementById('confirmMsg').textContent =
-      `Delete "${filename}"? All associated ATS and JD reports will also be removed. This cannot be undone.`;
-    const overlay = document.getElementById('confirmOverlay');
-    overlay.classList.add('open');
-    overlay.setAttribute('aria-hidden', 'false');
-  }
-  function closeConfirm() {
-    const overlay = document.getElementById('confirmOverlay');
-    overlay.classList.remove('open');
-    overlay.setAttribute('aria-hidden', 'true');
-    deleteTargetId = null;
-  }
-  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
-  document.getElementById('confirmDelete').addEventListener('click', async () => {
-    if (!deleteTargetId) return;
-    const id = deleteTargetId;
-    closeConfirm();
-    try {
-      const res = await fetch(`${API}/history/resumes/${id}`, {
-        method: 'DELETE',
-        headers: authHeaders()
-      });
-      if (!res.ok && res.status !== 204) throw new Error('Delete failed');
-      showToast('Resume deleted successfully.', 'success');
-      if (currentPage > 1 && totalCount % PAGE_SIZE === 1) currentPage--;
-      loadResumes();
-    } catch (err) {
-      showToast('Failed to delete resume. ' + err.message, 'error');
+    function renderEmptyState(isSearch = false) {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="state-card">
+          <div class="state-icon">📄</div>
+          <h3>${isSearch ? 'No resumes match your search' : 'No resumes found'}</h3>
+          <p>${isSearch ? 'Try adjusting your search filters or clear the search box.' : 'Upload your first resume to begin tracking ATS scores and job matches.'}</p>
+          ${isSearch ? '' : '<a href="index.html" class="btn-primary">Upload Resume</a>'}
+        </div>
+      `;
     }
-  });
 
-  /* ── Search + Sort listeners ──────────────────────────────── */
-  let searchTimer;
-  document.getElementById('searchInput').addEventListener('input', (e) => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      searchQuery = e.target.value.trim();
-      currentPage = 1;
-      loadResumes();
-    }, 400);
-  });
+    function renderErrorState(title, message, showLogin = false) {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="state-card">
+          <div class="state-icon">⚠️</div>
+          <h3>${title}</h3>
+          <p>${message}</p>
+          ${showLogin ? '<a href="login.html" class="btn-primary">Login Now</a>' : '<button class="btn-primary" onclick="fetchResumes()">Retry</button>'}
+        </div>
+      `;
+    }
 
-  document.getElementById('sortSelect').addEventListener('change', (e) => {
-    sortOrder = e.target.value;
-    currentPage = 1;
-    loadResumes();
-  });
+    function renderLoginState() {
+      document.getElementById('contentArea').innerHTML = `
+        <div class="state-card">
+          <div class="state-icon">🔒</div>
+          <h3>Authentication Required</h3>
+          <p>Please login to view your resume history.</p>
+          <a href="login.html" class="btn-primary">Login Now</a>
+        </div>
+      `;
+    }
 
-  /* ── Boot ────────────────────────────────────────────────── */
-  loadResumes();
-</script>
-
-<!-- ── Modern Footer ───────────────────────────────────────────────────────── -->
-<footer style="background: white; border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; margin-top: 4rem; color: var(--text);">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-      <div style="grid-column: span 2;">
-        <div style="font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#footer-grad)" stroke-width="2.5"><defs><linearGradient id="footer-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens AI
-        </div>
-        <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 400px;">
-          AI-Powered Resume Intelligence Platform. Helping students and professionals optimize resumes, improve ATS performance, prepare for interviews, and match job opportunities using AI.
-        </p>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Features</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume Parsing</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">ATS Analysis</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">JD Matching</a>
-          <a href="ai_assistant.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">AI Resume Assistant</a>
-          <a href="interview_prep.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Interview Preparation</a>
-          <a href="history.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume History</a>
-          <a href="reports.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Saved Reports</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Resources</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub Repository</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Documentation</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Tech Stack</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <span style="color: var(--muted); font-size: 0.95rem;">FastAPI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Python</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Gemini AI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLAlchemy</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLite / PostgreSQL</span>
-        </div>
-      </div>
-    </div>
+    // --- Helpers ---
+    function formatDate(iso) {
+      if (!iso) return 'N/A';
+      return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
     
-    <div style="border-top: 1px solid var(--border); padding-top: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-      <div style="color: var(--muted); font-size: 0.9rem;">
-        &copy; 2026 TalentLens AI. Built with ❤️ using FastAPI &bull; Python &bull; Gemini AI
-      </div>
-      <div style="display: flex; gap: 1.5rem;">
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Email</a>
-      </div>
-    </div>
-  </div>
-</footer>
+    function getAtsBadge(score) {
+      if (score == null) return `<span class="badge badge-gray">N/A</span>`;
+      if (score >= 75) return `<span class="badge badge-green">${score}%</span>`;
+      if (score >= 50) return `<span class="badge badge-yellow">${score}%</span>`;
+      return `<span class="badge badge-red">${score}%</span>`;
+    }
 
+    // --- Core Data Fetching ---
+    async function fetchResumes() {
+      const token = getToken();
+      if (!token || token === 'undefined') {
+        renderLoginState();
+        return;
+      }
+
+      renderSkeletons();
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      try {
+        const res = await fetch(`${API}/history/resumes?page=1&page_size=100`, {
+          headers: { 'Authorization': 'Bearer ' + token },
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (res.status === 401) {
+          localStorage.removeItem('auth_token');
+          renderErrorState('Session Expired', 'Your session has expired. Please log in again.', true);
+          showToast('Session expired.', 'error');
+          return;
+        }
+        if (!res.ok) throw new Error('Failed to fetch from backend.');
+
+        const data = await res.json();
+        allResumes = data.data || data.resumes || data.items || [];
+        updateStats();
+        applyFiltersAndSort();
+
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          renderErrorState('Request Timeout', 'The server took too long to respond.');
+        } else {
+          renderErrorState('History service unavailable', err.message || 'Unable to load your resume history.');
+          showToast('Unable to load history.', 'error');
+        }
+      } finally {
+        // Any final cleanup if necessary
+      }
+    }
+
+    // --- Filters & Rendering ---
+    function applyFiltersAndSort() {
+      let filtered = [...allResumes];
+      
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      if (q) {
+        filtered = filtered.filter(r => 
+          (r.filename || '').toLowerCase().includes(q) || 
+          (r.job_title || '').toLowerCase().includes(q) ||
+          formatDate(r.created_at).toLowerCase().includes(q)
+        );
+      }
+
+      const sort = document.getElementById('sortSelect').value;
+      filtered.sort((a, b) => {
+        if (sort === 'newest') return new Date(b.created_at) - new Date(a.created_at);
+        if (sort === 'oldest') return new Date(a.created_at) - new Date(b.created_at);
+        if (sort === 'score_high') return (b.ats_score || 0) - (a.ats_score || 0);
+        if (sort === 'jd_high') return (b.jd_score || 0) - (a.jd_score || 0);
+        if (sort === 'updated') return new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at);
+        if (sort === 'alpha') return (a.filename || '').localeCompare(b.filename || '');
+        return 0;
+      });
+
+      renderCards(filtered, !!q);
+    }
+
+    function renderCards(resumes, isSearch) {
+      if (resumes.length === 0) {
+        renderEmptyState(isSearch);
+        return;
+      }
+
+      const html = resumes.map(r => {
+        const jdScore = r.jd_score != null ? getAtsBadge(r.jd_score) : '<span class="badge badge-gray">N/A</span>';
+        const totalReports = (r.ats_report_count || 0) + (r.jd_report_count || 0);
+        
+        return `
+          <div class="resume-card" id="card-${r.id}">
+            <div class="rc-header">
+              <div class="rc-icon">📄</div>
+              <div class="rc-title-area">
+                <div class="rc-filename" title="${r.filename || 'Untitled'}">${r.filename || 'Untitled Resume'}</div>
+                <div class="rc-date">Uploaded ${formatDate(r.created_at)}</div>
+              </div>
+            </div>
+            <div class="rc-body">
+              <div class="rc-metrics">
+                <div class="metric-group">
+                  <span class="metric-label">ATS Score</span>
+                  <div class="metric-val">${getAtsBadge(r.ats_score)}</div>
+                </div>
+                <div class="metric-group">
+                  <span class="metric-label">JD Match</span>
+                  <div class="metric-val">${jdScore}</div>
+                </div>
+                <div class="metric-group">
+                  <span class="metric-label">Reports</span>
+                  <div class="metric-val" style="font-size:1.1rem;">${totalReports}</div>
+                </div>
+                <div class="metric-group">
+                  <span class="metric-label">Last Updated</span>
+                  <div class="metric-val" style="font-size:0.8rem; font-weight:500;">${formatDate(r.updated_at || r.created_at)}</div>
+                </div>
+              </div>
+            </div>
+            <div class="rc-footer">
+              <button class="btn-card btn-view" onclick="openDetail(${r.id})">👁 View</button>
+              <button class="btn-card btn-view" onclick="downloadResume(${r.id})">⬇ Download</button>
+              <button class="btn-card btn-delete" onclick="promptDelete(${r.id})">🗑 Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('contentArea').innerHTML = `<div class="resumes-grid">${html}</div>`;
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').textContent = allResumes.length;
+      
+      let atsSum = 0, atsCount = 0;
+      let jdSum = 0, jdCount = 0;
+      let totalReports = 0;
+
+      allResumes.forEach(r => {
+        if (r.ats_score != null) { atsSum += r.ats_score; atsCount++; }
+        if (r.jd_score != null) { jdSum += r.jd_score; jdCount++; }
+        totalReports += (r.ats_report_count || 0) + (r.jd_report_count || 0);
+      });
+
+      document.getElementById('statAvgAts').textContent = atsCount > 0 ? Math.round(atsSum / atsCount) + '%' : 'N/A';
+      document.getElementById('statAvgJd').textContent = jdCount > 0 ? Math.round(jdSum / jdCount) + '%' : 'N/A';
+      document.getElementById('statReports').textContent = totalReports;
+    }
+
+    // --- Modals ---
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    async function openDetail(id) {
+      const body = document.getElementById('detailModalBody');
+      body.innerHTML = `<div style="text-align:center; padding:3rem;"><div class="skeleton-el" style="width:40px;height:40px;border-radius:50%;margin:0 auto 1rem;"></div>Loading details...</div>`;
+      openModal('detailModal');
+
+      try {
+        const res = await fetch(`${API}/history/resumes/${id}`, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (!res.ok) throw new Error('Failed to fetch details');
+        const data = (await res.json()).data || {};
+        
+        const parsed = data.parsed_data || data.parsed_json || {};
+        const atsReports = data.ats_reports || [];
+        const jdReports = data.jd_reports || [];
+
+        body.innerHTML = `
+          <div class="detail-section">
+            <h4>Contact Info</h4>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Name</span><span class="info-value">${parsed.name || '-'}</span></div>
+              <div class="info-item"><span class="info-label">Email</span><span class="info-value">${parsed.email || '-'}</span></div>
+              <div class="info-item"><span class="info-label">Phone</span><span class="info-value">${parsed.phone || '-'}</span></div>
+            </div>
+          </div>
+          
+          <div class="detail-section">
+            <h4>Skills</h4>
+            <div class="tag-list">
+              ${(parsed.skills?.flat_list || []).length > 0 ? parsed.skills.flat_list.map(s => `<span class="tag">${s}</span>`).join('') : '<span class="info-value">No skills found</span>'}
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>ATS Reports (${atsReports.length})</h4>
+            ${atsReports.length ? atsReports.map(a => `
+              <div class="report-card">
+                <div class="report-card-header">
+                  <strong>Score: ${getAtsBadge(a.score || a.ats_score)}</strong>
+                  <span style="font-size:0.8rem;color:var(--muted);">${formatDate(a.created_at)}</span>
+                </div>
+                <p style="font-size:0.85rem;color:var(--text);margin-top:0.5rem;">${(a.suggestions || []).slice(0,3).join('<br>') || 'No suggestions'}</p>
+              </div>
+            `).join('') : '<p class="info-value">No ATS reports available.</p>'}
+          </div>
+
+          <div class="detail-section">
+            <h4>JD Match Reports (${jdReports.length})</h4>
+            ${jdReports.length ? jdReports.map(j => `
+              <div class="report-card">
+                <div class="report-card-header">
+                  <strong>Role: ${j.job_title || 'N/A'} - Match: ${getAtsBadge(j.match_score)}</strong>
+                  <span style="font-size:0.8rem;color:var(--muted);">${formatDate(j.created_at)}</span>
+                </div>
+              </div>
+            `).join('') : '<p class="info-value">No JD matches run yet.</p>'}
+          </div>
+        `;
+        
+        // Add footer buttons
+        document.getElementById('detailModalFooter').innerHTML = `
+          <button class="btn-primary" style="background:transparent;color:var(--danger);border:1px solid var(--danger);" onclick="closeModal('detailModal'); promptDelete(${id});">Delete</button>
+          <button class="btn-primary" onclick="downloadJSON(${id})">Download JSON</button>
+          <button class="btn-primary" style="background:var(--surface);color:var(--text);border:1px solid var(--border);" onclick="closeModal('detailModal')">Close</button>
+        `;
+
+      } catch (e) {
+        body.innerHTML = `<div class="state-card" style="margin:0;border:none;"><div class="state-icon">⚠️</div><p>${e.message}</p></div>`;
+      }
+    }
+
+    // --- Delete Flow ---
+    function promptDelete(id) {
+      deleteTargetId = id;
+      openModal('confirmModal');
+    }
+
+    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+      if (!deleteTargetId) return;
+      const id = deleteTargetId;
+      closeModal('confirmModal');
+
+      try {
+        const res = await fetch(`${API}/history/resumes/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        if (!res.ok && res.status !== 204) throw new Error('Delete failed');
+        
+        // Animate out
+        const card = document.getElementById(`card-${id}`);
+        if(card) {
+          card.style.transition = 'all 0.3s';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.9)';
+          setTimeout(() => {
+            allResumes = allResumes.filter(r => r.id !== id);
+            updateStats();
+            applyFiltersAndSort();
+          }, 300);
+        } else {
+          allResumes = allResumes.filter(r => r.id !== id);
+          updateStats();
+          applyFiltersAndSort();
+        }
+        
+        showToast('Resume deleted successfully.', 'success');
+      } catch (err) {
+        showToast('Failed to delete resume.', 'error');
+      }
+    });
+
+    // --- Future Actions ---
+    function downloadResume(id) {
+      showToast('File download will be available in v4.1', 'info');
+    }
+    
+    function downloadJSON(id) {
+      showToast('JSON export will be available in v4.1', 'info');
+    }
+
+    // --- Events ---
+    document.getElementById('searchInput').addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applyFiltersAndSort, 300);
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
+
+    // --- Boot ---
+    renderNav();
+    fetchResumes();
+
+  </script>
 </body>
 </html>

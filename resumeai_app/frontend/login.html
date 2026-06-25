@@ -668,8 +668,8 @@ window.addEventListener('scroll', () => {
           if(res.status === 401) throw new Error('Invalid email or password.');
           throw new Error(data.detail || data.message || 'Unable to connect to server.');
         }
-        localStorage.setItem('auth_token', data.access_token);
-        localStorage.setItem('auth_user', JSON.stringify(data.user || { name: email.split('@')[0], email }));
+        localStorage.setItem('auth_token', data.data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(data.data.user || { name: email.split('@')[0], email }));
         showToast('Login successful! Redirecting...', 'success');
         setTimeout(() => { window.location.href = 'index.html'; }, 1500);
       } catch (err) {

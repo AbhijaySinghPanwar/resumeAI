@@ -45,7 +45,7 @@ class GeminiService:
     BACKOFF_BASE = 1.5   # seconds — wait grows as 1.5^attempt
 
     def __init__(self, api_key: Optional[str] = None) -> None:
-        self._api_key: str = api_key or os.getenv("GEMINI_API_KEY", "")
+        self._api_key: str = ""
         self._client = None           # google.genai.Client instance
         self.active_model: Optional[str] = None   # e.g. "models/gemini-2.5-flash"
         self._init_error: Optional[str] = None
@@ -79,9 +79,9 @@ class GeminiService:
         return models
 
     def _initialize(self) -> None:
-        if not self._api_key:
+        if not self._api_key or self._api_key == "your-gemini-api-key-here":
             self._init_error = (
-                "GEMINI_API_KEY environment variable is not set. "
+                "GEMINI_API_KEY environment variable is not set or is a dummy value. "
                 "Phase 3 AI features will return fallback responses."
             )
             logger.warning(self._init_error)
@@ -113,7 +113,7 @@ class GeminiService:
                 "Run: py -m pip install google-genai"
             )
             logger.error(self._init_error)
-        except Exception as exc:
+        except BaseException as exc:
             self._init_error = f"Gemini initialization failed: {exc}"
             logger.error("Gemini init error: %s", exc, exc_info=True)
 

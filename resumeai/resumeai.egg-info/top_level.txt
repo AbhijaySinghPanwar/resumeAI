@@ -1,5 +1,6 @@
 ats
 core
 extractors
+matching
 scoring
 tests
