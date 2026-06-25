@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saved Reports — ResumeAI</title>
+  <meta name="description" content="View and manage your saved ATS score reports and job description match reports." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --primary:   #4F46E5;
+      --secondary: #7C3AED;
+      --success:   #10B981;
+      --warning:   #F59E0B;
+      --danger:    #EF4444;
+      --bg:        #F8FAFC;
+      --surface:   #FFFFFF;
+      --text:      #0F172A;
+      --muted:     #64748B;
+      --border:    #E2E8F0;
+      --shadow-soft: 0 4px 20px -2px rgba(79,70,229,0.10);
+      --shadow-hover: 0 10px 25px -5px rgba(79,70,229,0.15);
+      --shadow-btn:   0 4px 14px 0 rgba(79,70,229,0.30);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 800; font-size: 1.2rem; color: var(--text);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-btn); font-size: 1rem; color: white;
+    }
+    .logo span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link { color: var(--muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--primary); }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-size: 0.75rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .btn-nav {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-weight: 600; font-size: 0.875rem;
+      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
+
+    /* ── Page Header ─────────────────────────────────────────── */
+    .page-header {
+      background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #1E0A2B 100%);
+      padding: 3rem 0 2rem; position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .blob {
+      position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none;
+    }
+    .blob-1 { width: 350px; height: 350px; background: rgba(79,70,229,0.28); top: -80px; right: 5%; }
+    .blob-2 { width: 280px; height: 280px; background: rgba(124,58,237,0.22); bottom: -60px; left: 8%; }
+    .page-header-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      position: relative; z-index: 1;
+    }
+    .page-breadcrumb {
+      font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .page-breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+    .page-breadcrumb a:hover { color: rgba(255,255,255,0.7); }
+    .page-title {
+      font-size: 2.2rem; font-weight: 800; color: white;
+      margin-bottom: 0.5rem; letter-spacing: -0.02em;
+    }
+    .page-title .grad { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.5); }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
+    .tabs-strip {
+      display: flex; gap: 0; margin-top: 2.5rem;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
+      width: fit-content;
+    }
+    .tab-pill {
+      padding: 0.6rem 1.5rem; border-radius: 10px;
+      font-size: 0.875rem; font-weight: 700; cursor: pointer;
+      border: none; background: none; color: rgba(255,255,255,0.45);
+      transition: all 0.2s; display: flex; align-items: center; gap: 0.45rem;
+    }
+    .tab-pill.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; box-shadow: var(--shadow-btn);
+    }
+    .tab-pill:not(.active):hover { color: rgba(255,255,255,0.75); background: rgba(255,255,255,0.08); }
+    .tab-pill .tab-count {
+      background: rgba(255,255,255,0.2); font-size: 0.7rem;
+      padding: 1px 7px; border-radius: 99px;
+    }
+    .tab-pill.active .tab-count { background: rgba(255,255,255,0.25); }
+
+    /* ── Main Content ────────────────────────────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+    .content-section { padding: 2.5rem 0 4rem; }
+
+    /* ── Reports Grid ────────────────────────────────────────── */
+    .reports-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ── ATS Report Card ─────────────────────────────────────── */
+    .report-card {
+      background: white; border-radius: 18px;
+      border: 1px solid var(--border); box-shadow: var(--shadow-soft);
+      overflow: hidden; transition: all 0.25s;
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .report-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(79,70,229,0.2);
+    }
+
+    .rcard-top {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .rcard-meta { flex: 1; min-width: 0; }
+    .rcard-type {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; margin-bottom: 0.35rem;
+    }
+    .rcard-type.ats  { color: var(--primary); }
+    .rcard-type.jd   { color: var(--secondary); }
+    .rcard-filename {
+      font-size: 0.875rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
+    }
+    .rcard-date { font-size: 0.75rem; color: var(--muted); }
+
+    .score-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem; font-weight: 800; flex-shrink: 0;
+      position: relative;
+    }
+    .score-circle::before {
+      content: ''; position: absolute; inset: 3px;
+      border-radius: 50%; background: white;
+    }
+    .score-circle span { position: relative; z-index: 1; }
+    .score-circle.green { background: conic-gradient(#10B981 0%, #D1FAE5 0%); color: #065F46; }
+    .score-circle.amber { background: conic-gradient(#F59E0B 0%, #FEF3C7 0%); color: #92400E; }
+    .score-circle.red   { background: conic-gradient(#EF4444 0%, #FEE2E2 0%); color: #991B1B; }
+    .score-circle.none  { background: #F1F5F9; color: var(--muted); }
+
+    /* ATS Score badge */
+    .ats-badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.9rem; font-weight: 800;
+      padding: 0.2rem 0.75rem; border-radius: 99px;
+    }
+    .ats-green { background: #D1FAE5; color: #065F46; }
+    .ats-amber { background: #FEF3C7; color: #92400E; }
+    .ats-red   { background: #FEE2E2; color: #991B1B; }
+    .ats-none  { background: #F1F5F9; color: var(--muted); }
+
+    /* Score progress bar */
+    .score-bar-wrap { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+    .score-bar-label {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted);
+      margin-bottom: 0.4rem; display: flex; justify-content: space-between;
+      align-items: center;
+    }
+    .score-bar {
+      height: 7px; background: #E2E8F0; border-radius: 99px; overflow: hidden;
+    }
+    .score-bar-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 1.2s cubic-bezier(0.22,1,0.36,1);
+    }
+    .bar-green { background: linear-gradient(90deg, #10B981, #34D399); }
+    .bar-amber { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
+    .bar-red   { background: linear-gradient(90deg, #EF4444, #F87171); }
+
+    /* JD Match card extras */
+    .rcard-body { padding: 1.1rem 1.25rem; }
+    .skills-section { margin-bottom: 0.875rem; }
+    .skills-label {
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; margin-bottom: 0.5rem;
+    }
+    .skills-label.matched { color: #065F46; }
+    .skills-label.missing { color: #991B1B; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .skill-tag {
+      font-size: 0.7rem; font-weight: 600; padding: 2px 9px; border-radius: 99px;
+    }
+    .skill-tag.matched { background: #D1FAE5; color: #065F46; }
+    .skill-tag.missing { background: #FEE2E2; color: #991B1B; }
+    .skill-tag.more    { background: #F1F5F9; color: var(--muted); }
+    .job-title-big {
+      font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 0.2rem;
+    }
+
+    /* Footer */
+    .rcard-footer {
+      padding: 0.875rem 1.25rem; border-top: 1px solid var(--border);
+      display: flex; gap: 0.5rem;
+    }
+    .btn-del-report {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem; border-radius: 9px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      background: #FEE2E2; color: #991B1B;
+      border: 1px solid rgba(239,68,68,0.2); transition: all 0.18s;
+    }
+    .btn-del-report:hover { background: #FECACA; transform: translateY(-1px); }
+
+    /* ── Empty State ─────────────────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 5rem 2rem;
+      background: white; border-radius: 20px;
+      border: 2px dashed var(--border);
+    }
+    .empty-icon {
+      font-size: 4rem; margin-bottom: 1rem;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .empty-state h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .empty-state p  { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.9rem; padding: 0.7rem 1.5rem;
+      border-radius: 99px; border: none; cursor: pointer;
+      box-shadow: var(--shadow-btn); transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.4); }
+
+    /* ── Loading ─────────────────────────────────────────────── */
+    .loading-overlay {
+      text-align: center; padding: 5rem 2rem;
+    }
+    .spinner {
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 1.25rem;
+      border: 3px solid #E2E8F0; border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay h3 { font-weight: 700; margin-bottom: 0.35rem; }
+    .loading-overlay p  { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Pagination ──────────────────────────────────────────── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; margin-top: 2.5rem; flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: 0.55rem 1rem; border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 600;
+      border: 1px solid var(--border); background: white;
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+    }
+    .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; border-color: transparent; box-shadow: var(--shadow-btn);
+    }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { font-size: 0.85rem; color: var(--muted); padding: 0 0.5rem; font-weight: 600; }
+
+    /* ── Confirm Dialog ──────────────────────────────────────── */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 550;
+      background: rgba(15,23,42,0.65); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+    .confirm-box {
+      background: white; border-radius: 20px; padding: 2rem;
+      max-width: 400px; width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      transform: scale(0.94); transition: transform 0.2s;
+      text-align: center;
+    }
+    .confirm-overlay.open .confirm-box { transform: scale(1); }
+    .confirm-icon  { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .confirm-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .confirm-msg   { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .confirm-actions { display: flex; gap: 0.75rem; }
+    .btn-cancel {
+      flex: 1; padding: 0.7rem; border-radius: 10px;
+      background: #F1F5F9; color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-danger {
+      flex: 1; padding: 0.7rem; border-radius: 10px;
+      background: var(--danger); color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
+      transition: all 0.2s; box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover { background: #DC2626; transform: translateY(-1px); }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 600;
+      background: #0F172A; color: white;
+      padding: 0.875rem 1.25rem; border-radius: 12px;
+      font-size: 0.875rem; font-weight: 600;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transform: translateY(80px); opacity: 0; transition: all 0.3s;
+    }
+    .toast.show  { transform: translateY(0); opacity: 1; }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error   { border-left: 3px solid var(--danger); }
+
+    @media (max-width: 768px) {
+      .reports-grid { grid-template-columns: 1fr; }
+      .page-title { font-size: 1.6rem; }
+      .tabs-strip { width: 100%; }
+      .tab-pill { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="logo" aria-label="ResumeAI Home">
+      <div class="logo-icon" aria-hidden="true">✦</div>
+      <span>ResumeAI</span>
+    </a>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<header class="page-header" role="banner">
+  <div class="blob blob-1" aria-hidden="true"></div>
+  <div class="blob blob-2" aria-hidden="true"></div>
+  <div class="page-header-inner">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Home</a>
+      <span aria-hidden="true">›</span>
+      <span>Reports</span>
+    </nav>
+    <h1 class="page-title">📊 Saved <span class="grad">Reports</span></h1>
+    <p class="page-subtitle">Your ATS analysis results and job description match reports, all in one place.</p>
+
+    <!-- Tabs -->
+    <div class="tabs-strip" role="tablist" aria-label="Report types">
+      <button class="tab-pill active" id="tabAts" role="tab" aria-selected="true" aria-controls="atsPanel" onclick="switchTab('ats')">
+        📊 ATS Reports <span class="tab-count" id="atsTabCount">—</span>
+      </button>
+      <button class="tab-pill" id="tabJd" role="tab" aria-selected="false" aria-controls="jdPanel" onclick="switchTab('jd')">
+        🎯 JD Reports <span class="tab-count" id="jdTabCount">—</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="content-section" role="main">
+  <div class="container">
+
+    <!-- ATS Panel -->
+    <div id="atsPanel" role="tabpanel" aria-labelledby="tabAts">
+      <div id="atsContent">
+        <div class="loading-overlay" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <h3>Loading ATS reports…</h3>
+          <p>Fetching your analysis history</p>
+        </div>
+      </div>
+      <div class="pagination" id="atsPagination" role="navigation" aria-label="ATS pagination" style="display:none"></div>
+    </div>
+
+    <!-- JD Panel -->
+    <div id="jdPanel" role="tabpanel" aria-labelledby="tabJd" style="display:none">
+      <div id="jdContent">
+        <div class="loading-overlay" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <h3>Loading JD reports…</h3>
+          <p>Fetching your job match history</p>
+        </div>
+      </div>
+      <div class="pagination" id="jdPagination" role="navigation" aria-label="JD pagination" style="display:none"></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Confirm Delete -->
+<div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
+  <div class="confirm-box">
+    <div class="confirm-icon" aria-hidden="true">🗑️</div>
+    <h2 class="confirm-title" id="confirmTitle">Delete Report?</h2>
+    <p class="confirm-msg" id="confirmMsg">Are you sure you want to delete this report? This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" id="confirmCancel">Cancel</button>
+      <button class="btn-danger"  id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  /* ── Auth helpers ─────────────────────────────────────────── */
+  function getToken() { return localStorage.getItem('auth_token'); }
+  function getUser() {
+    const u = localStorage.getItem('auth_user');
+    return u ? JSON.parse(u) : null;
+  }
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    window.location.href = 'login.html';
+  }
+  function authHeaders() {
+    const token = getToken();
+    return token
+      ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      : { 'Content-Type': 'application/json' };
+  }
+
+  /* ── Auth guard ───────────────────────────────────────────── */
+  if (!getToken()) { window.location.href = 'login.html'; }
+
+  /* ── Render Nav ───────────────────────────────────────────── */
+  function renderNav() {
+    const user = getUser();
+    const navRight = document.getElementById('navRight');
+    if (!navRight) return;
+    if (user) {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="history.html" class="nav-link">📂 History</a>
+        <a href="reports.html" class="nav-link" style="color:var(--primary)">📊 Reports</a>
+        <a href="ai_assistant.html" class="nav-link">✨ AI</a>
+        <span class="nav-badge">👤 ${user.name.split(' ')[0]}</span>
+        <button class="btn-nav" onclick="logout()">Logout</button>
+      `;
+    } else {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="ai_assistant.html" class="nav-link">✨ AI</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <button class="btn-nav" onclick="window.location.href='signup.html'">Sign Up</button>
+      `;
+    }
+  }
+  renderNav();
+
+  /* ── State ───────────────────────────────────────────────── */
+  const state = {
+    ats: { page: 1, total: 0, totalPages: 1, loaded: false },
+    jd:  { page: 1, total: 0, totalPages: 1, loaded: false }
+  };
+  let activeTab = 'ats';
+  let deleteTarget = null; // { type, id }
+  const PAGE_SIZE = 9;
+
+  /* ── Toast ───────────────────────────────────────────────── */
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => { toast.className = 'toast'; }, 3500);
+  }
+
+  /* ── Date formatter ──────────────────────────────────────── */
+  function formatDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }); }
+    catch { return iso; }
+  }
+
+  /* ── Score helpers ───────────────────────────────────────── */
+  function scoreClass(score) {
+    if (score == null) return 'none';
+    return score >= 75 ? 'green' : score >= 50 ? 'amber' : 'red';
+  }
+  function barClass(score) {
+    if (score == null) return '';
+    return score >= 75 ? 'bar-green' : score >= 50 ? 'bar-amber' : 'bar-red';
+  }
+  function atsBadgeHtml(score) {
+    if (score == null) return `<span class="ats-badge ats-none">N/A</span>`;
+    const cls = score >= 75 ? 'ats-green' : score >= 50 ? 'ats-amber' : 'ats-red';
+    return `<span class="ats-badge ${cls}">${score}</span>`;
+  }
+
+  /* ── Tab switch ──────────────────────────────────────────── */
+  function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('tabAts').classList.toggle('active', tab === 'ats');
+    document.getElementById('tabJd').classList.toggle('active', tab === 'jd');
+    document.getElementById('tabAts').setAttribute('aria-selected', tab === 'ats');
+    document.getElementById('tabJd').setAttribute('aria-selected', tab === 'jd');
+    document.getElementById('atsPanel').style.display = tab === 'ats' ? '' : 'none';
+    document.getElementById('jdPanel').style.display  = tab === 'jd'  ? '' : 'none';
+    if (tab === 'ats' && !state.ats.loaded) loadAts();
+    if (tab === 'jd'  && !state.jd.loaded)  loadJd();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     ATS REPORTS
+  ═══════════════════════════════════════════════════════════ */
+  async function loadAts() {
+    const contentEl = document.getElementById('atsContent');
+    contentEl.innerHTML = `
+      <div class="loading-overlay" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h3>Loading ATS reports…</h3>
+        <p>Fetching your analysis history</p>
+      </div>`;
+    document.getElementById('atsPagination').style.display = 'none';
+
+    try {
+      const params = new URLSearchParams({ page: state.ats.page, page_size: PAGE_SIZE });
+      const res = await fetch(`${API}/reports/ats?${params}`, { headers: authHeaders() });
+      if (res.status === 401) { logout(); return; }
+      if (!res.ok) throw new Error('Failed to load ATS reports');
+      const data = await res.json();
+
+      const reports = data.reports || data.items || data || [];
+      state.ats.total      = data.total || reports.length;
+      state.ats.totalPages = Math.max(1, Math.ceil(state.ats.total / PAGE_SIZE));
+      state.ats.loaded     = true;
+
+      document.getElementById('atsTabCount').textContent = state.ats.total;
+
+      contentEl.innerHTML = renderAtsCards(reports);
+      renderAtsPagination();
+
+    } catch (err) {
+      contentEl.innerHTML = `
+        <div class="empty-state" role="alert">
+          <div class="empty-icon">⚠️</div>
+          <h3>Error Loading Reports</h3>
+          <p>${err.message}</p>
+          <button class="btn-primary" onclick="state.ats.loaded=false;loadAts()">Try Again</button>
+        </div>`;
+    }
+  }
+
+  function renderAtsCards(reports) {
+    if (!reports || reports.length === 0) {
+      return `
+        <div class="empty-state" role="status">
+          <div class="empty-icon">📊</div>
+          <h3>No ATS Reports Yet</h3>
+          <p>Upload a resume and run an ATS analysis to see your reports here.</p>
+          <a href="index.html" class="btn-primary">Analyze a Resume →</a>
+        </div>`;
+    }
+    return `<div class="reports-grid">` + reports.map((r, idx) => {
+      const sc  = r.score ?? r.ats_score ?? null;
+      const cls = scoreClass(sc);
+      const barW = sc != null ? sc : 0;
+      return `
+      <article class="report-card" style="animation-delay:${idx * 0.05}s" aria-label="ATS Report — Score ${sc ?? 'N/A'}">
+        <div class="rcard-top">
+          <div class="rcard-meta">
+            <div class="rcard-type ats">📊 ATS Analysis</div>
+            <div class="rcard-filename" title="${r.resume_filename || 'Resume'}">${r.resume_filename || 'Resume'}</div>
+            <div class="rcard-date">${formatDate(r.created_at)}</div>
+          </div>
+          <div class="score-circle ${cls}" aria-label="Score ${sc ?? 'N/A'}">
+            <span>${sc != null ? sc : '—'}</span>
+          </div>
+        </div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-label">
+            <span>ATS Score</span>
+            ${atsBadgeHtml(sc)}
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill ${barClass(sc)}" id="atsBar_${r.id}" style="width:0%"></div>
+          </div>
+        </div>
+        ${r.summary ? `<div style="padding:0.875rem 1.25rem;font-size:0.825rem;color:var(--muted);border-bottom:1px solid var(--border);">${r.summary}</div>` : ''}
+        <div class="rcard-footer">
+          <button class="btn-del-report" id="delAtsBtn_${r.id}" onclick="confirmDeleteReport('ats','${r.id}')">
+            🗑 Delete Report
+          </button>
+        </div>
+      </article>`;
+    }).join('') + `</div>`;
+  }
+
+  /* Animate score bars after render */
+  function animateBars(prefix, reports) {
+    reports.forEach(r => {
+      const sc = r.score ?? r.ats_score ?? r.match_score ?? null;
+      const el = document.getElementById(prefix + r.id);
+      if (el && sc != null) {
+        setTimeout(() => { el.style.width = sc + '%'; }, 100);
+      }
+    });
+  }
+
+  function renderAtsPagination() {
+    const el = document.getElementById('atsPagination');
+    if (state.ats.totalPages <= 1) { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+    el.innerHTML = buildPaginationHtml(state.ats.page, state.ats.totalPages, state.ats.total, 'goAtsPage');
+  }
+
+  function goAtsPage(p) {
+    if (p < 1 || p > state.ats.totalPages) return;
+    state.ats.page = p;
+    state.ats.loaded = false;
+    loadAts();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     JD REPORTS
+  ═══════════════════════════════════════════════════════════ */
+  async function loadJd() {
+    const contentEl = document.getElementById('jdContent');
+    contentEl.innerHTML = `
+      <div class="loading-overlay" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h3>Loading JD reports…</h3>
+        <p>Fetching your job match history</p>
+      </div>`;
+    document.getElementById('jdPagination').style.display = 'none';
+
+    try {
+      const params = new URLSearchParams({ page: state.jd.page, page_size: PAGE_SIZE });
+      const res = await fetch(`${API}/reports/jd?${params}`, { headers: authHeaders() });
+      if (res.status === 401) { logout(); return; }
+      if (!res.ok) throw new Error('Failed to load JD reports');
+      const data = await res.json();
+
+      const reports = data.reports || data.items || data || [];
+      state.jd.total      = data.total || reports.length;
+      state.jd.totalPages = Math.max(1, Math.ceil(state.jd.total / PAGE_SIZE));
+      state.jd.loaded     = true;
+
+      document.getElementById('jdTabCount').textContent = state.jd.total;
+
+      contentEl.innerHTML = renderJdCards(reports);
+      renderJdPagination();
+
+    } catch (err) {
+      contentEl.innerHTML = `
+        <div class="empty-state" role="alert">
+          <div class="empty-icon">⚠️</div>
+          <h3>Error Loading Reports</h3>
+          <p>${err.message}</p>
+          <button class="btn-primary" onclick="state.jd.loaded=false;loadJd()">Try Again</button>
+        </div>`;
+    }
+  }
+
+  function renderJdCards(reports) {
+    if (!reports || reports.length === 0) {
+      return `
+        <div class="empty-state" role="status">
+          <div class="empty-icon">🎯</div>
+          <h3>No JD Reports Yet</h3>
+          <p>Upload a resume and paste a job description to generate match reports.</p>
+          <a href="index.html" class="btn-primary">Match a Job Description →</a>
+        </div>`;
+    }
+    return `<div class="reports-grid">` + reports.map((r, idx) => {
+      const sc           = r.match_score ?? r.score ?? null;
+      const cls          = scoreClass(sc);
+      const matched      = r.matched_skills || [];
+      const missing      = r.missing_skills || [];
+      const maxShow      = 4;
+      const matchedShow  = matched.slice(0, maxShow);
+      const missingShow  = missing.slice(0, maxShow);
+      const matchedExtra = matched.length > maxShow;
+      const missingExtra = missing.length > maxShow;
+
+      return `
+      <article class="report-card" style="animation-delay:${idx * 0.05}s" aria-label="JD Match Report — ${r.job_title || 'Job Match'}">
+        <div class="rcard-top">
+          <div class="rcard-meta">
+            <div class="rcard-type jd">🎯 JD Match</div>
+            <div class="job-title-big" title="${r.job_title || 'Job Match'}">${r.job_title || 'Job Match'}</div>
+            <div class="rcard-date">Resume: ${r.resume_filename || '—'} &nbsp;·&nbsp; ${formatDate(r.created_at)}</div>
+          </div>
+          <div class="score-circle ${cls}" aria-label="Match ${sc ?? 'N/A'}%">
+            <span>${sc != null ? sc + '%' : '—'}</span>
+          </div>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-bar-label">
+            <span>Match Score</span>
+            ${atsBadgeHtml(sc)}
+          </div>
+          <div class="score-bar">
+            <div class="score-bar-fill ${barClass(sc)}" id="jdBar_${r.id}" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="rcard-body">
+          ${matchedShow.length > 0 ? `
+          <div class="skills-section">
+            <div class="skills-label matched">✅ Matched Skills</div>
+            <div class="skill-tags">
+              ${matchedShow.map(s => `<span class="skill-tag matched">${s}</span>`).join('')}
+              ${matchedExtra ? `<span class="skill-tag more">+${matched.length - maxShow} more</span>` : ''}
+            </div>
+          </div>` : ''}
+
+          ${missingShow.length > 0 ? `
+          <div class="skills-section">
+            <div class="skills-label missing">❌ Missing Skills</div>
+            <div class="skill-tags">
+              ${missingShow.map(s => `<span class="skill-tag missing">${s}</span>`).join('')}
+              ${missingExtra ? `<span class="skill-tag more">+${missing.length - maxShow} more</span>` : ''}
+            </div>
+          </div>` : ''}
+        </div>
+
+        <div class="rcard-footer">
+          <button class="btn-del-report" id="delJdBtn_${r.id}" onclick="confirmDeleteReport('jd','${r.id}')">
+            🗑 Delete Report
+          </button>
+        </div>
+      </article>`;
+    }).join('') + `</div>`;
+  }
+
+  function renderJdPagination() {
+    const el = document.getElementById('jdPagination');
+    if (state.jd.totalPages <= 1) { el.style.display = 'none'; return; }
+    el.style.display = 'flex';
+    el.innerHTML = buildPaginationHtml(state.jd.page, state.jd.totalPages, state.jd.total, 'goJdPage');
+  }
+
+  function goJdPage(p) {
+    if (p < 1 || p > state.jd.totalPages) return;
+    state.jd.page = p;
+    state.jd.loaded = false;
+    loadJd();
+  }
+
+  /* ── Pagination builder ──────────────────────────────────── */
+  function buildPaginationHtml(current, total, count, fnName) {
+    let html = `
+      <button class="page-btn" onclick="${fnName}(${current - 1})" ${current === 1 ? 'disabled' : ''}>← Prev</button>`;
+    for (let p = 1; p <= total; p++) {
+      if (p === 1 || p === total || Math.abs(p - current) <= 1) {
+        html += `<button class="page-btn ${p === current ? 'active' : ''}" onclick="${fnName}(${p})" aria-current="${p === current ? 'page' : 'false'}">${p}</button>`;
+      } else if (Math.abs(p - current) === 2) {
+        html += `<span class="page-info">…</span>`;
+      }
+    }
+    html += `
+      <button class="page-btn" onclick="${fnName}(${current + 1})" ${current === total ? 'disabled' : ''}>Next →</button>
+      <span class="page-info" aria-live="polite">Page ${current} of ${total} (${count} total)</span>`;
+    return html;
+  }
+
+  /* ── Animate bar widths after DOM insert ─────────────────── */
+  function triggerBarAnimations(contentId, prefix) {
+    const el = document.getElementById(contentId);
+    el.querySelectorAll('[id^="' + prefix + '"]').forEach(bar => {
+      const score = parseInt(bar.style.width) || 0;
+      // re-trigger via data attr set on card generation
+      setTimeout(() => { bar.style.width = bar.dataset.w + '%'; }, 150);
+    });
+  }
+
+  /* ── Confirm Delete ──────────────────────────────────────── */
+  function confirmDeleteReport(type, id) {
+    deleteTarget = { type, id };
+    document.getElementById('confirmMsg').textContent =
+      `Are you sure you want to permanently delete this ${type === 'ats' ? 'ATS' : 'JD Match'} report?`;
+    const overlay = document.getElementById('confirmOverlay');
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  function closeConfirm() {
+    const overlay = document.getElementById('confirmOverlay');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    deleteTarget = null;
+  }
+  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirm(); });
+
+  document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (!deleteTarget) return;
+    const { type, id } = deleteTarget;
+    closeConfirm();
+
+    const endpoint = type === 'ats' ? `${API}/reports/ats/${id}` : `${API}/reports/jd/${id}`;
+
+    try {
+      const res = await fetch(endpoint, { method: 'DELETE', headers: authHeaders() });
+      if (!res.ok && res.status !== 204) throw new Error('Delete failed');
+      showToast('Report deleted successfully.', 'success');
+      if (type === 'ats') {
+        state.ats.loaded = false;
+        if (state.ats.page > 1 && state.ats.total % PAGE_SIZE === 1) state.ats.page--;
+        loadAts();
+      } else {
+        state.jd.loaded = false;
+        if (state.jd.page > 1 && state.jd.total % PAGE_SIZE === 1) state.jd.page--;
+        loadJd();
+      }
+    } catch (err) {
+      showToast('Failed to delete report. ' + err.message, 'error');
+    }
+  });
+
+  /* ── Boot ────────────────────────────────────────────────── */
+  loadAts(); // Load ATS on page open
+  // Intercept ATS content mutation to animate bars
+  const atsContentObserver = new MutationObserver(() => {
+    document.querySelectorAll('[id^="atsBar_"]').forEach(bar => {
+      const m = bar.id.match(/atsBar_(.+)/);
+      if (m && bar.style.width === '0%') {
+        const sc = parseInt(bar.closest('.report-card')?.querySelector('.score-circle span')?.textContent) || 0;
+        setTimeout(() => { bar.style.width = sc + '%'; }, 200);
+      }
+    });
+    document.querySelectorAll('[id^="jdBar_"]').forEach(bar => {
+      const span = bar.closest('.report-card')?.querySelector('.score-circle span');
+      if (span && bar.style.width === '0%') {
+        const sc = parseInt(span.textContent) || 0;
+        setTimeout(() => { bar.style.width = sc + '%'; }, 200);
+      }
+    });
+  });
+  atsContentObserver.observe(document.getElementById('atsContent'), { childList: true, subtree: false });
+  atsContentObserver.observe(document.getElementById('jdContent'),  { childList: true, subtree: false });
+</script>
+</body>
+</html>

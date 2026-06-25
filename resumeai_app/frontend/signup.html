@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — ResumeAI</title>
+  <meta name="description" content="Create your free ResumeAI account — intelligent resume parsing, ATS scoring, and AI-powered career tools." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --primary:   #4F46E5;
+      --secondary: #7C3AED;
+      --success:   #10B981;
+      --warning:   #F59E0B;
+      --danger:    #EF4444;
+      --text:      #0F172A;
+      --muted:     #64748B;
+      --border:    #E2E8F0;
+      --shadow-btn: 0 4px 14px 0 rgba(79,70,229,0.30);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background: #0A0A1A;
+    }
+
+    /* ── Animated Background ─────────────────────────────────── */
+    .bg-canvas {
+      position: fixed; inset: 0; z-index: 0; overflow: hidden;
+      background: linear-gradient(135deg, #0D0D2B 0%, #0A0A1A 50%, #0D0D2B 100%);
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px);
+      animation: orb-float 8s ease-in-out infinite;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%);
+      top: -200px; right: -150px; animation-delay: 0s;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(79,70,229,0.30) 0%, transparent 70%);
+      bottom: -150px; left: -100px; animation-delay: -4s;
+    }
+    .orb-3 {
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(99,102,241,0.20) 0%, transparent 70%);
+      top: 40%; left: 55%; animation-delay: -2s;
+    }
+    @keyframes orb-float {
+      0%,100% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-25px) scale(1.04); }
+      66% { transform: translateY(18px) scale(0.96); }
+    }
+    .bg-canvas::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,26,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 800; font-size: 1.2rem; color: white;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-btn); font-size: 1rem;
+    }
+    .logo span { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link {
+      color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500;
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-link:hover { color: #818CF8; }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-size: 0.75rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .btn-nav {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-weight: 600; font-size: 0.875rem;
+      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.5); }
+
+    /* ── Page Layout ─────────────────────────────────────────── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      min-height: calc(100vh - 64px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    /* ── Auth Card ───────────────────────────────────────────── */
+    .auth-card {
+      width: 100%; max-width: 500px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+      animation: card-in 0.5s ease both;
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(24px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .auth-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4);
+      color: #A78BFA; font-size: 0.75rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px; margin-bottom: 1.5rem;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .auth-badge::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: #A78BFA; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+    .auth-title {
+      font-size: 2rem; font-weight: 800; color: white;
+      line-height: 1.15; margin-bottom: 0.5rem;
+    }
+    .auth-title .grad { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .auth-sub { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
+
+    /* ── Form ────────────────────────────────────────────────── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label {
+      display: block; font-size: 0.8rem; font-weight: 700;
+      color: rgba(255,255,255,0.7); margin-bottom: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: rgba(255,255,255,0.3); font-size: 1rem; pointer-events: none;
+      display: flex; align-items: center;
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 0.8rem 1rem 0.8rem 2.75rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem; font-weight: 500;
+      color: white; outline: none; transition: all 0.2s;
+    }
+    .form-input::placeholder { color: rgba(255,255,255,0.25); }
+    .form-input:focus {
+      border-color: rgba(129,140,248,0.6);
+      background: rgba(255,255,255,0.09);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.25);
+    }
+    .form-input.error { border-color: rgba(239,68,68,0.6); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+    .form-input.valid { border-color: rgba(16,185,129,0.6); }
+    .form-input:-webkit-autofill,
+    .form-input:-webkit-autofill:hover,
+    .form-input:-webkit-autofill:focus {
+      -webkit-text-fill-color: white;
+      -webkit-box-shadow: 0 0 0px 1000px rgba(20,20,50,0.95) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+    .pw-toggle {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.35); font-size: 1rem; padding: 0;
+      display: flex; align-items: center; transition: color 0.2s;
+    }
+    .pw-toggle:hover { color: rgba(255,255,255,0.7); }
+    .field-error {
+      font-size: 0.75rem; color: #FCA5A5; margin-top: 0.4rem;
+      display: none; font-weight: 600;
+    }
+
+    /* ── Password Strength ───────────────────────────────────── */
+    .pw-strength-wrap { margin-top: 0.6rem; }
+    .pw-strength-bars {
+      display: flex; gap: 4px; margin-bottom: 0.35rem;
+    }
+    .pw-bar {
+      flex: 1; height: 4px; border-radius: 99px;
+      background: rgba(255,255,255,0.1); transition: all 0.3s;
+    }
+    .pw-bar.fill-weak   { background: #EF4444; }
+    .pw-bar.fill-fair   { background: #F59E0B; }
+    .pw-bar.fill-good   { background: #3B82F6; }
+    .pw-bar.fill-strong { background: #10B981; }
+    .pw-strength-label {
+      font-size: 0.72rem; font-weight: 700; transition: color 0.3s;
+      color: rgba(255,255,255,0.3);
+    }
+    .pw-strength-label.weak   { color: #EF4444; }
+    .pw-strength-label.fair   { color: #F59E0B; }
+    .pw-strength-label.good   { color: #3B82F6; }
+    .pw-strength-label.strong { color: #10B981; }
+
+    /* ── Submit Button ───────────────────────────────────────── */
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 1rem;
+      padding: 0.9rem; border-radius: 12px; border: none;
+      cursor: pointer; transition: all 0.2s;
+      box-shadow: var(--shadow-btn);
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.5); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner-sm {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      animation: spin 0.7s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Alert ───────────────────────────────────────────────── */
+    .alert {
+      padding: 0.75rem 1rem; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 600;
+      margin-bottom: 1.25rem; display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+    .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; }
+    .alert-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6EE7B7; }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    .auth-divider {
+      display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+    }
+    .auth-divider span { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-weight: 600; }
+    .auth-footer {
+      text-align: center; margin-top: 1.5rem;
+      font-size: 0.875rem; color: rgba(255,255,255,0.4);
+    }
+    .auth-footer a { color: #818CF8; font-weight: 600; text-decoration: none; transition: color 0.2s; }
+    .auth-footer a:hover { color: #A78BFA; text-decoration: underline; }
+
+    .trust-row {
+      display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+      margin-top: 1.5rem; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.72rem; color: rgba(255,255,255,0.3); font-weight: 600;
+    }
+
+    /* ── Benefits list ───────────────────────────────────────── */
+    .benefits {
+      display: flex; flex-direction: column; gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .benefit-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.82rem; color: rgba(255,255,255,0.5); font-weight: 500;
+    }
+    .benefit-item .check {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(16,185,129,0.15));
+      border: 1px solid rgba(16,185,129,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; color: #6EE7B7;
+    }
+
+    @media (max-width: 540px) {
+      .auth-card { padding: 2rem 1.5rem; }
+      .auth-title { font-size: 1.6rem; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-canvas" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Navigation -->
+<nav aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="logo" aria-label="ResumeAI Home">
+      <div class="logo-icon" aria-hidden="true">✦</div>
+      <span>ResumeAI</span>
+    </a>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<main class="page-wrap" role="main">
+  <div class="auth-card">
+
+    <div class="auth-badge">Free Account</div>
+
+    <h1 class="auth-title">Start Your <span class="grad">AI Journey</span></h1>
+    <p class="auth-sub">Join thousands of professionals supercharging their job search.</p>
+
+    <div class="benefits" aria-label="Account benefits">
+      <div class="benefit-item"><span class="check">✓</span> Unlimited resume parsing &amp; ATS scoring</div>
+      <div class="benefit-item"><span class="check">✓</span> AI-powered job description matching</div>
+      <div class="benefit-item"><span class="check">✓</span> Full resume history &amp; report archive</div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="alert alert-error"   id="signupError"   role="alert"  aria-live="polite"></div>
+    <div class="alert alert-success" id="signupSuccess" role="status" aria-live="polite"></div>
+
+    <form id="signupForm" novalidate autocomplete="on">
+
+      <!-- Name + Email row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="signupName">Full Name</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">👤</span>
+            <input class="form-input" type="text" id="signupName" name="name"
+              placeholder="Jane Smith" autocomplete="name" required />
+          </div>
+          <span class="field-error" id="nameError">Please enter your name.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="signupEmail">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">✉</span>
+            <input class="form-input" type="email" id="signupEmail" name="email"
+              placeholder="you@example.com" autocomplete="email" required />
+          </div>
+          <span class="field-error" id="emailError">Please enter a valid email.</span>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label class="form-label" for="signupPassword">Password</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">🔒</span>
+          <input class="form-input" type="password" id="signupPassword" name="password"
+            placeholder="Create a strong password" autocomplete="new-password" required />
+          <button type="button" class="pw-toggle" id="pwToggle1" aria-label="Toggle password visibility">👁</button>
+        </div>
+        <!-- Strength indicator -->
+        <div class="pw-strength-wrap" id="pwStrengthWrap">
+          <div class="pw-strength-bars">
+            <div class="pw-bar" id="pwBar1"></div>
+            <div class="pw-bar" id="pwBar2"></div>
+            <div class="pw-bar" id="pwBar3"></div>
+            <div class="pw-bar" id="pwBar4"></div>
+          </div>
+          <span class="pw-strength-label" id="pwStrengthLabel">Enter a password</span>
+        </div>
+        <span class="field-error" id="passwordError">Password must be at least 8 characters.</span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label class="form-label" for="signupConfirmPw">Confirm Password</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">🔑</span>
+          <input class="form-input" type="password" id="signupConfirmPw" name="confirm_password"
+            placeholder="Repeat your password" autocomplete="new-password" required />
+          <button type="button" class="pw-toggle" id="pwToggle2" aria-label="Toggle confirm password visibility">👁</button>
+        </div>
+        <span class="field-error" id="confirmPwError">Passwords do not match.</span>
+      </div>
+
+      <button type="submit" class="btn-submit" id="signupBtn">
+        <span id="signupBtnText">Create Free Account</span>
+        <span class="spinner-sm" id="signupSpinner" aria-label="Creating account…"></span>
+        <span id="signupBtnArrow">→</span>
+      </button>
+    </form>
+
+    <div class="auth-divider"><span>Already have an account?</span></div>
+    <div class="auth-footer">
+      <a href="login.html" id="goToLogin">Sign in instead →</a>
+    </div>
+
+    <div class="trust-row" aria-label="Security badges">
+      <div class="trust-item"><span>🔐</span> Encrypted</div>
+      <div class="trust-item"><span>🚫</span> No Spam</div>
+      <div class="trust-item"><span>🛡️</span> Private</div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  function getToken() { return localStorage.getItem('auth_token'); }
+  function getUser() {
+    const u = localStorage.getItem('auth_user');
+    return u ? JSON.parse(u) : null;
+  }
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    window.location.href = 'login.html';
+  }
+  function authHeaders() {
+    const token = getToken();
+    return token
+      ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      : { 'Content-Type': 'application/json' };
+  }
+
+  /* Redirect if already logged in */
+  if (getToken() && getUser()) {
+    window.location.href = 'index.html';
+  }
+
+  /* ── Render Nav ───────────────────────────────────────────── */
+  function renderNav() {
+    const user = getUser();
+    const navRight = document.getElementById('navRight');
+    if (!navRight) return;
+    if (user) {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="history.html" class="nav-link">📂 History</a>
+        <a href="reports.html" class="nav-link">📊 Reports</a>
+        <a href="ai_assistant.html" class="nav-link" style="color:#818CF8">✨ AI</a>
+        <span class="nav-badge">👤 ${user.name.split(' ')[0]}</span>
+        <button class="btn-nav" onclick="logout()">Logout</button>
+      `;
+    } else {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="ai_assistant.html" class="nav-link">✨ AI</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <button class="btn-nav" onclick="window.location.href='signup.html'" style="color:#818CF8">Sign Up</button>
+      `;
+    }
+  }
+  renderNav();
+
+  /* ── Password toggles ────────────────────────────────────── */
+  function setupToggle(toggleId, inputId) {
+    const toggle = document.getElementById(toggleId);
+    const input  = document.getElementById(inputId);
+    let visible = false;
+    toggle.addEventListener('click', () => {
+      visible = !visible;
+      input.type = visible ? 'text' : 'password';
+      toggle.textContent = visible ? '🙈' : '👁';
+    });
+  }
+  setupToggle('pwToggle1', 'signupPassword');
+  setupToggle('pwToggle2', 'signupConfirmPw');
+
+  /* ── Password Strength ───────────────────────────────────── */
+  const bars = [1,2,3,4].map(n => document.getElementById('pwBar' + n));
+  const strengthLabel = document.getElementById('pwStrengthLabel');
+  const strengthClasses = ['', 'weak', 'fair', 'good', 'strong'];
+  const strengthTexts   = ['', 'Weak', 'Fair', 'Good', 'Strong — 💪'];
+  const fillClasses     = ['', 'fill-weak', 'fill-fair', 'fill-good', 'fill-strong'];
+
+  function calcStrength(pw) {
+    let score = 0;
+    if (pw.length >= 8)  score++;
+    if (pw.length >= 12) score++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return Math.min(4, Math.max(0, score));
+  }
+
+  document.getElementById('signupPassword').addEventListener('input', function() {
+    const pw = this.value;
+    if (!pw) {
+      bars.forEach(b => { b.className = 'pw-bar'; });
+      strengthLabel.textContent = 'Enter a password';
+      strengthLabel.className = 'pw-strength-label';
+      return;
+    }
+    const lvl = calcStrength(pw);
+    bars.forEach((b, i) => {
+      b.className = 'pw-bar' + (i < lvl ? ' ' + fillClasses[lvl] : '');
+    });
+    strengthLabel.textContent = strengthTexts[lvl];
+    strengthLabel.className = 'pw-strength-label ' + strengthClasses[lvl];
+  });
+
+  /* ── Alert helpers ───────────────────────────────────────── */
+  function showError(msg) {
+    const el = document.getElementById('signupError');
+    el.textContent = '⚠ ' + msg;
+    el.style.display = 'block';
+    document.getElementById('signupSuccess').style.display = 'none';
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('signupSuccess');
+    el.textContent = '✓ ' + msg;
+    el.style.display = 'block';
+    document.getElementById('signupError').style.display = 'none';
+  }
+  function clearAlerts() {
+    document.getElementById('signupError').style.display = 'none';
+    document.getElementById('signupSuccess').style.display = 'none';
+  }
+  function showFieldError(id, show) {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+  }
+
+  /* ── Form submit ─────────────────────────────────────────── */
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearAlerts();
+
+    const name     = document.getElementById('signupName').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirm  = document.getElementById('signupConfirmPw').value;
+
+    let valid = true;
+    showFieldError('nameError', false);
+    showFieldError('emailError', false);
+    showFieldError('passwordError', false);
+    showFieldError('confirmPwError', false);
+
+    if (!name)  { showFieldError('nameError', true); valid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('emailError', true); valid = false; }
+    if (password.length < 8) { showFieldError('passwordError', true); valid = false; }
+    if (password !== confirm) { showFieldError('confirmPwError', true); valid = false; }
+
+    if (!valid) return;
+
+    const btn     = document.getElementById('signupBtn');
+    const spinner = document.getElementById('signupSpinner');
+    const btnText = document.getElementById('signupBtnText');
+    const btnArrow= document.getElementById('signupBtnArrow');
+
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    btnText.textContent = 'Creating account…';
+    btnArrow.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || 'Registration failed. Please try again.');
+      }
+
+      localStorage.setItem('auth_token', data.access_token);
+      localStorage.setItem('auth_user', JSON.stringify(data.user || { name, email }));
+
+      showSuccess('Account created! Redirecting to your dashboard…');
+      setTimeout(() => { window.location.href = 'index.html'; }, 900);
+
+    } catch (err) {
+      showError(err.message || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = 'Create Free Account';
+      btnArrow.style.display = 'inline';
+    }
+  });
+</script>
+</body>
+</html>

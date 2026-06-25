@@ -1,0 +1,1421 @@
+{
+  "result": {
+    "version": "7.0.0",
+    "contact": {
+      "name": "Rajit Agrawal",
+      "email": "rajitagrawal2005@gmail.com",
+      "phone": "+91 84509 38936",
+      "location": null,
+      "linkedin": "https://linkedin.com/in/rajit-agrawal-639bab28a",
+      "github": "https://github.com/Arrkkkk",
+      "portfolio": "https://leetcode.com/u/RA_Ark/]",
+      "other_links": [
+        "https://leetcode.com/u/RA_Ark/]",
+        "https://badgr.com/public/assertions/jl-6v8SrQ3GbubIb0rvfbg]",
+        "https://www.credly.com/badges/8137ba35-1ce3-4ff1-8745-38ee8d0d0108/linked_in_profile]",
+        "https://www.credly.com/badges/412a66d7-2c8e-452f-96f9-8211541f4ffe/linked_in_profile]",
+        "https://catalog-education.oracle.com/pls/certview/sharebadge?id=D69759CB3F9AABBF71014DCC91753BE2180B1BAA47E7087B556469B23BAAF601]",
+        "https://credentials.databricks.com/e1a5dbe7-ee45-4b47-a590-859b82747f3b]",
+        "https://www.credly.com/badges/961258d9-2749-47d9-a594-43abf8ea6aab/linked_in_profile]"
+      ]
+    },
+    "summary": "Aspiring Software Engineer with experience in full-stack web development, AI-based projects, and software testing. Focused on building reliable, user-centered applications that integrate intelligent automation.",
+    "education": [
+      {
+        "institution": "Vellore Institute of Technology (VIT), Vellore Graduation:",
+        "degree": "B.Tech",
+        "field_of_study": "Computer Science and Engineering  CGPA: 9.81 Relevant Coursework: Data Structures & Algorithms",
+        "start_date": null,
+        "end_date": "2027",
+        "gpa": "9.81",
+        "honors": [],
+        "raw_lines": [
+          "Vellore Institute of Technology (VIT), Vellore Graduation: 2027",
+          "B.Tech in Computer Science and Engineering \u2014 CGPA: 9.81 Relevant Coursework: Data Structures & Algorithms,",
+          "Object-Oriented Programming, Software Engineering, Web Programming, Digital Systems, Discrete Mathematics"
+        ]
+      }
+    ],
+    "experience": [
+      {
+        "company": "ApexPlanet Software Pvt. Ltd.",
+        "title": "Web Development Intern (Remote) August 2025 - September 2025",
+        "location": null,
+        "start_date": null,
+        "end_date": null,
+        "is_current": false,
+        "bullets": [
+          "Proposedd and created 5+ responsive web projects using HTML, CSS, and JavaScript, improving cross-browser compatibility and",
+          "Implemented form validation, dynamic content rendering, and REST API integration, enhancing user interactivity and reliability.",
+          "Collaborated with designers to refactor UI components, achieving a 20% improvement in page load times and smoother responsive-"
+        ],
+        "raw_lines": [
+          "ApexPlanet Software Pvt. Ltd. \u2013 Web Development Intern (Remote) August 2025 \u2013 September 2025",
+          "\u2022 Proposedd and created 5+ responsive web projects using HTML, CSS, and JavaScript, improving cross-browser compatibility and",
+          "performance.",
+          "\u2022 Implemented form validation, dynamic content rendering, and REST API integration, enhancing user interactivity and reliability.",
+          "\u2022 Collaborated with designers to refactor UI components, achieving a 20% improvement in page load times and smoother responsive-",
+          "ness."
+        ]
+      },
+      {
+        "company": "AQM Technologies",
+        "title": null,
+        "location": null,
+        "start_date": null,
+        "end_date": "2025-06",
+        "is_current": false,
+        "bullets": [
+          "Performed integration and regression testing across trading modules, identifying 15+ critical defects prior to release. Understood",
+          "Automated recurring Postman test suites, reducing manual testing time by 15% and streamlining validation workflows."
+        ],
+        "raw_lines": [
+          "AQM Technologies \u2013 Software Testing Intern June 2025 \u2013 July 2025",
+          "\u2022 Performed integration and regression testing across trading modules, identifying 15+ critical defects prior to release. Understood",
+          "Agile Methodology with Testing (Both Manual and Automated).",
+          "\u2022 Automated recurring Postman test suites, reducing manual testing time by 15% and streamlining validation workflows."
+        ]
+      },
+      {
+        "company": "GirlScript Summer of Code (GSSoC 2024) - Open Source Contributor September 2024",
+        "title": null,
+        "location": null,
+        "start_date": null,
+        "end_date": "2024",
+        "is_current": false,
+        "bullets": [
+          "Contributed 10+ bug fixes and features; cooperated on Git workflows and improved documentation across open-source projects.",
+          "Collaborated with maintainers on Git branching strategies and issue triaging, improving overall codebase organization."
+        ],
+        "raw_lines": [
+          "GirlScript Summer of Code (GSSoC 2024) \u2013 Open Source Contributor September 2024 \u2013 November 2024",
+          "\u2022 Contributed 10+ bug fixes and features; cooperated on Git workflows and improved documentation across open-source projects.",
+          "\u2022 Collaborated with maintainers on Git branching strategies and issue triaging, improving overall codebase organization."
+        ]
+      },
+      {
+        "company": "Winter of Blockchain 2024 - Contributor September 2024",
+        "title": null,
+        "location": null,
+        "start_date": null,
+        "end_date": "2024",
+        "is_current": false,
+        "bullets": [],
+        "raw_lines": [
+          "Winter of Blockchain 2024 \u2013 Contributor September 2024 \u2013 November 2024",
+          "Reviewed and merged 10+ PRs, ensuring consistency and reliability in blockchain project repositories."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "Marketpulse \u2013 Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API",
+        "description": null,
+        "technologies": [
+          "python",
+          "api"
+        ],
+        "url": null,
+        "bullets": [],
+        "raw_lines": [
+          "Marketpulse \u2013 Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API",
+          "Developed and revamped a full-stack market tracker with real-time stock/crypto data and AI-powered news analysis; optimized data",
+          "pipelines for performance. - GitHub Link"
+        ]
+      },
+      {
+        "name": "Multi AI Chatbot \u2013 Python, Streamlit",
+        "description": null,
+        "technologies": [
+          "python"
+        ],
+        "url": null,
+        "bullets": [],
+        "raw_lines": [
+          "Multi AI Chatbot \u2013 Python, Streamlit",
+          "Architected and deployed a chatbot platform integrating multiple APIs, enabling seamless multi-AI conversations with real-time",
+          "interaction. - GitHub Link"
+        ]
+      },
+      {
+        "name": "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+        "description": null,
+        "technologies": [
+          "javascript",
+          "html",
+          "css",
+          "api"
+        ],
+        "url": null,
+        "bullets": [],
+        "raw_lines": [
+          "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+          "Engineered a web-based tool that delivers personalized budgeting suggestions; executed responsive UI and API-driven architecture. -",
+          "GitHub Link"
+        ]
+      }
+    ],
+    "leadership": [
+      {
+        "organization": "Supported \u201cJoy of Giving",
+        "role": "Rotary International",
+        "start_date": null,
+        "end_date": "2019-01",
+        "bullets": [],
+        "raw_lines": [
+          "Rotary International \u2013 Volunteer January 2019 \u2013 Februrary 2019",
+          "Supported \u201cJoy of Giving \u2013 Annapoorna\u201d by distributing essentials worth Rs. 20,000 to underprivileged communities."
+        ]
+      },
+      {
+        "organization": "Raised Rs. 20,100 to support adolescent hygiene and education programs.",
+        "role": "Indian Development Foundation (IDF)",
+        "start_date": "2019-04",
+        "end_date": "2019-05",
+        "bullets": [
+          "Merit Scholarship \u2013 VIT (2 consecutive years)",
+          "Branch Topper \u2013 IT (2023\u201324), CSE Core (2024\u201325)"
+        ],
+        "raw_lines": [
+          "Indian Development Foundation (IDF) \u2013 Fundraiser April 2019 \u2013 May 2019",
+          "Raised Rs. 20,100 to support adolescent hygiene and education programs.",
+          "Awards & Scholarships",
+          "\u2022 Merit Scholarship \u2013 VIT (2 consecutive years)",
+          "\u2022 Branch Topper \u2013 IT (2023\u201324), CSE Core (2024\u201325)",
+          "Extra-Curriculars & Hackathons"
+        ]
+      },
+      {
+        "organization": "ADG VIT (Technical Club)",
+        "role": "Senior Core, Sponsorship Domain",
+        "start_date": null,
+        "end_date": null,
+        "bullets": [],
+        "raw_lines": [
+          "ADG VIT (Technical Club) \u2013 Senior Core, Sponsorship Domain",
+          "Participated in hackathons and tech events, collaborating with peers on innovative software solutions."
+        ]
+      }
+    ],
+    "certifications": [
+      {
+        "name": "Postman API Fundamentals",
+        "issuer": "Postman",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 Postman API Fundamentals \u2013 Postman"
+        ]
+      },
+      {
+        "name": "Oracle Cloud Infrastructure Generative AI Professional",
+        "issuer": "Oracle",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 Oracle Cloud Infrastructure Generative AI Professional"
+        ]
+      },
+      {
+        "name": "GenAI using IBM Watsonx",
+        "issuer": "IBM Skills Network",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 GenAI using IBM Watsonx \u2013 IBM Skills Network"
+        ]
+      },
+      {
+        "name": "Databricks Fundamentals",
+        "issuer": "Databricks",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 Databricks Fundamentals \u2013 Databricks"
+        ]
+      },
+      {
+        "name": "Agile Explorer - IBM SkillsBuild",
+        "issuer": "Ibm",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 Agile Explorer \u2013 IBM SkillsBuild"
+        ]
+      },
+      {
+        "name": "AWS Knowledge: Cloud Essentials",
+        "issuer": "AWS",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 AWS Knowledge: Cloud Essentials"
+        ]
+      },
+      {
+        "name": "AI Fundamentals - IBM SkillsBuild",
+        "issuer": "Ibm",
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 AI Fundamentals \u2013 IBM SkillsBuild"
+        ]
+      },
+      {
+        "name": "The Complete Flutter Development Bootcamp with Dart",
+        "issuer": null,
+        "date": null,
+        "expiry": null,
+        "credential_id": null,
+        "raw_lines": [
+          "\u2022 The Complete Flutter Development Bootcamp with Dart"
+        ]
+      }
+    ],
+    "skills": {
+      "categories": [
+        {
+          "category": "Languages",
+          "skills": [
+            "Java",
+            "C++",
+            "Python",
+            "C",
+            "JavaScript",
+            "ML/DS/Databases: NumPy",
+            "Pandas",
+            "Matplotlib",
+            "MySQL"
+          ]
+        },
+        {
+          "category": "Web Development",
+          "skills": [
+            "HTML",
+            "CSS",
+            "React",
+            "REST APIs",
+            "Android/ iOS Dev: Flutter",
+            "Dart"
+          ]
+        },
+        {
+          "category": "Software Engineering",
+          "skills": [
+            "Agile",
+            "Git",
+            "GitHub",
+            "Test Coverage",
+            "DevOps/Tools: Postman",
+            "IBM WatsonX",
+            "Gemini API"
+          ]
+        }
+      ],
+      "flat_list": [
+        "Java",
+        "C++",
+        "Python",
+        "C",
+        "JavaScript",
+        "ML/DS/Databases: NumPy",
+        "Pandas",
+        "Matplotlib",
+        "MySQL",
+        "HTML",
+        "CSS",
+        "React",
+        "REST APIs",
+        "Android/ iOS Dev: Flutter",
+        "Dart",
+        "Agile",
+        "Git",
+        "GitHub",
+        "Test Coverage",
+        "DevOps/Tools: Postman",
+        "IBM WatsonX",
+        "Gemini API",
+        "Code Review",
+        "Version Control (Git)",
+        "Languages",
+        "English (Fluent)",
+        "Hindi (Native)",
+        "German (A1 CEFR)",
+        "1"
+      ],
+      "raw_lines": [
+        "Technical Skills",
+        "\u2022 Languages: Java, C++, Python, C, JavaScript \u2022 ML/DS/Databases: NumPy, Pandas, Matplotlib, MySQL",
+        "\u2022 Web Development: HTML, CSS, React, REST APIs \u2022 Android/ iOS Dev: Flutter, Dart",
+        "\u2022 Software Engineering: Agile, Git, GitHub, Test Coverage, \u2022 DevOps/Tools: Postman, IBM WatsonX, Gemini API",
+        "Code Review, Version Control (Git)",
+        "Languages",
+        "English (Fluent), Hindi (Native), German (A1 CEFR)",
+        "1",
+        ""
+      ]
+    },
+    "other_section": {
+      "blocks": []
+    },
+    "metadata": {
+      "parse_duration_ms": 7,
+      "source_file_hash": "1bff8efb74e2efea",
+      "total_lines_processed": 61,
+      "sections_detected": [
+        "certifications",
+        "contact",
+        "education",
+        "experience",
+        "leadership",
+        "projects",
+        "skills",
+        "summary"
+      ],
+      "parser_version": "7.0.0",
+      "extractor_used": "pdfplumber",
+      "anomaly_count": 0,
+      "invariant_violations": [],
+      "extraction_warnings": []
+    },
+    "debug": {
+      "parser_version": "7.0.0",
+      "parse_timestamp": "2026-06-21T14:08:11.627289+00:00Z",
+      "source_hash": "1bff8efb74e2efea",
+      "total_lines": 61,
+      "detected_headers": [
+        {
+          "line_number": 3,
+          "original_text": "Summary",
+          "normalized_text": "Summary",
+          "canonical_section": "summary",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:1_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 6,
+          "original_text": "Education",
+          "normalized_text": "Education",
+          "canonical_section": "education",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:1_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 10,
+          "original_text": "Technical Skills",
+          "normalized_text": "Technical Skills",
+          "canonical_section": "skills",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:2_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 15,
+          "original_text": "Projects",
+          "normalized_text": "Projects",
+          "canonical_section": "projects",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:1_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 25,
+          "original_text": "Internships & Experience",
+          "normalized_text": "Internships & Experience",
+          "canonical_section": "experience",
+          "confidence": 0.75,
+          "match_method": "combined",
+          "combined_sections": [
+            "experience"
+          ],
+          "structural_score": 0.4,
+          "signals_fired": [
+            "short_line:3_words",
+            "title_case",
+            "contains_separator:'&'"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 41,
+          "original_text": "Volunteer Experience",
+          "normalized_text": "Volunteer Experience",
+          "canonical_section": "leadership",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:2_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 46,
+          "original_text": "Certifications & Courses",
+          "normalized_text": "Certifications & Courses",
+          "canonical_section": "certifications",
+          "confidence": 0.75,
+          "match_method": "combined",
+          "combined_sections": [
+            "certifications"
+          ],
+          "structural_score": 0.4,
+          "signals_fired": [
+            "short_line:3_words",
+            "title_case",
+            "contains_separator:'&'"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 51,
+          "original_text": "Awards & Scholarships",
+          "normalized_text": "Awards & Scholarships",
+          "canonical_section": "leadership",
+          "confidence": 0.82,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.4,
+          "signals_fired": [
+            "short_line:3_words",
+            "title_case",
+            "contains_separator:'&'"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        },
+        {
+          "line_number": 57,
+          "original_text": "Languages",
+          "normalized_text": "Languages",
+          "canonical_section": "skills",
+          "confidence": 0.805,
+          "match_method": "exact",
+          "combined_sections": [],
+          "structural_score": 0.35,
+          "signals_fired": [
+            "short_line:1_words",
+            "title_case"
+          ],
+          "normalization_applied": [],
+          "fuzzy_candidates": []
+        }
+      ],
+      "section_transitions": [
+        {
+          "from_section": "contact",
+          "to_section": "summary",
+          "at_line": 3,
+          "trigger_line": "Summary",
+          "confidence": 0.805,
+          "previous_block_line_count": 3,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "summary",
+          "to_section": "education",
+          "at_line": 6,
+          "trigger_line": "Education",
+          "confidence": 0.805,
+          "previous_block_line_count": 3,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "education",
+          "to_section": "skills",
+          "at_line": 10,
+          "trigger_line": "Technical Skills",
+          "confidence": 0.805,
+          "previous_block_line_count": 4,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "skills",
+          "to_section": "projects",
+          "at_line": 15,
+          "trigger_line": "Projects",
+          "confidence": 0.805,
+          "previous_block_line_count": 5,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "projects",
+          "to_section": "experience",
+          "at_line": 25,
+          "trigger_line": "Internships & Experience",
+          "confidence": 0.75,
+          "previous_block_line_count": 10,
+          "reason": "header_detected:combined"
+        },
+        {
+          "from_section": "experience",
+          "to_section": "leadership",
+          "at_line": 41,
+          "trigger_line": "Volunteer Experience",
+          "confidence": 0.805,
+          "previous_block_line_count": 16,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "leadership",
+          "to_section": "certifications",
+          "at_line": 46,
+          "trigger_line": "Certifications & Courses",
+          "confidence": 0.75,
+          "previous_block_line_count": 5,
+          "reason": "header_detected:combined"
+        },
+        {
+          "from_section": "certifications",
+          "to_section": "leadership",
+          "at_line": 51,
+          "trigger_line": "Awards & Scholarships",
+          "confidence": 0.82,
+          "previous_block_line_count": 5,
+          "reason": "header_detected:exact"
+        },
+        {
+          "from_section": "leadership",
+          "to_section": "skills",
+          "at_line": 57,
+          "trigger_line": "Languages",
+          "confidence": 0.805,
+          "previous_block_line_count": 6,
+          "reason": "header_detected:exact"
+        }
+      ],
+      "unrecognized_headers": [],
+      "ownership_log": [
+        {
+          "line_number": 0,
+          "raw_line": "Rajit Agrawal",
+          "assigned_section": "contact",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 1,
+          "raw_line": "Phone: +91 84509 38936 \u2014 Email: rajitagrawal2005@gmail.com",
+          "assigned_section": "contact",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 2,
+          "raw_line": "LinkedIn \u2014 GitHub \u2014 Portfolio \u2014 LeetCode",
+          "assigned_section": "contact",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 3,
+          "raw_line": "Summary",
+          "assigned_section": "summary",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 4,
+          "raw_line": "Aspiring Software Engineer with experience in full-stack web development, AI-based projects, and software testing. Focus",
+          "assigned_section": "summary",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 5,
+          "raw_line": "reliable, user-centered applications that integrate intelligent automation.",
+          "assigned_section": "summary",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 6,
+          "raw_line": "Education",
+          "assigned_section": "education",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 7,
+          "raw_line": "Vellore Institute of Technology (VIT), Vellore Graduation: 2027",
+          "assigned_section": "education",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 8,
+          "raw_line": "B.Tech in Computer Science and Engineering \u2014 CGPA: 9.81 Relevant Coursework: Data Structures & Algorithms,",
+          "assigned_section": "education",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 9,
+          "raw_line": "Object-Oriented Programming, Software Engineering, Web Programming, Digital Systems, Discrete Mathematics",
+          "assigned_section": "education",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 10,
+          "raw_line": "Technical Skills",
+          "assigned_section": "skills",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 11,
+          "raw_line": "\u2022 Languages: Java, C++, Python, C, JavaScript \u2022 ML/DS/Databases: NumPy, Pandas, Matplotlib, MySQL",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 12,
+          "raw_line": "\u2022 Web Development: HTML, CSS, React, REST APIs \u2022 Android/ iOS Dev: Flutter, Dart",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 13,
+          "raw_line": "\u2022 Software Engineering: Agile, Git, GitHub, Test Coverage, \u2022 DevOps/Tools: Postman, IBM WatsonX, Gemini API",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 14,
+          "raw_line": "Code Review, Version Control (Git)",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 15,
+          "raw_line": "Projects",
+          "assigned_section": "projects",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 16,
+          "raw_line": "Marketpulse \u2013 Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 17,
+          "raw_line": "Developed and revamped a full-stack market tracker with real-time stock/crypto data and AI-powered news analysis; optimi",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 18,
+          "raw_line": "pipelines for performance. - GitHub Link",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 19,
+          "raw_line": "Multi AI Chatbot \u2013 Python, Streamlit",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 20,
+          "raw_line": "Architected and deployed a chatbot platform integrating multiple APIs, enabling seamless multi-AI conversations with rea",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 21,
+          "raw_line": "interaction. - GitHub Link",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 22,
+          "raw_line": "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 23,
+          "raw_line": "Engineered a web-based tool that delivers personalized budgeting suggestions; executed responsive UI and API-driven arch",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 24,
+          "raw_line": "GitHub Link",
+          "assigned_section": "projects",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 25,
+          "raw_line": "Internships & Experience",
+          "assigned_section": "experience",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 26,
+          "raw_line": "ApexPlanet Software Pvt. Ltd. \u2013 Web Development Intern (Remote) August 2025 \u2013 September 2025",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 27,
+          "raw_line": "\u2022 Proposedd and created 5+ responsive web projects using HTML, CSS, and JavaScript, improving cross-browser compatibilit",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 28,
+          "raw_line": "performance.",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 29,
+          "raw_line": "\u2022 Implemented form validation, dynamic content rendering, and REST API integration, enhancing user interactivity and rel",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 30,
+          "raw_line": "\u2022 Collaborated with designers to refactor UI components, achieving a 20% improvement in page load times and smoother res",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 31,
+          "raw_line": "ness.",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 32,
+          "raw_line": "AQM Technologies \u2013 Software Testing Intern June 2025 \u2013 July 2025",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 33,
+          "raw_line": "\u2022 Performed integration and regression testing across trading modules, identifying 15+ critical defects prior to release",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 34,
+          "raw_line": "Agile Methodology with Testing (Both Manual and Automated).",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 35,
+          "raw_line": "\u2022 Automated recurring Postman test suites, reducing manual testing time by 15% and streamlining validation workflows.",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 36,
+          "raw_line": "GirlScript Summer of Code (GSSoC 2024) \u2013 Open Source Contributor September 2024 \u2013 November 2024",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 37,
+          "raw_line": "\u2022 Contributed 10+ bug fixes and features; cooperated on Git workflows and improved documentation across open-source proj",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 38,
+          "raw_line": "\u2022 Collaborated with maintainers on Git branching strategies and issue triaging, improving overall codebase organization.",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 39,
+          "raw_line": "Winter of Blockchain 2024 \u2013 Contributor September 2024 \u2013 November 2024",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 40,
+          "raw_line": "Reviewed and merged 10+ PRs, ensuring consistency and reliability in blockchain project repositories.",
+          "assigned_section": "experience",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 41,
+          "raw_line": "Volunteer Experience",
+          "assigned_section": "leadership",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 42,
+          "raw_line": "Rotary International \u2013 Volunteer January 2019 \u2013 Februrary 2019",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 43,
+          "raw_line": "Supported \u201cJoy of Giving \u2013 Annapoorna\u201d by distributing essentials worth Rs. 20,000 to underprivileged communities.",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 44,
+          "raw_line": "Indian Development Foundation (IDF) \u2013 Fundraiser April 2019 \u2013 May 2019",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 45,
+          "raw_line": "Raised Rs. 20,100 to support adolescent hygiene and education programs.",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 46,
+          "raw_line": "Certifications & Courses",
+          "assigned_section": "certifications",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 47,
+          "raw_line": "\u2022 Postman API Fundamentals \u2013 Postman \u2022 Oracle Cloud Infrastructure Generative AI Professional",
+          "assigned_section": "certifications",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 48,
+          "raw_line": "\u2022 GenAI using IBM Watsonx \u2013 IBM Skills Network \u2022 Databricks Fundamentals \u2013 Databricks",
+          "assigned_section": "certifications",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 49,
+          "raw_line": "\u2022 Agile Explorer \u2013 IBM SkillsBuild \u2022 AWS Knowledge: Cloud Essentials",
+          "assigned_section": "certifications",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 50,
+          "raw_line": "\u2022 AI Fundamentals \u2013 IBM SkillsBuild \u2022 The Complete Flutter Development Bootcamp with Dart",
+          "assigned_section": "certifications",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 51,
+          "raw_line": "Awards & Scholarships",
+          "assigned_section": "leadership",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 52,
+          "raw_line": "\u2022 Merit Scholarship \u2013 VIT (2 consecutive years)",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 53,
+          "raw_line": "\u2022 Branch Topper \u2013 IT (2023\u201324), CSE Core (2024\u201325)",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 54,
+          "raw_line": "Extra-Curriculars & Hackathons",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 55,
+          "raw_line": "ADG VIT (Technical Club) \u2013 Senior Core, Sponsorship Domain",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 56,
+          "raw_line": "Participated in hackathons and tech events, collaborating with peers on innovative software solutions.",
+          "assigned_section": "leadership",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 57,
+          "raw_line": "Languages",
+          "assigned_section": "skills",
+          "assignment_reason": "header_transition"
+        },
+        {
+          "line_number": 58,
+          "raw_line": "English (Fluent), Hindi (Native), German (A1 CEFR)",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 59,
+          "raw_line": "1",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        },
+        {
+          "line_number": 60,
+          "raw_line": "",
+          "assigned_section": "skills",
+          "assignment_reason": "content"
+        }
+      ],
+      "artifact_warnings": [
+        {
+          "line_number": 1,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Phone: +91 84509 38936 \u2014 Email: rajitagrawal2005@gmail.com",
+          "normalized": "Phone: +91 84509 38936 - Email: rajitagrawal2005@gmail.com"
+        },
+        {
+          "line_number": 2,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "LinkedIn \u2014 GitHub \u2014 Portfolio \u2014 LeetCode",
+          "normalized": "LinkedIn - GitHub - Portfolio - LeetCode"
+        },
+        {
+          "line_number": 8,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "B.Tech in Computer Science and Engineering \u2014 CGPA: 9.81 Relevant Coursework: Data Structures & Algorithms,",
+          "normalized": "B.Tech in Computer Science and Engineering - CGPA: 9.81 Relevant Coursework: Data Structures & Algorithms,"
+        },
+        {
+          "line_number": 11,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Languages: Java, C++, Python, C, JavaScript \u2022 ML/DS/Databases: NumPy, Pandas, Matplotlib, MySQL",
+          "normalized": "Languages: Java, C++, Python, C, JavaScript \u2022 ML/DS/Databases: NumPy, Pandas, Matplotlib, MySQL"
+        },
+        {
+          "line_number": 12,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Web Development: HTML, CSS, React, REST APIs \u2022 Android/ iOS Dev: Flutter, Dart",
+          "normalized": "Web Development: HTML, CSS, React, REST APIs \u2022 Android/ iOS Dev: Flutter, Dart"
+        },
+        {
+          "line_number": 13,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Software Engineering: Agile, Git, GitHub, Test Coverage, \u2022 DevOps/Tools: Postman, IBM WatsonX, Gemini API",
+          "normalized": "Software Engineering: Agile, Git, GitHub, Test Coverage, \u2022 DevOps/Tools: Postman, IBM WatsonX, Gemini API"
+        },
+        {
+          "line_number": 16,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Marketpulse \u2013 Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API",
+          "normalized": "Marketpulse - Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API"
+        },
+        {
+          "line_number": 19,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Multi AI Chatbot \u2013 Python, Streamlit",
+          "normalized": "Multi AI Chatbot - Python, Streamlit"
+        },
+        {
+          "line_number": 22,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+          "normalized": "Personal Finance Tip Generator - HTML, CSS, JavaScript, Gemini API"
+        },
+        {
+          "line_number": 26,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "ApexPlanet Software Pvt. Ltd. \u2013 Web Development Intern (Remote) August 2025 \u2013 September 2025",
+          "normalized": "ApexPlanet Software Pvt. Ltd. - Web Development Intern (Remote) August 2025 - September 2025"
+        },
+        {
+          "line_number": 27,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Proposedd and created 5+ responsive web projects using HTML, CSS, and JavaScript, improving cross-browser compatibility and",
+          "normalized": "Proposedd and created 5+ responsive web projects using HTML, CSS, and JavaScript, improving cross-browser compatibility and"
+        },
+        {
+          "line_number": 29,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Implemented form validation, dynamic content rendering, and REST API integration, enhancing user interactivity and reliability.",
+          "normalized": "Implemented form validation, dynamic content rendering, and REST API integration, enhancing user interactivity and reliability."
+        },
+        {
+          "line_number": 30,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Collaborated with designers to refactor UI components, achieving a 20% improvement in page load times and smoother responsive-",
+          "normalized": "Collaborated with designers to refactor UI components, achieving a 20% improvement in page load times and smoother responsive-"
+        },
+        {
+          "line_number": 32,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "AQM Technologies \u2013 Software Testing Intern June 2025 \u2013 July 2025",
+          "normalized": "AQM Technologies - Software Testing Intern June 2025 - July 2025"
+        },
+        {
+          "line_number": 33,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Performed integration and regression testing across trading modules, identifying 15+ critical defects prior to release. Understood",
+          "normalized": "Performed integration and regression testing across trading modules, identifying 15+ critical defects prior to release. Understood"
+        },
+        {
+          "line_number": 35,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Automated recurring Postman test suites, reducing manual testing time by 15% and streamlining validation workflows.",
+          "normalized": "Automated recurring Postman test suites, reducing manual testing time by 15% and streamlining validation workflows."
+        },
+        {
+          "line_number": 36,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "GirlScript Summer of Code (GSSoC 2024) \u2013 Open Source Contributor September 2024 \u2013 November 2024",
+          "normalized": "GirlScript Summer of Code (GSSoC 2024) - Open Source Contributor September 2024 - November 2024"
+        },
+        {
+          "line_number": 37,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Contributed 10+ bug fixes and features; cooperated on Git workflows and improved documentation across open-source projects.",
+          "normalized": "Contributed 10+ bug fixes and features; cooperated on Git workflows and improved documentation across open-source projects."
+        },
+        {
+          "line_number": 38,
+          "artifact_types": [
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Collaborated with maintainers on Git branching strategies and issue triaging, improving overall codebase organization.",
+          "normalized": "Collaborated with maintainers on Git branching strategies and issue triaging, improving overall codebase organization."
+        },
+        {
+          "line_number": 39,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Winter of Blockchain 2024 \u2013 Contributor September 2024 \u2013 November 2024",
+          "normalized": "Winter of Blockchain 2024 - Contributor September 2024 - November 2024"
+        },
+        {
+          "line_number": 42,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Rotary International \u2013 Volunteer January 2019 \u2013 Februrary 2019",
+          "normalized": "Rotary International - Volunteer January 2019 - Februrary 2019"
+        },
+        {
+          "line_number": 43,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "normalized_smart_quotes"
+          ],
+          "original": "Supported \u201cJoy of Giving \u2013 Annapoorna\u201d by distributing essentials worth Rs. 20,000 to underprivileged communities.",
+          "normalized": "Supported \"Joy of Giving - Annapoorna\" by distributing essentials worth Rs. 20,000 to underprivileged communities."
+        },
+        {
+          "line_number": 44,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "Indian Development Foundation (IDF) \u2013 Fundraiser April 2019 \u2013 May 2019",
+          "normalized": "Indian Development Foundation (IDF) - Fundraiser April 2019 - May 2019"
+        },
+        {
+          "line_number": 47,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Postman API Fundamentals \u2013 Postman \u2022 Oracle Cloud Infrastructure Generative AI Professional",
+          "normalized": "Postman API Fundamentals - Postman \u2022 Oracle Cloud Infrastructure Generative AI Professional"
+        },
+        {
+          "line_number": 48,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 GenAI using IBM Watsonx \u2013 IBM Skills Network \u2022 Databricks Fundamentals \u2013 Databricks",
+          "normalized": "GenAI using IBM Watsonx - IBM Skills Network \u2022 Databricks Fundamentals - Databricks"
+        },
+        {
+          "line_number": 49,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Agile Explorer \u2013 IBM SkillsBuild \u2022 AWS Knowledge: Cloud Essentials",
+          "normalized": "Agile Explorer - IBM SkillsBuild \u2022 AWS Knowledge: Cloud Essentials"
+        },
+        {
+          "line_number": 50,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 AI Fundamentals \u2013 IBM SkillsBuild \u2022 The Complete Flutter Development Bootcamp with Dart",
+          "normalized": "AI Fundamentals - IBM SkillsBuild \u2022 The Complete Flutter Development Bootcamp with Dart"
+        },
+        {
+          "line_number": 52,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Merit Scholarship \u2013 VIT (2 consecutive years)",
+          "normalized": "Merit Scholarship - VIT (2 consecutive years)"
+        },
+        {
+          "line_number": 53,
+          "artifact_types": [
+            "normalized_unicode_dashes",
+            "stripped_leading_bullet"
+          ],
+          "original": "\u2022 Branch Topper \u2013 IT (2023\u201324), CSE Core (2024\u201325)",
+          "normalized": "Branch Topper - IT (2023-24), CSE Core (2024-25)"
+        },
+        {
+          "line_number": 55,
+          "artifact_types": [
+            "normalized_unicode_dashes"
+          ],
+          "original": "ADG VIT (Technical Club) \u2013 Senior Core, Sponsorship Domain",
+          "normalized": "ADG VIT (Technical Club) - Senior Core, Sponsorship Domain"
+        }
+      ],
+      "section_summary": {
+        "contact": {
+          "block_count": 1,
+          "total_lines": 3
+        },
+        "summary": {
+          "block_count": 1,
+          "total_lines": 3
+        },
+        "education": {
+          "block_count": 1,
+          "total_lines": 4
+        },
+        "skills": {
+          "block_count": 2,
+          "total_lines": 9
+        },
+        "projects": {
+          "block_count": 1,
+          "total_lines": 10
+        },
+        "experience": {
+          "block_count": 1,
+          "total_lines": 16
+        },
+        "leadership": {
+          "block_count": 2,
+          "total_lines": 11
+        },
+        "certifications": {
+          "block_count": 1,
+          "total_lines": 5
+        }
+      },
+      "anomalies": []
+    }
+  },
+  "ats_score": {
+    "overall_score": 89,
+    "candidate_type": "EXPERIENCED",
+    "resume_tier": "STRONG",
+    "recruiter_readiness": 73,
+    "readiness_band": "COMPETITIVE",
+    "recruiter_readiness_breakdown": {
+      "overall_ats": 53.4,
+      "project_quality": 6.25,
+      "experience": 8.0,
+      "formatting": 5.0
+    },
+    "project_quality_score": 25,
+    "project_quality_breakdown": {
+      "overall_score": 25,
+      "project_count": 3,
+      "average_project_score": 19,
+      "strongest_project": "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+      "weakest_project": "Multi AI Chatbot \u2013 Python, Streamlit",
+      "breakdowns": [
+        {
+          "project_name": "Personal Finance Tip Generator \u2013 HTML, CSS, JavaScript, Gemini API",
+          "parser_confidence": 0.4,
+          "technical_complexity": 15,
+          "implementation_depth": 0,
+          "tech_stack_diversity": 15,
+          "documentation": 0,
+          "project_impact": 0,
+          "deployment": 0,
+          "github": 0,
+          "metrics": 0,
+          "total": 30
+        },
+        {
+          "project_name": "Marketpulse \u2013 Python, yfinance, CoinGecko API, NewsAPI.org & MarketAux API",
+          "parser_confidence": 0.4,
+          "technical_complexity": 10,
+          "implementation_depth": 0,
+          "tech_stack_diversity": 6,
+          "documentation": 0,
+          "project_impact": 0,
+          "deployment": 0,
+          "github": 0,
+          "metrics": 0,
+          "total": 16
+        },
+        {
+          "project_name": "Multi AI Chatbot \u2013 Python, Streamlit",
+          "parser_confidence": 0.4,
+          "technical_complexity": 5,
+          "implementation_depth": 0,
+          "tech_stack_diversity": 6,
+          "documentation": 0,
+          "project_impact": 0,
+          "deployment": 0,
+          "github": 0,
+          "metrics": 0,
+          "total": 11
+        }
+      ]
+    },
+    "skill_diversity_score": 6,
+    "strongest_section": {
+      "name": "Contact",
+      "score": 10,
+      "max_score": 10
+    },
+    "weakest_section": {
+      "name": "Projects",
+      "score": 4,
+      "max_score": 15
+    },
+    "calibration_bonus": 0,
+    "strengths": [
+      "Robust professional experience with clear metrics.",
+      "Strong continued learning through certifications.",
+      "Complete professional online presence."
+    ],
+    "risks": [],
+    "improvements": [
+      "Enhance project descriptions with more technical details and bullet points."
+    ],
+    "breakdown": {
+      "contact": {
+        "score": 10,
+        "max": 10
+      },
+      "education": {
+        "score": 10,
+        "max": 10
+      },
+      "experience": {
+        "score": 20,
+        "max": 25
+      },
+      "projects": {
+        "score": 4,
+        "max": 15
+      },
+      "skills": {
+        "score": 10,
+        "max": 10
+      },
+      "keywords": {
+        "score": 10,
+        "max": 10
+      },
+      "certifications": {
+        "score": 10,
+        "max": 10
+      },
+      "formatting": {
+        "score": 5,
+        "max": 5
+      },
+      "awards": {
+        "score": 5,
+        "max": 5
+      }
+    },
+    "bonus_breakdown": {
+      "internship_achievement_bonus": 5
+    },
+    "weights": {
+      "contact": 10,
+      "education": 10,
+      "experience": 25,
+      "projects": 15,
+      "skills": 10,
+      "keywords": 10,
+      "certifications": 10,
+      "formatting": 5,
+      "awards": 5
+    },
+    "grade": "A",
+    "resume_completeness": 100
+  }
+}

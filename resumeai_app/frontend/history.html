@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume History — ResumeAI</title>
+  <meta name="description" content="View and manage all your uploaded resumes, ATS scores, and reports in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --primary:   #4F46E5;
+      --secondary: #7C3AED;
+      --success:   #10B981;
+      --warning:   #F59E0B;
+      --danger:    #EF4444;
+      --bg:        #F8FAFC;
+      --surface:   #FFFFFF;
+      --text:      #0F172A;
+      --muted:     #64748B;
+      --border:    #E2E8F0;
+      --shadow-soft: 0 4px 20px -2px rgba(79,70,229,0.10);
+      --shadow-hover: 0 10px 25px -5px rgba(79,70,229,0.15);
+      --shadow-btn:   0 4px 14px 0 rgba(79,70,229,0.30);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 800; font-size: 1.2rem; color: var(--text);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-btn); font-size: 1rem; color: white;
+    }
+    .logo span { background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .nav-link { color: var(--muted); font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--primary); }
+    .nav-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-size: 0.75rem; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .btn-nav {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-weight: 600; font-size: 0.875rem;
+      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
+      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
+    }
+    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.4); }
+
+    /* ── Page Header ─────────────────────────────────────────── */
+    .page-header {
+      background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #1E0A2B 100%);
+      padding: 3rem 0 2rem; position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .page-header-blob {
+      position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none;
+    }
+    .page-header-blob-1 {
+      width: 400px; height: 400px;
+      background: rgba(79,70,229,0.25); top: -100px; right: -50px;
+    }
+    .page-header-blob-2 {
+      width: 300px; height: 300px;
+      background: rgba(124,58,237,0.20); bottom: -80px; left: 10%;
+    }
+    .page-header-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
+      position: relative; z-index: 1;
+    }
+    .page-breadcrumb {
+      font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .page-breadcrumb a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+    .page-breadcrumb a:hover { color: rgba(255,255,255,0.7); }
+    .page-title {
+      font-size: 2.2rem; font-weight: 800; color: white;
+      margin-bottom: 0.5rem; letter-spacing: -0.02em;
+    }
+    .page-title .grad { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.5); }
+
+    /* ── Stats Bar ───────────────────────────────────────────── */
+    .stats-bar {
+      display: flex; gap: 1.5rem; margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px; padding: 0.75rem 1.25rem;
+      display: flex; align-items: center; gap: 0.75rem;
+      backdrop-filter: blur(10px);
+      transition: background 0.2s;
+    }
+    .stat-chip:hover { background: rgba(255,255,255,0.12); }
+    .stat-chip-icon {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: linear-gradient(135deg, rgba(79,70,229,0.4), rgba(124,58,237,0.4));
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .stat-chip-num { font-size: 1.5rem; font-weight: 800; color: white; line-height: 1; }
+    .stat-chip-label { font-size: 0.75rem; color: rgba(255,255,255,0.45); font-weight: 600; }
+
+    /* ── Main Content ────────────────────────────────────────── */
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+    .content-section { padding: 2.5rem 0 4rem; }
+
+    /* ── Toolbar ─────────────────────────────────────────────── */
+    .toolbar {
+      display: flex; gap: 1rem; align-items: center;
+      margin-bottom: 1.75rem; flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); font-size: 0.9rem; pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.7rem 1rem 0.7rem 2.5rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.9rem; color: var(--text); outline: none;
+      transition: all 0.2s; box-shadow: var(--shadow-soft);
+    }
+    .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+    .search-input::placeholder { color: #94A3B8; }
+
+    .sort-select {
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.7rem 1rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem; color: var(--text);
+      outline: none; cursor: pointer;
+      box-shadow: var(--shadow-soft); transition: all 0.2s;
+      min-width: 160px;
+    }
+    .sort-select:focus { border-color: var(--primary); }
+
+    /* ── Resume Cards Grid ───────────────────────────────────── */
+    .resumes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .resume-card {
+      background: white; border-radius: 18px;
+      border: 1px solid var(--border); box-shadow: var(--shadow-soft);
+      overflow: hidden; transition: all 0.25s;
+      display: flex; flex-direction: column;
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .resume-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(79,70,229,0.2);
+    }
+
+    .rc-header {
+      background: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+      padding: 1.1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 0.75rem;
+    }
+    .rc-file-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: white; box-shadow: var(--shadow-btn);
+    }
+    .rc-file-info { flex: 1; min-width: 0; }
+    .rc-filename {
+      font-size: 0.9rem; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
+    }
+    .rc-date { font-size: 0.75rem; color: var(--muted); font-weight: 500; }
+
+    .rc-body { padding: 1.1rem 1.25rem; flex: 1; }
+    .rc-metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem; margin-bottom: 1rem;
+    }
+    .metric-item { text-align: center; }
+    .metric-val {
+      font-size: 1.4rem; font-weight: 800; color: var(--text);
+      line-height: 1;
+    }
+    .metric-label { font-size: 0.68rem; color: var(--muted); font-weight: 600; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ATS Score badge */
+    .ats-badge {
+      display: inline-flex; align-items: center;
+      font-size: 1.1rem; font-weight: 800; padding: 0.2rem 0.75rem;
+      border-radius: 99px; line-height: 1;
+    }
+    .ats-green  { background: #D1FAE5; color: #065F46; }
+    .ats-amber  { background: #FEF3C7; color: #92400E; }
+    .ats-red    { background: #FEE2E2; color: #991B1B; }
+    .ats-none   { background: #F1F5F9; color: var(--muted); }
+
+    .rc-footer { padding: 0.9rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 0.5rem; }
+    .btn-action {
+      flex: 1; padding: 0.55rem 0.5rem; border-radius: 9px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      border: none; transition: all 0.18s; text-align: center;
+    }
+    .btn-view {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; box-shadow: var(--shadow-btn);
+    }
+    .btn-view:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79,70,229,0.4); }
+    .btn-delete {
+      background: #FEE2E2; color: #991B1B;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-delete:hover { background: #FECACA; transform: translateY(-1px); }
+
+    /* ── Empty State ─────────────────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 5rem 2rem;
+      background: white; border-radius: 20px;
+      border: 2px dashed var(--border);
+    }
+    .empty-icon {
+      font-size: 4rem; margin-bottom: 1rem;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .empty-state h3 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .empty-state p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.9rem; padding: 0.7rem 1.5rem;
+      border-radius: 99px; border: none; cursor: pointer;
+      box-shadow: var(--shadow-btn); transition: all 0.2s; text-decoration: none;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.4); }
+
+    /* ── Pagination ──────────────────────────────────────────── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.5rem; margin-top: 2.5rem; flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: 0.55rem 1rem; border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 600;
+      border: 1px solid var(--border); background: white;
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+    }
+    .page-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; border-color: transparent; box-shadow: var(--shadow-btn);
+    }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { font-size: 0.85rem; color: var(--muted); padding: 0 0.5rem; font-weight: 600; }
+
+    /* ── Loading ─────────────────────────────────────────────── */
+    .loading-overlay {
+      text-align: center; padding: 5rem 2rem;
+    }
+    .spinner {
+      width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 1.25rem;
+      border: 3px solid #E2E8F0;
+      border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay h3 { font-weight: 700; margin-bottom: 0.35rem; }
+    .loading-overlay p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ── Modal ───────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(15,23,42,0.6);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem; opacity: 0; pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: white; border-radius: 24px;
+      width: 100%; max-width: 760px; max-height: 88vh;
+      overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      position: sticky; top: 0; background: white;
+      padding: 1.5rem 1.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+    }
+    .modal-title { font-size: 1.2rem; font-weight: 800; }
+    .modal-close {
+      background: #F1F5F9; border: none; cursor: pointer;
+      width: 32px; height: 32px; border-radius: 8px;
+      font-size: 1rem; color: var(--muted); transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: #E2E8F0; color: var(--text); }
+    .modal-body { padding: 1.75rem; }
+
+    /* Modal sections */
+    .modal-section { margin-bottom: 1.75rem; }
+    .modal-section-title {
+      font-size: 0.8rem; font-weight: 700; color: var(--primary);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .modal-section-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .detail-field { }
+    .detail-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
+    .detail-value { font-size: 0.9rem; font-weight: 600; color: var(--text); word-break: break-word; }
+    .detail-value.empty { color: #CBD5E1; font-style: italic; font-weight: 400; }
+
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .tag {
+      font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 99px;
+      background: #EDE9FE; color: var(--secondary);
+    }
+
+    .report-card-mini {
+      background: #F8FAFC; border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.875rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .report-card-mini:last-child { margin-bottom: 0; }
+    .rcm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+    .rcm-title { font-size: 0.875rem; font-weight: 700; }
+    .rcm-date  { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 600;
+      background: #0F172A; color: white;
+      padding: 0.875rem 1.25rem; border-radius: 12px;
+      font-size: 0.875rem; font-weight: 600;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error   { border-left: 3px solid var(--danger); }
+
+    /* ── Confirm dialog ──────────────────────────────────────── */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 550;
+      background: rgba(15,23,42,0.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+    .confirm-box {
+      background: white; border-radius: 20px; padding: 2rem;
+      max-width: 400px; width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+      transform: scale(0.94); transition: transform 0.2s;
+      text-align: center;
+    }
+    .confirm-overlay.open .confirm-box { transform: scale(1); }
+    .confirm-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .confirm-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .confirm-msg { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .confirm-actions { display: flex; gap: 0.75rem; }
+    .btn-cancel {
+      flex: 1; padding: 0.7rem; border-radius: 10px;
+      background: #F1F5F9; color: var(--muted);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-danger {
+      flex: 1; padding: 0.7rem; border-radius: 10px;
+      background: var(--danger); color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: 0.875rem; border: none; cursor: pointer;
+      transition: all 0.2s; box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+    }
+    .btn-danger:hover { background: #DC2626; transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+      .resumes-grid { grid-template-columns: 1fr; }
+      .detail-grid  { grid-template-columns: 1fr; }
+      .stats-bar { gap: 0.75rem; }
+      .page-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="logo" aria-label="ResumeAI Home">
+      <div class="logo-icon" aria-hidden="true">✦</div>
+      <span>ResumeAI</span>
+    </a>
+    <div class="nav-right" id="navRight"></div>
+  </div>
+</nav>
+
+<!-- Page Header -->
+<header class="page-header" role="banner">
+  <div class="page-header-blob page-header-blob-1" aria-hidden="true"></div>
+  <div class="page-header-blob page-header-blob-2" aria-hidden="true"></div>
+  <div class="page-header-inner">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Home</a>
+      <span aria-hidden="true">›</span>
+      <span>Resume History</span>
+    </nav>
+    <h1 class="page-title">📂 Resume <span class="grad">History</span></h1>
+    <p class="page-subtitle">All your uploaded resumes, ATS scores, and reports in one place.</p>
+
+    <div class="stats-bar" id="statsBar" role="region" aria-label="Summary statistics">
+      <div class="stat-chip">
+        <div class="stat-chip-icon" aria-hidden="true">📄</div>
+        <div>
+          <div class="stat-chip-num" id="totalResumes">—</div>
+          <div class="stat-chip-label">Total Resumes</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-icon" aria-hidden="true">📊</div>
+        <div>
+          <div class="stat-chip-num" id="totalAts">—</div>
+          <div class="stat-chip-label">ATS Reports</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-icon" aria-hidden="true">🎯</div>
+        <div>
+          <div class="stat-chip-num" id="totalJd">—</div>
+          <div class="stat-chip-label">JD Reports</div>
+        </div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-chip-icon" aria-hidden="true">⭐</div>
+        <div>
+          <div class="stat-chip-num" id="avgScore">—</div>
+          <div class="stat-chip-label">Avg ATS Score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="content-section" id="mainContent" role="main">
+  <div class="container">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          class="search-input"
+          type="search"
+          id="searchInput"
+          placeholder="Search by filename…"
+          aria-label="Search resumes"
+        />
+      </div>
+      <select class="sort-select" id="sortSelect" aria-label="Sort resumes">
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+        <option value="score_high">Highest ATS Score</option>
+        <option value="score_low">Lowest ATS Score</option>
+      </select>
+    </div>
+
+    <!-- Content area -->
+    <div id="contentArea">
+      <div class="loading-overlay" id="loadingState" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h3>Loading your resumes…</h3>
+        <p>Fetching your resume history</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="paginationControls" role="navigation" aria-label="Pagination" style="display:none"></div>
+  </div>
+</main>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modalTitle">Resume Details</h2>
+      <button class="modal-close" id="closeModal" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Confirm Delete Dialog -->
+<div class="confirm-overlay" id="confirmOverlay" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-hidden="true">
+  <div class="confirm-box">
+    <div class="confirm-icon" aria-hidden="true">🗑️</div>
+    <h3 class="confirm-title" id="confirmTitle">Delete Resume?</h3>
+    <p class="confirm-msg" id="confirmMsg">This action cannot be undone. All associated reports will also be deleted.</p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" id="confirmCancel">Cancel</button>
+      <button class="btn-danger" id="confirmDelete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  /* ── Auth helpers ─────────────────────────────────────────── */
+  function getToken() { return localStorage.getItem('auth_token'); }
+  function getUser() {
+    const u = localStorage.getItem('auth_user');
+    return u ? JSON.parse(u) : null;
+  }
+  function logout() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    window.location.href = 'login.html';
+  }
+  function authHeaders() {
+    const token = getToken();
+    return token
+      ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      : { 'Content-Type': 'application/json' };
+  }
+
+  /* ── Auth guard ───────────────────────────────────────────── */
+  if (!getToken()) { window.location.href = 'login.html'; }
+
+  /* ── Render Nav ───────────────────────────────────────────── */
+  function renderNav() {
+    const user = getUser();
+    const navRight = document.getElementById('navRight');
+    if (!navRight) return;
+    if (user) {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="history.html" class="nav-link" style="color:var(--primary)">📂 History</a>
+        <a href="reports.html" class="nav-link">📊 Reports</a>
+        <a href="ai_assistant.html" class="nav-link">✨ AI</a>
+        <span class="nav-badge">👤 ${user.name.split(' ')[0]}</span>
+        <button class="btn-nav" onclick="logout()">Logout</button>
+      `;
+    } else {
+      navRight.innerHTML = `
+        <a href="index.html" class="nav-link">Dashboard</a>
+        <a href="ai_assistant.html" class="nav-link">✨ AI</a>
+        <a href="login.html" class="nav-link">Login</a>
+        <button class="btn-nav" onclick="window.location.href='signup.html'">Sign Up</button>
+      `;
+    }
+  }
+  renderNav();
+
+  /* ── State ───────────────────────────────────────────────── */
+  let currentPage = 1;
+  let totalPages  = 1;
+  let totalCount  = 0;
+  let searchQuery = '';
+  let sortOrder   = 'newest';
+  let deleteTargetId = null;
+  const PAGE_SIZE = 9;
+
+  /* ── Toast ───────────────────────────────────────────────── */
+  function showToast(msg, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = (type === 'success' ? '✓ ' : '⚠ ') + msg;
+    toast.className = 'toast show ' + type;
+    setTimeout(() => { toast.className = 'toast'; }, 3500);
+  }
+
+  /* ── ATS badge ───────────────────────────────────────────── */
+  function atsBadge(score) {
+    if (score == null) return `<span class="ats-badge ats-none">N/A</span>`;
+    const cls = score >= 75 ? 'ats-green' : score >= 50 ? 'ats-amber' : 'ats-red';
+    return `<span class="ats-badge ${cls}">${score}</span>`;
+  }
+
+  /* ── Render cards ────────────────────────────────────────── */
+  function renderCards(resumes) {
+    if (!resumes || resumes.length === 0) {
+      return `
+        <div class="empty-state" role="status">
+          <div class="empty-icon">📭</div>
+          <h3>No Resumes Found</h3>
+          <p>${searchQuery ? 'No resumes match your search. Try a different query.' : 'You haven\'t uploaded any resumes yet. Get started on your dashboard!'}</p>
+          <a href="index.html" class="btn-primary">Upload Your First Resume →</a>
+        </div>`;
+    }
+
+    return `<div class="resumes-grid">` + resumes.map((r, idx) => `
+      <article class="resume-card" style="animation-delay:${idx * 0.05}s" aria-label="Resume: ${r.filename || 'Untitled'}">
+        <div class="rc-header">
+          <div class="rc-file-icon" aria-hidden="true">📄</div>
+          <div class="rc-file-info">
+            <div class="rc-filename" title="${r.filename || 'Untitled'}">${r.filename || 'Untitled Resume'}</div>
+            <div class="rc-date">${formatDate(r.uploaded_at || r.created_at)}</div>
+          </div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-metrics">
+            <div class="metric-item">
+              <div class="metric-val">${atsBadge(r.ats_score)}</div>
+              <div class="metric-label">ATS Score</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">${r.ats_report_count ?? 0}</div>
+              <div class="metric-label">ATS Reports</div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-val">${r.jd_report_count ?? 0}</div>
+              <div class="metric-label">JD Reports</div>
+            </div>
+          </div>
+        </div>
+        <div class="rc-footer">
+          <button class="btn-action btn-view" id="viewBtn_${r.id}" onclick="openDetail('${r.id}')">
+            👁 View Details
+          </button>
+          <button class="btn-action btn-delete" id="deleteBtn_${r.id}" onclick="confirmDelete('${r.id}', '${(r.filename||'').replace(/'/g,"\\'")}')">
+            🗑 Delete
+          </button>
+        </div>
+      </article>
+    `).join('') + `</div>`;
+  }
+
+  /* ── Pagination ──────────────────────────────────────────── */
+  function renderPagination() {
+    const container = document.getElementById('paginationControls');
+    if (totalPages <= 1) { container.style.display = 'none'; return; }
+    container.style.display = 'flex';
+
+    let html = `
+      <button class="page-btn" id="prevPage" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled aria-disabled="true"' : ''}>← Prev</button>
+    `;
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+        html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" id="pageBtn_${p}" onclick="goPage(${p})" aria-current="${p === currentPage ? 'page' : 'false'}">${p}</button>`;
+      } else if (Math.abs(p - currentPage) === 2) {
+        html += `<span class="page-info">…</span>`;
+      }
+    }
+    html += `
+      <button class="page-btn" id="nextPage" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled aria-disabled="true"' : ''}>Next →</button>
+      <span class="page-info" aria-live="polite">Page ${currentPage} of ${totalPages} (${totalCount} total)</span>
+    `;
+    container.innerHTML = html;
+  }
+
+  function goPage(p) {
+    if (p < 1 || p > totalPages) return;
+    currentPage = p;
+    loadResumes();
+  }
+
+  /* ── Date formatter ──────────────────────────────────────── */
+  function formatDate(iso) {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    } catch { return iso; }
+  }
+
+  /* ── Load resumes ────────────────────────────────────────── */
+  async function loadResumes() {
+    const contentArea = document.getElementById('contentArea');
+    contentArea.innerHTML = `
+      <div class="loading-overlay" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <h3>Loading your resumes…</h3>
+        <p>Fetching your resume history</p>
+      </div>`;
+    document.getElementById('paginationControls').style.display = 'none';
+
+    try {
+      const params = new URLSearchParams({
+        page: currentPage,
+        page_size: PAGE_SIZE
+      });
+      if (searchQuery) params.set('search', searchQuery);
+      if (sortOrder)   params.set('sort', sortOrder);
+
+      const res = await fetch(`${API}/history/resumes?${params}`, {
+        headers: authHeaders()
+      });
+
+      if (res.status === 401) { logout(); return; }
+      if (!res.ok) throw new Error('Failed to fetch resumes');
+
+      const data = await res.json();
+
+      const resumes = data.resumes || data.items || data || [];
+      totalCount    = data.total || resumes.length;
+      totalPages    = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+      /* Update stats */
+      document.getElementById('totalResumes').textContent = data.total_count ?? totalCount;
+      if (data.total_ats_reports != null) document.getElementById('totalAts').textContent = data.total_ats_reports;
+      if (data.total_jd_reports != null)  document.getElementById('totalJd').textContent  = data.total_jd_reports;
+      if (data.avg_ats_score != null)     document.getElementById('avgScore').textContent  = Math.round(data.avg_ats_score);
+
+      contentArea.innerHTML = renderCards(resumes);
+      renderPagination();
+
+    } catch (err) {
+      contentArea.innerHTML = `
+        <div class="empty-state" role="alert">
+          <div class="empty-icon">⚠️</div>
+          <h3>Error Loading Resumes</h3>
+          <p>${err.message || 'An unexpected error occurred.'}</p>
+          <button class="btn-primary" onclick="loadResumes()">Try Again</button>
+        </div>`;
+    }
+  }
+
+  /* ── Detail Modal ────────────────────────────────────────── */
+  async function openDetail(id) {
+    const overlay = document.getElementById('detailModal');
+    const body    = document.getElementById('modalBody');
+    body.innerHTML = `<div class="loading-overlay"><div class="spinner"></div><h3>Loading details…</h3></div>`;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    try {
+      const res = await fetch(`${API}/history/resumes/${id}`, { headers: authHeaders() });
+      if (!res.ok) throw new Error('Failed to load resume details');
+      const r = await res.json();
+
+      const parsed = r.parsed_data || r.parsed || {};
+      const atsReports = r.ats_reports || [];
+      const jdReports  = r.jd_reports  || [];
+
+      body.innerHTML = `
+        <!-- Contact Info -->
+        <div class="modal-section">
+          <div class="modal-section-title">📋 Contact Information</div>
+          <div class="detail-grid">
+            <div class="detail-field"><div class="detail-label">Name</div><div class="detail-value ${!parsed.name ? 'empty' : ''}">${parsed.name || 'Not found'}</div></div>
+            <div class="detail-field"><div class="detail-label">Email</div><div class="detail-value ${!parsed.email ? 'empty' : ''}">${parsed.email || 'Not found'}</div></div>
+            <div class="detail-field"><div class="detail-label">Phone</div><div class="detail-value ${!parsed.phone ? 'empty' : ''}">${parsed.phone || 'Not found'}</div></div>
+            <div class="detail-field"><div class="detail-label">Location</div><div class="detail-value ${!parsed.location ? 'empty' : ''}">${parsed.location || 'Not found'}</div></div>
+            <div class="detail-field"><div class="detail-label">LinkedIn</div><div class="detail-value ${!parsed.linkedin ? 'empty' : ''}">${parsed.linkedin || 'Not found'}</div></div>
+            <div class="detail-field"><div class="detail-label">GitHub</div><div class="detail-value ${!parsed.github ? 'empty' : ''}">${parsed.github || 'Not found'}</div></div>
+          </div>
+        </div>
+
+        <!-- Skills -->
+        <div class="modal-section">
+          <div class="modal-section-title">🛠 Skills</div>
+          <div class="tag-cloud">
+            ${(parsed.skills || []).length > 0
+              ? parsed.skills.map(s => `<span class="tag">${s}</span>`).join('')
+              : '<span style="color:var(--muted);font-size:0.85rem;">No skills found</span>'}
+          </div>
+        </div>
+
+        <!-- ATS Reports -->
+        <div class="modal-section">
+          <div class="modal-section-title">📊 ATS Reports (${atsReports.length})</div>
+          ${atsReports.length === 0
+            ? '<p style="color:var(--muted);font-size:0.875rem;">No ATS reports for this resume.</p>'
+            : atsReports.map(a => `
+              <div class="report-card-mini">
+                <div class="rcm-header">
+                  <span class="rcm-title">ATS Analysis</span>
+                  <span class="rcm-date">${formatDate(a.created_at)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                  ${atsBadge(a.score)}
+                  <span style="font-size:0.8rem;color:var(--muted);">${a.summary || ''}</span>
+                </div>
+              </div>`).join('')}
+        </div>
+
+        <!-- JD Reports -->
+        <div class="modal-section">
+          <div class="modal-section-title">🎯 JD Match Reports (${jdReports.length})</div>
+          ${jdReports.length === 0
+            ? '<p style="color:var(--muted);font-size:0.875rem;">No JD match reports for this resume.</p>'
+            : jdReports.map(j => `
+              <div class="report-card-mini">
+                <div class="rcm-header">
+                  <span class="rcm-title">${j.job_title || 'Job Match'}</span>
+                  <span class="rcm-date">${formatDate(j.created_at)}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+                  ${atsBadge(j.match_score)}
+                  <span style="font-size:0.8rem;color:var(--muted);">Match Score</span>
+                </div>
+              </div>`).join('')}
+        </div>
+      `;
+    } catch (err) {
+      body.innerHTML = `<p style="color:var(--danger);padding:2rem;text-align:center;">⚠ ${err.message}</p>`;
+    }
+  }
+
+  function closeModal() {
+    const overlay = document.getElementById('detailModal');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  document.getElementById('detailModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+  });
+
+  /* ── Confirm Delete ──────────────────────────────────────── */
+  function confirmDelete(id, filename) {
+    deleteTargetId = id;
+    document.getElementById('confirmMsg').textContent =
+      `Delete "${filename}"? All associated ATS and JD reports will also be removed. This cannot be undone.`;
+    const overlay = document.getElementById('confirmOverlay');
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  function closeConfirm() {
+    const overlay = document.getElementById('confirmOverlay');
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    deleteTargetId = null;
+  }
+  document.getElementById('confirmCancel').addEventListener('click', closeConfirm);
+  document.getElementById('confirmDelete').addEventListener('click', async () => {
+    if (!deleteTargetId) return;
+    const id = deleteTargetId;
+    closeConfirm();
+    try {
+      const res = await fetch(`${API}/history/resumes/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders()
+      });
+      if (!res.ok && res.status !== 204) throw new Error('Delete failed');
+      showToast('Resume deleted successfully.', 'success');
+      if (currentPage > 1 && totalCount % PAGE_SIZE === 1) currentPage--;
+      loadResumes();
+    } catch (err) {
+      showToast('Failed to delete resume. ' + err.message, 'error');
+    }
+  });
+
+  /* ── Search + Sort listeners ──────────────────────────────── */
+  let searchTimer;
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      searchQuery = e.target.value.trim();
+      currentPage = 1;
+      loadResumes();
+    }, 400);
+  });
+
+  document.getElementById('sortSelect').addEventListener('change', (e) => {
+    sortOrder = e.target.value;
+    currentPage = 1;
+    loadResumes();
+  });
+
+  /* ── Boot ────────────────────────────────────────────────── */
+  loadResumes();
+</script>
+</body>
+</html>

@@ -26,7 +26,14 @@ resumeai.egg-info/SOURCES.txt
 resumeai.egg-info/dependency_links.txt
 resumeai.egg-info/requires.txt
 resumeai.egg-info/top_level.txt
+scoring/__init__.py
+scoring/ats_scorer.py
+scoring/feedback_engine.py
+scoring/scoring_rules.py
 tests/__init__.py
+tests/test_ats_scoring.py
+tests/test_fresher_calibration.py
+tests/test_regressions.py
 tests/adversarial/__init__.py
 tests/adversarial/test_adversarial.py
 tests/fixtures/__init__.py

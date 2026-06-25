@@ -247,8 +247,27 @@ def client():
     import sys
     import os
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from database.engine import Base, get_db
     from main import app
-    return TestClient(app)
+
+    _engine = create_engine("sqlite:///./test_phase3_client.db", connect_args={"check_same_thread": False})
+    _Session = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+    Base.metadata.create_all(bind=_engine)
+
+    def _override_db():
+        db = _Session()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = _override_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
 
 
 class TestAIEndpoints:

@@ -606,6 +606,26 @@
       .msc-cols { grid-template-columns: 1fr; }
       .msc-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
     }
+    /* ── Stats Bar ──────────────────────────────── */
+    #userStatsBar {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(135deg, rgba(79,70,229,0.06), rgba(124,58,237,0.06));
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 0;
+      flex-wrap: wrap;
+    }
+    #userStatsBar .container { display:flex; align-items:center; gap:1.5rem; width:100%; flex-wrap:wrap; }
+    .stat-card {
+      display: flex; flex-direction: column; align-items: center;
+      background: white; border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      min-width: 80px;
+    }
+    .stat-value { font-size: 1.25rem; font-weight: 800; color: var(--primary); line-height: 1; }
+    .stat-label { font-size: 0.72rem; color: var(--muted); font-weight: 500; margin-top: 2px; white-space: nowrap; }
+
     /* ── AI Features Banner ──────────────────────────────── */
     .ai-features-section {
       padding: 4rem 0;
@@ -704,20 +724,19 @@
         </div>
         Resume<span>AI</span>
       </a>
-      <div class="nav-right">
-        <a href="#how" class="nav-link">How it works</a>
-        <a href="#app" class="nav-link">Try it</a>
-        <a href="ai_assistant.html" class="nav-link" style="color:var(--primary);font-weight:600;">✨ AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link" style="color:var(--primary);font-weight:600;">🎤 Interview Prep</a>
-        <span class="nav-badge">v3.0.0</span>
-        <button class="btn-nav" onclick="scrollTo('#app')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          Parse Resume
-        </button>
+      <div class="nav-right" id="navRight">
+        <!-- Populated dynamically by renderNav() -->
       </div>
     </div>
   </div>
 </nav>
+
+<!-- ── Stats Bar (visible when logged in) ──────────────────── -->
+<div id="userStatsBar">
+  <div class="container">
+    <!-- Populated by loadStats() when user is logged in -->
+  </div>
+</div>
 
 <!-- ── Hero ─────────────────────────────────────────────────────────── -->
 <section class="hero">
@@ -1782,6 +1801,101 @@ function showToast(msg, type='') {
   t.className = 'toast ' + type + ' show';
   setTimeout(() => t.classList.remove('show'), 3200);
 }
+
+// ── Phase 4: Auth helpers ─────────────────────────────────────────────────────
+function getToken() { return localStorage.getItem('auth_token'); }
+function getUser()  {
+  const u = localStorage.getItem('auth_user');
+  return u ? JSON.parse(u) : null;
+}
+function doLogout() {
+  const token = getToken();
+  if (token) {
+    fetch(`${API}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).catch(() => {});
+  }
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('auth_user');
+  window.location.href = 'login.html';
+}
+function authHeaders() {
+  const token = getToken();
+  const h = {};
+  if (token) h['Authorization'] = 'Bearer ' + token;
+  return h;
+}
+function renderNav() {
+  const user = getUser();
+  const navRight = document.getElementById('navRight');
+  if (!navRight) return;
+  if (user) {
+    navRight.innerHTML = `
+      <a href="#how" class="nav-link">How it works</a>
+      <a href="#app" class="nav-link">Try it</a>
+      <a href="history.html" class="nav-link">📂 History</a>
+      <a href="reports.html" class="nav-link">📊 Reports</a>
+      <a href="ai_assistant.html" class="nav-link" style="color:var(--primary);font-weight:600;">✨ AI</a>
+      <span class="nav-badge" style="background:rgba(79,70,229,0.1);color:var(--primary);">👤 ${user.name.split(' ')[0]}</span>
+      <button class="btn-nav" onclick="doLogout()">Logout</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <a href="#how" class="nav-link">How it works</a>
+      <a href="#app" class="nav-link">Try it</a>
+      <a href="ai_assistant.html" class="nav-link" style="color:var(--primary);font-weight:600;">✨ AI Assistant</a>
+      <a href="interview_prep.html" class="nav-link" style="color:var(--primary);font-weight:600;">🎤 Interview Prep</a>
+      <a href="login.html" class="nav-link">Login</a>
+      <button class="btn-nav" onclick="window.location.href='signup.html'">Sign Up</button>
+    `;
+  }
+}
+renderNav();
+
+// ── Load user stats for dashboard cards ───────────────────────────────────────
+async function loadStats() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const resp = await fetch(`${API}/auth/stats`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!resp.ok) return;
+    const json = await resp.json();
+    const stats = json.data;
+    const el = document.getElementById('userStatsBar');
+    if (el && stats) {
+      el.style.display = 'flex';
+      const name = getUser()?.name?.split(' ')[0] || 'User';
+      el.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">👋 Welcome back, ${name}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.total_resumes}</div>
+          <div class="stat-label">Resumes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.average_ats_score ?? '—'}</div>
+          <div class="stat-label">Avg ATS Score</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.average_match_score ?? '—'}</div>
+          <div class="stat-label">Avg JD Match</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.total_reports}</div>
+          <div class="stat-label">Reports Saved</div>
+        </div>
+        <div class="stat-card" style="margin-left:auto;">
+          <a href="history.html" style="color:var(--primary);font-weight:600;font-size:0.85rem;text-decoration:none;">📂 View History →</a>
+        </div>
+      `;
+    }
+  } catch(e) { console.warn('Stats load failed', e); }
+}
+loadStats();
 </script>
 </body>
 </html>
