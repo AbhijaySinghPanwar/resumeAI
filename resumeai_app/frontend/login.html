@@ -294,36 +294,44 @@
     }
   
 
-    /* Modern Navbar CSS */
+    
+        /* Modern Navbar CSS - Light/White */
     .navbar {
       position: sticky; top: 0; z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
       transition: all 0.3s ease;
-      padding: 1rem 0;
+      padding: 0; height: 70px;
     }
     .navbar.scrolled {
-      background: rgba(255, 255, 255, 0.95);
-      border-bottom: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-      padding: 0.75rem 0;
+      background: rgba(255, 255, 255, 1);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
     .nav-inner {
       display: flex; justify-content: space-between; align-items: center;
-      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;
+      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 100%;
     }
+    .nav-left { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
     .logo {
       font-size: 1.25rem; font-weight: 800; color: var(--text); text-decoration: none;
       display: flex; align-items: center; gap: 0.5rem;
     }
+    .logo svg { color: var(--primary); }
     .logo span {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
+    .btn-back {
+      display: flex; align-items: center; gap: 0.4rem; color: var(--muted);
+      text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem;
+      border-radius: 8px; transition: all 0.2s; background: white; border: 1px solid var(--border);
+    }
+    .btn-back:hover { color: var(--primary); border-color: var(--primary); background: rgba(79,70,229,0.05); }
+    
     .nav-right { display: flex; align-items: center; gap: 2rem; }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
     
     .nav-link {
       color: var(--muted);
@@ -331,20 +339,21 @@
       font-size: 0.95rem;
       font-weight: 500;
       position: relative;
-      padding: 0.5rem 0;
+      padding: 1.5rem 0; /* to center it vertically in 70px */
       transition: color 0.2s ease;
+      display: flex; align-items: center;
     }
-    .nav-link:hover { color: var(--text); }
+    .nav-link:hover { color: var(--primary); }
     .nav-link::after {
       content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
-      background: var(--primary); transition: width 0.2s ease; border-radius: 2px;
+      background: var(--primary); transition: width 0.2s ease; border-radius: 2px 2px 0 0;
     }
     .nav-link:hover::after, .nav-link.active::after { width: 100%; }
     .nav-link.active { color: var(--text); font-weight: 600; }
     
     .auth-buttons { display: flex; align-items: center; gap: 1rem; }
-    .login-link { padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.2s; }
-    .login-link:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+    .login-link { padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.2s; color: var(--muted); text-decoration: none; font-weight: 600;}
+    .login-link:hover { background: rgba(0,0,0,0.05); color: var(--text); }
     .signup-btn {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 8px;
@@ -355,16 +364,16 @@
     /* Profile Dropdown */
     .profile-dropdown { position: relative; }
     .profile-btn {
-      background: rgba(79,70,229,0.08); color: var(--primary);
-      border: none; padding: 0.5rem 1rem; border-radius: 20px;
+      background: white; color: var(--text);
+      border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 20px;
       font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
       transition: background 0.2s;
     }
-    .profile-btn:hover { background: rgba(79,70,229,0.15); }
+    .profile-btn:hover { background: rgba(0,0,0,0.02); border-color: #cbd5e1; }
     .profile-menu {
-      position: absolute; top: calc(100% + 0.5rem); right: 0;
+      position: absolute; top: calc(100% + 1rem); right: 0;
       background: white; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 220px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 220px;
       opacity: 0; visibility: hidden; transform: translateY(-10px);
       transition: all 0.2s; z-index: 1000;
     }
@@ -374,20 +383,38 @@
     .profile-header small { color: var(--muted); font-size: 0.8rem; }
     .profile-item {
       display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
-      color: var(--text); text-decoration: none; font-size: 0.95rem; border: none; background: none;
-      cursor: pointer; transition: background 0.2s;
+      border: none; background: none; color: var(--text); text-decoration: none;
+      font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
     }
-    .profile-item:hover { background: var(--bg); }
-    .logout-btn { color: #EF4444; border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; }
+    .profile-item:hover { background: rgba(79,70,229,0.05); color: var(--primary); }
+    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; }
+    .logout-btn:hover { background: rgba(239,68,68,0.05); color: var(--danger); }
 
     /* Responsive Navbar */
     .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
     @media (max-width: 768px) {
       .nav-links, .auth-buttons, .profile-dropdown { display: none; }
-      .nav-right { flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background: white; border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem; display: none; }
+      .nav-right { flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background: white; border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
       .nav-right.show { display: flex; }
       .mobile-menu-btn { display: block; }
     }
+    
+    /* ── Toasts ───────────────────────────────────────── */
+    .toast-container {
+      position: fixed; top: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid var(--primary);
+      display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem;
+      animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      opacity: 0; transform: translateX(100%);
+    }
+    .toast.success { border-left-color: #10B981; }
+    .toast.error { border-left-color: #EF4444; }
+    @keyframes toast-in { to { opacity: 1; transform: translateX(0); } }
+    @keyframes toast-out { to { opacity: 0; transform: translateX(100%); } }
 
 </style>
 </head>
@@ -403,10 +430,12 @@
 <!-- Navigation -->
 <nav class="navbar">
   <div class="nav-inner">
-    <a href="index.html" class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      TalentLens<span>AI</span>
-    </a>
+    <div class="nav-left" id="navLeft">
+      <a href="index.html" class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        TalentLens<span>AI</span>
+      </a>
+    </div>
     <button class="mobile-menu-btn" onclick="document.getElementById('navRight').classList.toggle('show')">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
     </button>
@@ -452,14 +481,14 @@
           <span class="input-icon" aria-hidden="true">🔒</span>
           <input
             class="form-input"
-            type="password"
+            type="password" minlength="8"
             id="loginPassword"
             name="password"
             placeholder="Enter your password"
             autocomplete="current-password"
             required
           />
-          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Toggle password visibility">👁</button>
+          <button type="button" class="pw-toggle" aria-label="Toggle password visibility" onclick="const p=document.getElementById(\'loginPassword\'); if(p.type===\'password\'){p.type=\'text\';this.innerHTML=\'🙈\';}else{p.type=\'password\';this.innerHTML=\'👁\';}">👁</button>
         </div>
       </div>
 
@@ -484,35 +513,9 @@
   </div>
 </main>
 
+
 <script>
-  const API = 'http://localhost:8000';
-
-  /* ── Auth helpers ─────────────────────────────────────────── */
-  function getToken() { return localStorage.getItem('auth_token'); }
-  function getUser() {
-    const u = localStorage.getItem('auth_user');
-    return u ? JSON.parse(u) : null;
-  }
-  function logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    window.location.href = 'login.html';
-  }
-  function authHeaders() {
-    const token = getToken();
-    return token
-      ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
-      : { 'Content-Type': 'application/json' };
-  }
-
-  /* ── Redirect if already logged in ────────────────────────── */
-  if (getToken() && getUser()) {
-    window.location.href = 'index.html';
-  }
-
-  /* ── Render Nav ───────────────────────────────────────────── */
-  
-// ── Navbar ──────────────────────────────────────────────────────────────────
+// ── Navbar & Toast Logic ──────────────────────────────────────────────────
 const API = 'http://localhost:8000';
 
 function getToken() { return localStorage.getItem('auth_token'); }
@@ -533,13 +536,51 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
+function showToast(message, type='success') {
+  let container = document.getElementById('toast-container');
+  if(!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = type === 'success' ? `✅ ${message}` : `❌ ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toast-out 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
 function renderNav() {
   const user = getUser();
   const navRight = document.getElementById('navRight');
-  if (!navRight) return;
-  
+  const navLeft = document.getElementById('navLeft');
   const currentPath = window.location.pathname.split('/').pop() || 'index.html';
   const isActive = (path) => currentPath === path ? 'active' : '';
+
+  if (navLeft) {
+    if (currentPath !== 'index.html') {
+      navLeft.innerHTML = `
+        <a href="index.html" class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          TalentLens<span>AI</span>
+        </a>
+        <a href="index.html" class="btn-back">← Back to Home</a>
+      `;
+    } else {
+      navLeft.innerHTML = `
+        <a href="index.html" class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          TalentLens<span>AI</span>
+        </a>
+      `;
+    }
+  }
+
+  if (!navRight) return;
 
   if (user) {
     navRight.innerHTML = `
@@ -552,14 +593,16 @@ function renderNav() {
       </div>
       <div class="profile-dropdown">
         <button class="nav-badge profile-btn">
-          <span>${user.name.split(' ')[0]} ▼</span>
+          <span>👤 ${user.name.split(' ')[0]} ▼</span>
         </button>
         <div class="profile-menu">
           <div class="profile-header">
             <strong>${user.name}</strong>
             <small>${user.email}</small>
           </div>
-          <a href="#" class="profile-item">My Account</a>
+          <a href="index.html" class="profile-item">Dashboard</a>
+          <a href="history.html" class="profile-item">History</a>
+          <a href="reports.html" class="profile-item">Reports</a>
           <button class="profile-item logout-btn" onclick="doLogout()">Logout</button>
         </div>
       </div>
@@ -567,13 +610,13 @@ function renderNav() {
   } else {
     navRight.innerHTML = `
       <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Features</a>
+        <a href="index.html" class="nav-link ${isActive('index.html')}">Home</a>
         <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
         <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
         <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" class="nav-link">GitHub</a>
       </div>
       <div class="auth-buttons">
-        <a href="login.html" class="nav-link login-link">Login</a>
+        <a href="login.html" class="login-link">Login</a>
         <button class="btn-nav signup-btn" onclick="window.location.href='signup.html'">Sign Up</button>
       </div>
     `;
@@ -589,87 +632,56 @@ window.addEventListener('scroll', () => {
     nav.classList.remove('scrolled');
   }
 });
-
-
-  /* ── Password toggle ─────────────────────────────────────── */
-  const pwInput = document.getElementById('loginPassword');
-  const pwToggle = document.getElementById('pwToggle');
-  let pwVisible = false;
-  pwToggle.addEventListener('click', () => {
-    pwVisible = !pwVisible;
-    pwInput.type = pwVisible ? 'text' : 'password';
-    pwToggle.textContent = pwVisible ? '🙈' : '👁';
-  });
-
-  /* ── Alert helpers ───────────────────────────────────────── */
-  function showError(msg) {
-    const el = document.getElementById('loginError');
-    el.textContent = '⚠ ' + msg;
-    el.style.display = 'block';
-    document.getElementById('loginSuccess').style.display = 'none';
-  }
-  function showSuccess(msg) {
-    const el = document.getElementById('loginSuccess');
-    el.textContent = '✓ ' + msg;
-    el.style.display = 'block';
-    document.getElementById('loginError').style.display = 'none';
-  }
-  function clearAlerts() {
-    document.getElementById('loginError').style.display = 'none';
-    document.getElementById('loginSuccess').style.display = 'none';
-  }
-
-  /* ── Form submit ─────────────────────────────────────────── */
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearAlerts();
-
-    const email    = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-
-    if (!email || !password) { showError('Please fill in all fields.'); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email address.'); return; }
-
-    const btn     = document.getElementById('loginBtn');
-    const spinner = document.getElementById('loginSpinner');
-    const btnText = document.getElementById('loginBtnText');
-    const btnArrow= document.getElementById('loginBtnArrow');
-
-    btn.disabled = true;
-    spinner.style.display = 'inline-block';
-    btnText.textContent = 'Signing in…';
-    btnArrow.style.display = 'none';
-
-    try {
-      const res = await fetch(`${API}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.detail || data.message || 'Invalid credentials. Please try again.');
-      }
-
-      /* Store token & user */
-      localStorage.setItem('auth_token', data.access_token);
-      localStorage.setItem('auth_user', JSON.stringify(data.user || { name: email.split('@')[0], email }));
-
-      showSuccess('Login successful! Redirecting…');
-      setTimeout(() => { window.location.href = 'index.html'; }, 800);
-
-    } catch (err) {
-      showError(err.message || 'Something went wrong. Please try again.');
-      btn.disabled = false;
-      spinner.style.display = 'none';
-      btnText.textContent = 'Sign In';
-      btnArrow.style.display = 'inline';
-    }
-  });
 </script>
 
+<script>
+  const form = document.getElementById('loginForm');
+  const btn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('loginBtnText');
+  const spinner = document.getElementById('loginSpinner');
+  const btnArrow = document.getElementById('loginBtnArrow');
+
+  if(form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if(!email || !password) {
+        showToast('Please fill out all fields.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Signing In...';
+      btnArrow.style.display = 'none';
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          if(res.status === 401) throw new Error('Invalid email or password.');
+          throw new Error(data.detail || data.message || 'Unable to connect to server.');
+        }
+        localStorage.setItem('auth_token', data.access_token);
+        localStorage.setItem('auth_user', JSON.stringify(data.user || { name: email.split('@')[0], email }));
+        showToast('Login successful! Redirecting...', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      } catch (err) {
+        showToast(err.message || 'Unable to connect to server.', 'error');
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Sign In';
+        btnArrow.style.display = 'inline';
+      }
+    });
+  }
+</script>
 <!-- ── Modern Footer ───────────────────────────────────────────────────────── -->
 <footer style="background: white; border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; margin-top: 4rem; color: var(--text);">
   <div style="max-width: 1200px; margin: 0 auto;">
