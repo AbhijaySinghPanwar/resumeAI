@@ -17,6 +17,8 @@ import os
 import time
 from typing import Optional, List
 
+from core.config import settings
+
 logger = logging.getLogger(__name__)
 
 # Preference order for model selection (exact names returned by the API)
@@ -45,7 +47,7 @@ class GeminiService:
     BACKOFF_BASE = 1.5   # seconds — wait grows as 1.5^attempt
 
     def __init__(self, api_key: Optional[str] = None) -> None:
-        self._api_key: str = ""
+        self._api_key: str = api_key or settings.GEMINI_API_KEY
         self._client = None           # google.genai.Client instance
         self.active_model: Optional[str] = None   # e.g. "models/gemini-2.5-flash"
         self._init_error: Optional[str] = None

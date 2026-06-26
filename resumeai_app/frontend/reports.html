@@ -623,14 +623,7 @@
   /* ── Render Nav ───────────────────────────────────────────── */
   
 
-// ── Navbar & Toast Logic ──────────────────────────────────────────────────
-const API = 'http://localhost:8000';
 
-function getToken() { return localStorage.getItem('auth_token'); }
-function getUser()  {
-  const u = localStorage.getItem('auth_user');
-  return u ? JSON.parse(u) : null;
-}
 function doLogout() {
   const token = getToken();
   if (token) {
@@ -1127,66 +1120,8 @@ window.addEventListener('scroll', () => {
   atsContentObserver.observe(document.getElementById('jdContent'),  { childList: true, subtree: false });
 </script>
 
-<!-- ── Modern Footer ───────────────────────────────────────────────────────── -->
-<footer style="background: white; border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; margin-top: 4rem; color: var(--text);">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-      <div style="grid-column: span 2;">
-        <div style="font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#footer-grad)" stroke-width="2.5"><defs><linearGradient id="footer-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens AI
-        </div>
-        <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 400px;">
-          AI-Powered Resume Intelligence Platform. Helping students and professionals optimize resumes, improve ATS performance, prepare for interviews, and match job opportunities using AI.
-        </p>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Features</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume Parsing</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">ATS Analysis</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">JD Matching</a>
-          <a href="ai_assistant.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">AI Resume Assistant</a>
-          <a href="interview_prep.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Interview Preparation</a>
-          <a href="history.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume History</a>
-          <a href="reports.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Saved Reports</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Resources</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub Repository</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Documentation</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Tech Stack</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <span style="color: var(--muted); font-size: 0.95rem;">FastAPI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Python</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Gemini AI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLAlchemy</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLite / PostgreSQL</span>
-        </div>
-      </div>
-    </div>
-    
-    <div style="border-top: 1px solid var(--border); padding-top: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-      <div style="color: var(--muted); font-size: 0.9rem;">
-        &copy; 2026 TalentLens AI. Built with ❤️ using FastAPI &bull; Python &bull; Gemini AI
-      </div>
-      <div style="display: flex; gap: 1.5rem;">
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Email</a>
-      </div>
-    </div>
-  </div>
-</footer>
+<footer class="site-footer" id="main-footer"></footer>
 
+  <script src="shared.js"></script>
 </body>
 </html>

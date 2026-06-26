@@ -4,744 +4,234 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — TalentLens AI</title>
-  <meta name="description" content="Sign in to TalentLens AI — your intelligent resume parser and ATS optimization platform." />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="description" content="Sign in to TalentLens AI" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-system.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    :root {
-      --primary:   #4F46E5;
-      --secondary: #7C3AED;
-      --success:   #10B981;
-      --warning:   #F59E0B;
-      --danger:    #EF4444;
-      --bg:        #F8FAFC;
-      --surface:   #FFFFFF;
-      --text:      #0F172A;
-      --muted:     #64748B;
-      --border:    #E2E8F0;
-      --shadow-soft: 0 4px 20px -2px rgba(79,70,229,0.10);
-      --shadow-hover: 0 10px 25px -5px rgba(79,70,229,0.15), 0 8px 10px -6px rgba(79,70,229,0.10);
-      --shadow-btn:   0 4px 14px 0 rgba(79,70,229,0.30);
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      min-height: 100vh;
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-      background: #0A0A1A;
-    }
-
-    /* ── Animated Background ─────────────────────────────────── */
-    .bg-canvas {
-      position: fixed; inset: 0; z-index: 0; overflow: hidden;
-      background: linear-gradient(135deg, #0D0D2B 0%, #0A0A1A 50%, #0D0D2B 100%);
-    }
-    .orb {
-      position: absolute; border-radius: 50%; filter: blur(80px);
-      animation: orb-float 8s ease-in-out infinite;
-    }
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(79,70,229,0.35) 0%, transparent 70%);
-      top: -200px; left: -150px;
-      animation-delay: 0s;
-    }
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(124,58,237,0.30) 0%, transparent 70%);
-      bottom: -150px; right: -100px;
-      animation-delay: -3s;
-    }
-    .orb-3 {
-      width: 300px; height: 300px;
-      background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%);
-      top: 50%; left: 50%; transform: translate(-50%,-50%);
-      animation-delay: -6s;
-    }
-    @keyframes orb-float {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      33% { transform: translateY(-30px) scale(1.05); }
-      66% { transform: translateY(20px) scale(0.95); }
-    }
-    .orb-3 { animation-name: orb-float-center; }
-    @keyframes orb-float-center {
-      0%, 100% { transform: translate(-50%,-50%) scale(1); }
-      50% { transform: translate(-50%,-50%) scale(1.2); }
-    }
-
-    /* Grid overlay */
-    .bg-canvas::after {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 50px 50px;
-    }
-
-    /* ── Nav ─────────────────────────────────────────────────── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(10,10,26,0.7);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .nav-inner {
-      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 64px;
-    }
-    .logo {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-weight: 800; font-size: 1.2rem; color: white;
-      text-decoration: none;
-    }
-    .logo-icon {
-      width: 36px; height: 36px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--shadow-btn);
-      font-size: 1rem;
-    }
-    .logo span { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .nav-right { display: flex; align-items: center; gap: 1rem; }
-    .nav-link {
-      color: rgba(255,255,255,0.6); font-size: 0.9rem; font-weight: 500;
-      text-decoration: none; transition: color 0.2s;
-    }
-    .nav-link:hover { color: #818CF8; }
-    .nav-badge {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-size: 0.75rem; font-weight: 700;
-      padding: 4px 12px; border-radius: 99px;
-    }
-    .btn-nav {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-weight: 600; font-size: 0.875rem;
-      padding: 0.5rem 1.25rem; border-radius: 99px; border: none;
-      cursor: pointer; transition: all 0.2s; box-shadow: var(--shadow-btn);
-    }
-    .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,0.5); }
-
-    /* ── Page Layout ─────────────────────────────────────────── */
-    .page-wrap {
-      position: relative; z-index: 1;
-      min-height: calc(100vh - 64px);
-      display: flex; align-items: center; justify-content: center;
+    .auth-page {
+      min-height: calc(100vh - 70px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 3rem 1.5rem;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .auth-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .auth-blob-1 {
+      width: 500px; height: 500px;
+      background: rgba(79,70,229,0.1);
+      top: -150px; left: -150px;
+    }
+    .auth-blob-2 {
+      width: 400px; height: 400px;
+      background: rgba(124,58,237,0.1);
+      bottom: -100px; right: -100px;
     }
 
-    /* ── Auth Card ───────────────────────────────────────────── */
     .auth-card {
-      width: 100%; max-width: 460px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 24px;
-      padding: 2.5rem;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
-      animation: card-in 0.5s ease both;
-    }
-    @keyframes card-in {
-      from { opacity: 0; transform: translateY(24px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-hover);
+      width: 100%;
+      max-width: 440px;
+      padding: 3rem 2.5rem;
+      position: relative;
+      z-index: 1;
     }
 
-    .auth-badge {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      background: rgba(79,70,229,0.2); border: 1px solid rgba(79,70,229,0.4);
-      color: #818CF8; font-size: 0.75rem; font-weight: 700;
-      padding: 4px 12px; border-radius: 99px; margin-bottom: 1.5rem;
-      letter-spacing: 0.05em; text-transform: uppercase;
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
     }
-    .auth-badge::before {
-      content: ''; width: 6px; height: 6px; border-radius: 50%;
-      background: #818CF8; animation: pulse 2s infinite;
+
+    .auth-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: white;
+      box-shadow: var(--shadow-btn);
     }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
 
     .auth-title {
-      font-size: 2rem; font-weight: 800; color: white;
-      line-height: 1.15; margin-bottom: 0.5rem;
-    }
-    .auth-title .grad { background: linear-gradient(135deg, #818CF8, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .auth-sub { font-size: 0.9rem; color: rgba(255,255,255,0.5); margin-bottom: 2rem; }
-
-    /* ── Form ────────────────────────────────────────────────── */
-    .form-group { margin-bottom: 1.25rem; }
-    .form-label {
-      display: block; font-size: 0.8rem; font-weight: 700;
-      color: rgba(255,255,255,0.7); margin-bottom: 0.5rem;
-      letter-spacing: 0.03em;
-    }
-    .input-wrap { position: relative; }
-    .input-icon {
-      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-      color: rgba(255,255,255,0.3); font-size: 1rem; pointer-events: none;
-      display: flex; align-items: center;
-    }
-    .form-input {
-      width: 100%;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 12px;
-      padding: 0.8rem 1rem 0.8rem 2.75rem;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 0.9rem; font-weight: 500;
-      color: white; outline: none;
-      transition: all 0.2s;
-    }
-    .form-input::placeholder { color: rgba(255,255,255,0.25); }
-    .form-input:focus {
-      border-color: rgba(129,140,248,0.6);
-      background: rgba(255,255,255,0.09);
-      box-shadow: 0 0 0 3px rgba(79,70,229,0.25);
-    }
-    .form-input:-webkit-autofill,
-    .form-input:-webkit-autofill:hover,
-    .form-input:-webkit-autofill:focus {
-      -webkit-text-fill-color: white;
-      -webkit-box-shadow: 0 0 0px 1000px rgba(20,20,50,0.95) inset;
-      transition: background-color 5000s ease-in-out 0s;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.5rem;
     }
 
-    /* ── Password toggle ─────────────────────────────────────── */
-    .pw-toggle {
-      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer;
-      color: rgba(255,255,255,0.35); font-size: 1rem; padding: 0;
-      display: flex; align-items: center; transition: color 0.2s;
-    }
-    .pw-toggle:hover { color: rgba(255,255,255,0.7); }
-
-    /* ── Submit Button ───────────────────────────────────────── */
-    .btn-submit {
-      width: 100%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; font-size: 1rem;
-      padding: 0.9rem; border-radius: 12px; border: none;
-      cursor: pointer; transition: all 0.2s;
-      box-shadow: var(--shadow-btn);
-      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      margin-top: 1.5rem;
-    }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79,70,229,0.5); }
-    .btn-submit:active { transform: translateY(0); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    /* ── Spinner ─────────────────────────────────────────────── */
-    .spinner-sm {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      animation: spin 0.7s linear infinite; display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Error / Success messages ────────────────────────────── */
-    .alert {
-      padding: 0.75rem 1rem; border-radius: 10px;
-      font-size: 0.85rem; font-weight: 600;
-      margin-bottom: 1.25rem; display: none;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-    .alert-error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #FCA5A5; }
-    .alert-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6EE7B7; }
-
-    /* ── Divider ─────────────────────────────────────────────── */
-    .auth-divider {
-      display: flex; align-items: center; gap: 1rem;
-      margin: 1.5rem 0;
-    }
-    .auth-divider::before, .auth-divider::after {
-      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1);
-    }
-    .auth-divider span { font-size: 0.75rem; color: rgba(255,255,255,0.3); font-weight: 600; }
-
-    /* ── Footer link ─────────────────────────────────────────── */
-    .auth-footer {
-      text-align: center; margin-top: 1.5rem;
-      font-size: 0.875rem; color: rgba(255,255,255,0.4);
-    }
-    .auth-footer a {
-      color: #818CF8; font-weight: 600; text-decoration: none; transition: color 0.2s;
-    }
-    .auth-footer a:hover { color: #A78BFA; text-decoration: underline; }
-
-    /* ── Trust badges ────────────────────────────────────────── */
-    .trust-row {
-      display: flex; align-items: center; justify-content: center; gap: 1.5rem;
-      margin-top: 1.5rem; padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.07);
-    }
-    .trust-item {
-      display: flex; align-items: center; gap: 0.4rem;
-      font-size: 0.72rem; color: rgba(255,255,255,0.3); font-weight: 600;
-    }
-    .trust-item span { font-size: 0.9rem; }
-
-    @media (max-width: 480px) {
-      .auth-card { padding: 2rem 1.5rem; }
-      .auth-title { font-size: 1.6rem; }
-    }
-  
-
-    
-        /* Modern Navbar CSS - Light/White */
-    .navbar {
-      position: sticky; top: 0; z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      transition: all 0.3s ease;
-      padding: 0; height: 70px;
-    }
-    .navbar.scrolled {
-      background: rgba(255, 255, 255, 1);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-    }
-    .nav-inner {
-      display: flex; justify-content: space-between; align-items: center;
-      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 100%;
-    }
-    .nav-left { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    .logo {
-      font-size: 1.25rem; font-weight: 800; color: var(--text); text-decoration: none;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .logo svg { color: var(--primary); }
-    .logo span {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .btn-back {
-      display: flex; align-items: center; gap: 0.4rem; color: var(--muted);
-      text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem;
-      border-radius: 8px; transition: all 0.2s; background: white; border: 1px solid var(--border);
-    }
-    .btn-back:hover { color: var(--primary); border-color: var(--primary); background: rgba(79,70,229,0.05); }
-    
-    .nav-right { display: flex; align-items: center; gap: 2rem; }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    
-    .nav-link {
+    .auth-subtitle {
       color: var(--muted);
-      text-decoration: none;
       font-size: 0.95rem;
-      font-weight: 500;
-      position: relative;
-      padding: 1.5rem 0; /* to center it vertically in 70px */
-      transition: color 0.2s ease;
-      display: flex; align-items: center;
     }
-    .nav-link:hover { color: var(--primary); }
-    .nav-link::after {
-      content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
-      background: var(--primary); transition: width 0.2s ease; border-radius: 2px 2px 0 0;
-    }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    .nav-link.active { color: var(--text); font-weight: 600; }
-    
-    .auth-buttons { display: flex; align-items: center; gap: 1rem; }
-    .login-link { padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.2s; color: var(--muted); text-decoration: none; font-weight: 600;}
-    .login-link:hover { background: rgba(0,0,0,0.05); color: var(--text); }
-    .signup-btn {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 8px;
-      font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .signup-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
 
-    /* Profile Dropdown */
-    .profile-dropdown { position: relative; }
-    .profile-btn {
-      background: white; color: var(--text);
-      border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 20px;
-      font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-      transition: background 0.2s;
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
-    .profile-btn:hover { background: rgba(0,0,0,0.02); border-color: #cbd5e1; }
-    .profile-menu {
-      position: absolute; top: calc(100% + 1rem); right: 0;
-      background: white; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 220px;
-      opacity: 0; visibility: hidden; transform: translateY(-10px);
-      transition: all 0.2s; z-index: 1000;
-    }
-    .profile-dropdown:hover .profile-menu { opacity: 1; visibility: visible; transform: translateY(0); }
-    .profile-header { padding: 1rem; border-bottom: 1px solid var(--border); }
-    .profile-header strong { display: block; color: var(--text); font-size: 0.95rem; }
-    .profile-header small { color: var(--muted); font-size: 0.8rem; }
-    .profile-item {
-      display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
-      border: none; background: none; color: var(--text); text-decoration: none;
-      font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
-    }
-    .profile-item:hover { background: rgba(79,70,229,0.05); color: var(--primary); }
-    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; }
-    .logout-btn:hover { background: rgba(239,68,68,0.05); color: var(--danger); }
 
-    /* Responsive Navbar */
-    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
-    @media (max-width: 768px) {
-      .nav-links, .auth-buttons, .profile-dropdown { display: none; }
-      .nav-right { flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background: white; border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-      .nav-right.show { display: flex; }
-      .mobile-menu-btn { display: block; }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    
-    /* ── Toasts ───────────────────────────────────────── */
-    .toast-container {
-      position: fixed; top: 20px; right: 20px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .toast {
-      background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid var(--primary);
-      display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem;
-      animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-      opacity: 0; transform: translateX(100%);
-    }
-    .toast.success { border-left-color: #10B981; }
-    .toast.error { border-left-color: #EF4444; }
-    @keyframes toast-in { to { opacity: 1; transform: translateX(0); } }
-    @keyframes toast-out { to { opacity: 0; transform: translateX(100%); } }
 
-</style>
+    .input-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .auth-btn {
+      width: 100%;
+      margin-top: 1rem;
+      justify-content: center;
+      padding: 0.85rem;
+      font-size: 1rem;
+    }
+
+    .auth-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .auth-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .auth-link:hover {
+      color: var(--secondary);
+    }
+
+    .forgot-link {
+      font-size: 0.8rem;
+      text-align: right;
+      display: block;
+      margin-top: -0.25rem;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="bg-canvas" aria-hidden="true">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
+  <nav class="navbar" id="main-nav"></nav>
 
-<!-- Navigation -->
-<nav class="navbar">
-  <div class="nav-inner">
-    <div class="nav-left" id="navLeft">
-      <a href="index.html" class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        TalentLens<span>AI</span>
-      </a>
-    </div>
-    <button class="mobile-menu-btn" onclick="document.getElementById('navRight').classList.toggle('show')">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <div class="nav-right" id="navRight"></div>
-  </div>
-</nav>
-
-<!-- Main Content -->
-<main class="page-wrap" role="main">
-  <div class="auth-card">
-
-    <div class="auth-badge">Secure Login</div>
-
-    <h1 class="auth-title">Welcome <span class="grad">Back</span></h1>
-    <p class="auth-sub">Sign in to access your resume dashboard and AI tools.</p>
-
-    <!-- Error / Success alerts -->
-    <div class="alert alert-error" id="loginError" role="alert" aria-live="polite"></div>
-    <div class="alert alert-success" id="loginSuccess" role="status" aria-live="polite"></div>
-
-    <form id="loginForm" novalidate autocomplete="on">
-      <!-- Email -->
-      <div class="form-group">
-        <label class="form-label" for="loginEmail">Email Address</label>
-        <div class="input-wrap">
-          <span class="input-icon" aria-hidden="true">✉</span>
-          <input
-            class="form-input"
-            type="email"
-            id="loginEmail"
-            name="email"
-            placeholder="you@example.com"
-            autocomplete="email"
-            required
-          />
+  <div class="auth-page">
+    <div class="auth-blob auth-blob-1"></div>
+    <div class="auth-blob auth-blob-2"></div>
+    
+    <div class="auth-card fade-in">
+      <div class="auth-header">
+        <div class="auth-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
         </div>
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-subtitle">Sign in to continue to TalentLens AI</p>
       </div>
 
-      <!-- Password -->
-      <div class="form-group">
-        <label class="form-label" for="loginPassword">Password</label>
-        <div class="input-wrap">
-          <span class="input-icon" aria-hidden="true">🔒</span>
-          <input
-            class="form-input"
-            type="password" minlength="8"
-            id="loginPassword"
-            name="password"
-            placeholder="Enter your password"
-            autocomplete="current-password"
-            required
-          />
-          <button type="button" class="pw-toggle" aria-label="Toggle password visibility" onclick="const p=document.getElementById(\'loginPassword\'); if(p.type===\'password\'){p.type=\'text\';this.innerHTML=\'🙈\';}else{p.type=\'password\';this.innerHTML=\'👁\';}">👁</button>
+      <form id="loginForm" class="auth-form">
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
         </div>
-      </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" required autocomplete="current-password">
+          <a href="#" class="auth-link forgot-link">Forgot password?</a>
+        </div>
 
-      <button type="submit" class="btn-submit" id="loginBtn">
-        <span id="loginBtnText">Sign In</span>
-        <span class="spinner-sm" id="loginSpinner" aria-label="Signing in…"></span>
-        <span id="loginBtnArrow">→</span>
-      </button>
-    </form>
-
-    <div class="auth-divider"><span>New here?</span></div>
-
-    <div class="auth-footer">
-      Don't have an account? <a href="signup.html" id="goToSignup">Create one free →</a>
-    </div>
-
-    <div class="trust-row" aria-label="Security badges">
-      <div class="trust-item"><span>🔐</span> Encrypted</div>
-      <div class="trust-item"><span>⚡</span> Instant Access</div>
-      <div class="trust-item"><span>🛡️</span> Private</div>
-    </div>
-  </div>
-</main>
-
-
-<script>
-// ── Navbar & Toast Logic ──────────────────────────────────────────────────
-const API = 'http://localhost:8000';
-
-function getToken() { return localStorage.getItem('auth_token'); }
-function getUser()  {
-  const u = localStorage.getItem('auth_user');
-  return u ? JSON.parse(u) : null;
-}
-function doLogout() {
-  const token = getToken();
-  if (token) {
-    fetch(`${API}/auth/logout`, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    }).catch(() => {});
-  }
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('auth_user');
-  window.location.href = 'login.html';
-}
-
-function showToast(message, type='success') {
-  let container = document.getElementById('toast-container');
-  if(!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = type === 'success' ? `✅ ${message}` : `❌ ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.animation = 'toast-out 0.3s ease forwards';
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-function renderNav() {
-  const user = getUser();
-  const navRight = document.getElementById('navRight');
-  const navLeft = document.getElementById('navLeft');
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-  const isActive = (path) => currentPath === path ? 'active' : '';
-
-  if (navLeft) {
-    if (currentPath !== 'index.html') {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
-        </a>
-        <a href="index.html" class="btn-back">← Back to Home</a>
-      `;
-    } else {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
-        </a>
-      `;
-    }
-  }
-
-  if (!navRight) return;
-
-  if (user) {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Dashboard</a>
-        <a href="history.html" class="nav-link ${isActive('history.html')}">History</a>
-        <a href="reports.html" class="nav-link ${isActive('reports.html')}">Reports</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
-      </div>
-      <div class="profile-dropdown">
-        <button class="nav-badge profile-btn">
-          <span>👤 ${user.name.split(' ')[0]} ▼</span>
+        <button type="submit" class="btn-primary auth-btn" id="loginBtn">
+          <span id="btnText">Sign In</span>
+          <div class="loading-spinner" id="btnSpinner" style="display:none; width: 18px; height: 18px; border-width: 2px; border-top-color: white;"></div>
         </button>
-        <div class="profile-menu">
-          <div class="profile-header">
-            <strong>${user.name}</strong>
-            <small>${user.email}</small>
-          </div>
-          <a href="index.html" class="profile-item">Dashboard</a>
-          <a href="history.html" class="profile-item">History</a>
-          <a href="reports.html" class="profile-item">Reports</a>
-          <button class="profile-item logout-btn" onclick="doLogout()">Logout</button>
-        </div>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="signup.html" class="auth-link">Create an account</a>
       </div>
-    `;
-  } else {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Home</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" class="nav-link">GitHub</a>
-      </div>
-      <div class="auth-buttons">
-        <a href="login.html" class="login-link">Login</a>
-        <button class="btn-nav signup-btn" onclick="window.location.href='signup.html'">Sign Up</button>
-      </div>
-    `;
-  }
-}
-renderNav();
+    </div>
+  </div>
 
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.navbar');
-  if (nav && window.scrollY > 10) {
-    nav.classList.add('scrolled');
-  } else if(nav) {
-    nav.classList.remove('scrolled');
-  }
-});
-</script>
+  <footer class="site-footer" id="main-footer"></footer>
 
-<script>
-  const form = document.getElementById('loginForm');
-  const btn = document.getElementById('loginBtn');
-  const btnText = document.getElementById('loginBtnText');
-  const spinner = document.getElementById('loginSpinner');
-  const btnArrow = document.getElementById('loginBtnArrow');
-
-  if(form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-
-      if(!email || !password) {
-        showToast('Please fill out all fields.', 'error');
-        return;
+  <script src="shared.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If already logged in, redirect to dashboard
+      if (getToken() && getToken() !== 'undefined') {
+        window.location.href = 'index.html';
       }
 
-      btn.disabled = true;
-      spinner.style.display = 'inline-block';
-      btnText.textContent = 'Signing In...';
-      btnArrow.style.display = 'none';
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          const btn = document.getElementById('loginBtn');
+          const btnText = document.getElementById('btnText');
+          const spinner = document.getElementById('btnSpinner');
 
-      try {
-        const res = await fetch(`${API}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          if (!email || !password) {
+            showToast('Please fill out all fields.', 'error');
+            return;
+          }
+
+          btn.disabled = true;
+          btnText.textContent = 'Signing In...';
+          spinner.style.display = 'inline-block';
+
+          try {
+            const res = await fetch(`${API}/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) {
+              if(res.status === 401) throw new Error('Invalid email or password.');
+              throw new Error(data.detail || data.message || 'Unable to connect to server.');
+            }
+            
+            localStorage.setItem('auth_token', data.data.access_token);
+            localStorage.setItem('auth_user', JSON.stringify(data.data.user || { name: email.split('@')[0], email }));
+            
+            showToast('Login successful! Redirecting...', 'success');
+            setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            
+          } catch (err) {
+            showToast(err.message || 'Unable to connect to server.', 'error');
+            btn.disabled = false;
+            btnText.textContent = 'Sign In';
+            spinner.style.display = 'none';
+          }
         });
-        const data = await res.json();
-        if (!res.ok) {
-          if(res.status === 401) throw new Error('Invalid email or password.');
-          throw new Error(data.detail || data.message || 'Unable to connect to server.');
-        }
-        localStorage.setItem('auth_token', data.data.access_token);
-        localStorage.setItem('auth_user', JSON.stringify(data.data.user || { name: email.split('@')[0], email }));
-        showToast('Login successful! Redirecting...', 'success');
-        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
-      } catch (err) {
-        showToast(err.message || 'Unable to connect to server.', 'error');
-        btn.disabled = false;
-        spinner.style.display = 'none';
-        btnText.textContent = 'Sign In';
-        btnArrow.style.display = 'inline';
       }
     });
-  }
-</script>
-<!-- ── Modern Footer ───────────────────────────────────────────────────────── -->
-<footer style="background: white; border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; margin-top: 4rem; color: var(--text);">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-      <div style="grid-column: span 2;">
-        <div style="font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#footer-grad)" stroke-width="2.5"><defs><linearGradient id="footer-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens AI
-        </div>
-        <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 400px;">
-          AI-Powered Resume Intelligence Platform. Helping students and professionals optimize resumes, improve ATS performance, prepare for interviews, and match job opportunities using AI.
-        </p>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Features</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume Parsing</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">ATS Analysis</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">JD Matching</a>
-          <a href="ai_assistant.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">AI Resume Assistant</a>
-          <a href="interview_prep.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Interview Preparation</a>
-          <a href="history.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume History</a>
-          <a href="reports.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Saved Reports</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Resources</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub Repository</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Documentation</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Tech Stack</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <span style="color: var(--muted); font-size: 0.95rem;">FastAPI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Python</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Gemini AI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLAlchemy</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLite / PostgreSQL</span>
-        </div>
-      </div>
-    </div>
-    
-    <div style="border-top: 1px solid var(--border); padding-top: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-      <div style="color: var(--muted); font-size: 0.9rem;">
-        &copy; 2026 TalentLens AI. Built with ❤️ using FastAPI &bull; Python &bull; Gemini AI
-      </div>
-      <div style="display: flex; gap: 1.5rem;">
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Email</a>
-      </div>
-    </div>
-  </div>
-</footer>
-
+  </script>
 </body>
 </html>

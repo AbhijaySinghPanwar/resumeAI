@@ -4,677 +4,346 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Interview Prep — TalentLens AI</title>
-  <meta name="description" content="AI-powered personalized interview question generator. Get tailored technical, project, and behavioral questions based on your resume and target JD."/>
+  <meta name="description" content="Generate AI interview questions based on your resume and a target job description."/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-system.css">
   <style>
-    :root {
-      --bg:        #0A0B14;
-      --surface:   #111220;
-      --surface2:  #181929;
-      --border:    rgba(255,255,255,0.07);
-      --accent:    #6C63FF;
-      --accent2:   #A78BFA;
-      --green:     #10B981;
-      --amber:     #F59E0B;
-      --blue:      #3B82F6;
-      --pink:      #EC4899;
-      --muted:     #6B7280;
-      --text:      #F9FAFB;
-      --text-dim:  #9CA3AF;
-      --radius:    14px;
-    }
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;line-height:1.6;}
-
-    /* ── NAV ── */
-    nav{
-      position:sticky;top:0;z-index:100;
-      background:rgba(10,11,20,0.85);
-      backdrop-filter:blur(20px);
-      border-bottom:1px solid var(--border);
-      padding:0 2rem;height:64px;
-      display:flex;align-items:center;gap:2rem;
-    }
-    .nav-logo{
-      font-size:1.3rem;font-weight:800;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      text-decoration:none;
-    }
-    .nav-links{display:flex;gap:1.5rem;margin-left:auto;}
-    .nav-links a{
-      color:var(--text-dim);text-decoration:none;font-size:.9rem;font-weight:500;
-      transition:color .2s;padding:.3rem .6rem;border-radius:8px;
-    }
-    .nav-links a:hover{color:var(--text);background:var(--surface);}
-    .nav-links a.active{color:var(--accent);}
-
-    .ai-status-badge{
-      display:inline-flex;align-items:center;gap:.4rem;
-      font-size:.78rem;font-weight:600;padding:.3rem .8rem;border-radius:100px;
-      margin-left:.5rem;
-    }
-    .ai-status-badge.ready{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
-    .ai-status-badge.fallback{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25);}
-    .status-dot{width:7px;height:7px;border-radius:50%;}
-    .dot-green{background:var(--green);box-shadow:0 0 6px var(--green);}
-    .dot-amber{background:var(--amber);}
-
-    /* ── HERO ── */
-    .hero{text-align:center;padding:4rem 2rem 2rem;}
-    .hero-badge{
-      display:inline-flex;align-items:center;gap:.5rem;
-      background:rgba(108,99,255,.12);border:1px solid rgba(108,99,255,.3);
-      color:var(--accent2);font-size:.8rem;font-weight:600;
-      padding:.35rem .9rem;border-radius:100px;margin-bottom:1.5rem;
-    }
-    .hero h1{
-      font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.15;margin-bottom:1rem;
-      background:linear-gradient(135deg,#fff 40%,var(--accent2));
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .hero p{color:var(--text-dim);font-size:1.1rem;max-width:600px;margin:0 auto 2rem;}
-
-    /* ── LAYOUT ── */
-    .page{max-width:900px;margin:0 auto;padding:2rem;}
-
-    .card{
-      background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--radius);padding:2rem;margin-bottom:1.5rem;
-    }
-    .card-title{font-size:1rem;font-weight:700;margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem;}
-
-    label{display:block;font-size:.85rem;font-weight:600;color:var(--text-dim);margin-bottom:.5rem;}
-    textarea{
-      width:100%;
-      background:var(--surface2);border:1px solid var(--border);border-radius:10px;
-      color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;
-      padding:.85rem 1rem;resize:vertical;min-height:140px;transition:border-color .2s;
-    }
-    textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
-    input{
-      width:100%;
-      background:var(--surface2);border:1px solid var(--border);border-radius:10px;
-      color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;
-      padding:.85rem 1rem;transition:border-color .2s;
-    }
-    input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,99,255,.15);}
-
-    .form-hint{font-size:.8rem;color:var(--muted);margin-top:.4rem;}
-
-    .btn{
-      display:inline-flex;align-items:center;gap:.5rem;
-      background:linear-gradient(135deg,var(--accent),#8B5CF6);
-      color:#fff;border:none;border-radius:10px;
-      padding:.85rem 1.8rem;font-size:.95rem;font-weight:700;
-      cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
-      margin-top:1rem;
-    }
-    .btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.4);}
-    .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-
-    /* ── LOADING ── */
-    .loading{
-      display:none;align-items:center;gap:.75rem;
-      color:var(--accent2);font-size:.9rem;font-weight:500;margin-top:1rem;
-    }
-    .loading.visible{display:flex;}
-    .spinner{
-      width:20px;height:20px;border:2px solid rgba(108,99,255,.3);
-      border-top-color:var(--accent);border-radius:50%;
-      animation:spin .8s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg);}}
-
-    /* ── QUESTIONS ── */
-    .results{display:none;margin-top:1.5rem;}
-    .results.visible{display:block;}
-
-    .q-section{margin-bottom:2rem;}
-    .q-section-title{
-      font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-      display:flex;align-items:center;gap:.5rem;
-      padding:.4rem .9rem;border-radius:8px;margin-bottom:1rem;
-      width:fit-content;
-    }
-    .q-tech{background:rgba(59,130,246,.12);color:#60A5FA;}
-    .q-project{background:rgba(16,185,129,.12);color:var(--green);}
-    .q-behavioral{background:rgba(236,72,153,.12);color:#F472B6;}
-
-    .q-list{display:flex;flex-direction:column;gap:.75rem;}
-    .q-item{
-      background:var(--surface2);border:1px solid var(--border);
-      border-radius:12px;padding:1rem 1.25rem;
-      display:flex;gap:1rem;align-items:flex-start;
-      transition:border-color .2s;
-    }
-    .q-item:hover{border-color:rgba(108,99,255,.25);}
-    .q-num{
-      font-size:.8rem;font-weight:700;color:var(--muted);
-      min-width:22px;padding-top:.1rem;
-    }
-    .q-text{font-size:.92rem;line-height:1.65;flex:1;}
-    .q-actions{display:flex;gap:.5rem;margin-top:.5rem;}
-    .q-copy-btn{
-      background:none;border:1px solid var(--border);border-radius:6px;
-      color:var(--muted);font-size:.78rem;padding:.25rem .6rem;
-      cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
-    }
-    .q-copy-btn:hover{color:var(--text);border-color:rgba(108,99,255,.4);}
-
-    /* ── ALERT ── */
-    .alert{
-      border-radius:10px;padding:1rem 1.25rem;font-size:.88rem;margin-top:1rem;
-      display:flex;align-items:flex-start;gap:.75rem;
-    }
-    .alert-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#FCA5A5;}
-    .alert-info{background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);color:var(--accent2);}
-
-    /* ── PASTE ── */
-    .paste-hint{
-      background:rgba(108,99,255,.06);border:1px dashed rgba(108,99,255,.2);
-      border-radius:10px;padding:1rem;
-      font-size:.85rem;color:var(--text-dim);text-align:center;margin-top:.75rem;
-    }
-
-    footer{
-      text-align:center;padding:2rem;
-      color:var(--muted);font-size:.82rem;
-      border-top:1px solid var(--border);margin-top:4rem;
-    }
-  
-
-    
-        /* Modern Navbar CSS - Light/White */
-    .navbar {
-      position: sticky; top: 0; z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    /* ── Hero ────────────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 4rem 1.5rem 2.5rem;
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
-      transition: all 0.3s ease;
-      padding: 0; height: 70px;
+      position: relative;
+      overflow: hidden;
     }
-    .navbar.scrolled {
-      background: rgba(255, 255, 255, 1);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
     }
-    .nav-inner {
-      display: flex; justify-content: space-between; align-items: center;
-      max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 100%;
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(79,70,229,0.1); border: 1px solid rgba(79,70,229,0.2);
+      color: var(--primary); font-size: 0.8rem; font-weight: 700;
+      padding: 0.35rem 1rem; border-radius: 99px; margin-bottom: 1.5rem;
+      position: relative; z-index: 1;
     }
-    .nav-left { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    .logo {
-      font-size: 1.25rem; font-weight: 800; color: var(--text); text-decoration: none;
-      display: flex; align-items: center; gap: 0.5rem;
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 800;
+      line-height: 1.15; margin-bottom: 1rem; color: var(--text);
+      position: relative; z-index: 1; letter-spacing: -0.02em;
     }
-    .logo svg { color: var(--primary); }
-    .logo span {
+    .hero h1 .grad {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .btn-back {
-      display: flex; align-items: center; gap: 0.4rem; color: var(--muted);
-      text-decoration: none; font-size: 0.9rem; font-weight: 600; padding: 0.4rem 0.8rem;
-      border-radius: 8px; transition: all 0.2s; background: white; border: 1px solid var(--border);
+    .hero p {
+      color: var(--muted); font-size: 1.1rem; max-width: 600px;
+      margin: 0 auto; position: relative; z-index: 1;
     }
-    .btn-back:hover { color: var(--primary); border-color: var(--primary); background: rgba(79,70,229,0.05); }
-    
-    .nav-right { display: flex; align-items: center; gap: 2rem; }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    
-    .nav-link {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      position: relative;
-      padding: 1.5rem 0; /* to center it vertically in 70px */
-      transition: color 0.2s ease;
-      display: flex; align-items: center;
-    }
-    .nav-link:hover { color: var(--primary); }
-    .nav-link::after {
-      content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
-      background: var(--primary); transition: width 0.2s ease; border-radius: 2px 2px 0 0;
-    }
-    .nav-link:hover::after, .nav-link.active::after { width: 100%; }
-    .nav-link.active { color: var(--text); font-weight: 600; }
-    
-    .auth-buttons { display: flex; align-items: center; gap: 1rem; }
-    .login-link { padding: 0.5rem 1rem; border-radius: 8px; transition: background 0.2s; color: var(--muted); text-decoration: none; font-weight: 600;}
-    .login-link:hover { background: rgba(0,0,0,0.05); color: var(--text); }
-    .signup-btn {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white; border: none; padding: 0.6rem 1.25rem; border-radius: 8px;
-      font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .signup-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
 
-    /* Profile Dropdown */
-    .profile-dropdown { position: relative; }
-    .profile-btn {
-      background: white; color: var(--text);
-      border: 1px solid var(--border); padding: 0.5rem 1rem; border-radius: 20px;
-      font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
-      transition: background 0.2s;
+    /* ── Main Layout ─────────────────────────────────────────────────── */
+    .page-container {
+      max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;
     }
-    .profile-btn:hover { background: rgba(0,0,0,0.02); border-color: #cbd5e1; }
-    .profile-menu {
-      position: absolute; top: calc(100% + 1rem); right: 0;
-      background: white; border: 1px solid var(--border); border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 220px;
-      opacity: 0; visibility: hidden; transform: translateY(-10px);
-      transition: all 0.2s; z-index: 1000;
-    }
-    .profile-dropdown:hover .profile-menu { opacity: 1; visibility: visible; transform: translateY(0); }
-    .profile-header { padding: 1rem; border-bottom: 1px solid var(--border); }
-    .profile-header strong { display: block; color: var(--text); font-size: 0.95rem; }
-    .profile-header small { color: var(--muted); font-size: 0.8rem; }
-    .profile-item {
-      display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
-      border: none; background: none; color: var(--text); text-decoration: none;
-      font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
-    }
-    .profile-item:hover { background: rgba(79,70,229,0.05); color: var(--primary); }
-    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; }
-    .logout-btn:hover { background: rgba(239,68,68,0.05); color: var(--danger); }
+    @media (max-width: 800px) { .page-container { grid-template-columns: 1fr; } }
 
-    /* Responsive Navbar */
-    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); cursor: pointer; }
-    @media (max-width: 768px) {
-      .nav-links, .auth-buttons, .profile-dropdown { display: none; }
-      .nav-right { flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; background: white; border-bottom: 1px solid var(--border); padding: 1rem; gap: 1rem; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-      .nav-right.show { display: flex; }
-      .mobile-menu-btn { display: block; }
+    /* ── AI Status ───────────────────────────────────────────────────── */
+    .ai-status-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.8rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700;
+      margin-top: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      position: relative; z-index: 1;
     }
+    .ai-status-badge.ready { background: var(--surface); color: var(--text); }
+    .ai-status-badge.fallback { background: #FFFBEB; color: #92400E; border-color: #FDE68A; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot-green { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .dot-amber { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+
+    /* ── Form Cards ──────────────────────────────────────────────────── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-xl); padding: 2rem;
+      box-shadow: var(--shadow-hover);
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-label {
+      display: block; font-size: 0.85rem; font-weight: 700;
+      color: var(--text); margin-bottom: 0.5rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .textarea-field {
+      width: 100%; padding: 0.8rem 1rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-md); color: var(--text);
+      font-family: inherit; font-size: 0.95rem; min-height: 200px;
+      resize: vertical; transition: all 0.2s;
+    }
+    .textarea-field:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.1); background: var(--surface);
+    }
+    .btn-full { width: 100%; justify-content: center; margin-top: 1rem; }
+
+    /* ── Alerts ──────────────────────────────────────────────────────── */
+    .alert {
+      padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem;
+      margin-bottom: 1rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .alert-error { background: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; }
+    .alert-info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+
+    /* ── Loading ─────────────────────────────────────────────────────── */
+    .loading-state {
+      display: none; text-align: center; padding: 4rem 0;
+      grid-column: 1 / -1;
+    }
+    .loading-state.visible { display: block; }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid var(--border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 1s linear infinite; margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Results ─────────────────────────────────────────────────────── */
+    .results-container {
+      grid-column: 1 / -1; display: none; margin-top: 2rem;
+    }
+    .results-container.visible { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .results-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;
+    }
+
+    .q-category-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .q-category-header {
+      padding: 1rem 1.25rem; font-weight: 800; font-size: 0.95rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .header-tech { background: rgba(79,70,229,0.05); color: var(--primary); border-bottom: 1px solid rgba(79,70,229,0.1); }
+    .header-proj { background: rgba(16,185,129,0.05); color: var(--success); border-bottom: 1px solid rgba(16,185,129,0.1); }
+    .header-behav { background: rgba(245,158,11,0.05); color: #B45309; border-bottom: 1px solid rgba(245,158,11,0.1); }
+
+    .q-list { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
     
-    /* ── Toasts ───────────────────────────────────────── */
-    .toast-container {
-      position: fixed; top: 20px; right: 20px; z-index: 9999;
-      display: flex; flex-direction: column; gap: 10px;
+    .q-item {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      background: var(--bg); padding: 1rem; border-radius: var(--radius-md);
+      border: 1px solid var(--border);
     }
-    .toast {
-      background: #1e293b; color: white; padding: 16px 24px; border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-left: 4px solid var(--primary);
-      display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem;
-      animation: toast-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-      opacity: 0; transform: translateX(100%);
+    .q-num {
+      background: var(--surface); border: 1px solid var(--border);
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; color: var(--muted);
     }
-    .toast.success { border-left-color: #10B981; }
-    .toast.error { border-left-color: #EF4444; }
-    @keyframes toast-in { to { opacity: 1; transform: translateX(0); } }
-    @keyframes toast-out { to { opacity: 0; transform: translateX(100%); } }
-
-</style>
+    .q-text { font-size: 0.95rem; color: var(--text); line-height: 1.5; margin-bottom: 0.75rem; }
+    
+    .q-actions { display: flex; justify-content: flex-end; }
+    .q-copy-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--muted); font-size: 0.75rem; font-weight: 700;
+      padding: 0.3rem 0.6rem; border-radius: var(--radius-md);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .q-copy-btn:hover { color: var(--text); border-color: var(--muted); }
+  </style>
 </head>
 <body>
 
-<nav class="navbar">
-  <div class="nav-inner">
-    <div class="nav-left" id="navLeft">
-      <a href="index.html" class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        TalentLens<span>AI</span>
-      </a>
+  <nav class="navbar" id="main-nav"></nav>
+
+  <header class="hero">
+    <div class="hero-badge">🎙 AI-Powered</div>
+    <h1>Interview <span class="grad">Preparation</span></h1>
+    <p>Generate highly targeted interview questions based on your unique resume and the specific job you are applying for.</p>
+    <div id="aiStatusBadge" class="ai-status-badge fallback">
+      <span class="status-dot dot-amber"></span> Checking Status...
     </div>
-    <button class="mobile-menu-btn" onclick="document.getElementById('navRight').classList.toggle('show')">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-    </button>
-    <div class="nav-right" id="navRight"></div>
-  </div>
-</nav>
+  </header>
 
-<div class="hero">
-  <div class="hero-badge">🎤 AI Interview Coach</div>
-  <h1>Interview Prep</h1>
-  <p>Get personalized technical, project, and behavioral questions tailored to your exact resume and target job description.</p>
-</div>
-
-<div class="page">
-
-  <!-- Input Card -->
-  <div class="card">
-    <div class="card-title">📋 Your Information</div>
-
-    <div style="margin-bottom:1.25rem;">
-      <label for="resumeJsonInput">Resume Data (JSON)</label>
-      <textarea id="resumeJsonInput" style="min-height:120px;font-family:monospace;font-size:.82rem;"
-        placeholder='Paste your parsed resume JSON here. You can get this from the Dashboard after uploading your resume. Example: {"contact":{"name":"..."},"skills":{"flat_list":[...]},"projects":[...],...}'></textarea>
-      <div class="form-hint">Tip: Parse your resume on the <a href="index.html" style="color:var(--accent)">Dashboard</a>, then copy the parse result JSON here.</div>
-    </div>
-
-    <div>
-      <label for="jdInput">Job Description</label>
-      <textarea id="jdInput" style="min-height:160px;"
-        placeholder="Paste the full job description here. The more detail, the more personalized your interview questions will be.&#10;&#10;Example:&#10;We are looking for a Python Backend Engineer to build scalable REST APIs..."></textarea>
-    </div>
-
-    <button class="btn" id="generateBtn" onclick="generateQuestions()">
-      🎯 Generate Interview Questions
-    </button>
-
-    <div class="loading" id="interviewLoading">
-      <div class="spinner"></div>
-      Generating personalized questions with AI…
-    </div>
-
-    <div id="interviewError"></div>
-  </div>
-
-  <!-- Results -->
-  <div class="results" id="interviewResults">
-
-    <!-- Technical -->
-    <div class="q-section">
-      <div class="q-section-title q-tech">⚙️ Technical Questions</div>
-      <div class="q-list" id="technicalList"></div>
-    </div>
-
-    <!-- Project -->
-    <div class="q-section">
-      <div class="q-section-title q-project">🚀 Project Deep-Dive Questions</div>
-      <div class="q-list" id="projectList"></div>
-    </div>
-
-    <!-- Behavioral -->
-    <div class="q-section">
-      <div class="q-section-title q-behavioral">🧠 Behavioral Questions</div>
-      <div class="q-list" id="behavioralList"></div>
-    </div>
-
-    <!-- Print tip -->
-    <div class="paste-hint">
-      💡 Pro tip: Copy all questions and practice answering each one out loud using the STAR method (Situation, Task, Action, Result).
-    </div>
-  </div>
-
-</div>
-
-
-<!-- ── Modern Footer ───────────────────────────────────────────────────────── -->
-<footer style="background: white; border-top: 1px solid var(--border); padding: 4rem 2rem 2rem; margin-top: 4rem; color: var(--text);">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
-      <div style="grid-column: span 2;">
-        <div style="font-weight: 800; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="url(#footer-grad)" stroke-width="2.5"><defs><linearGradient id="footer-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--secondary)"/></linearGradient></defs><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens AI
-        </div>
-        <p style="color: var(--muted); font-size: 0.95rem; line-height: 1.6; max-width: 400px;">
-          AI-Powered Resume Intelligence Platform. Helping students and professionals optimize resumes, improve ATS performance, prepare for interviews, and match job opportunities using AI.
-        </p>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Features</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume Parsing</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">ATS Analysis</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">JD Matching</a>
-          <a href="ai_assistant.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">AI Resume Assistant</a>
-          <a href="interview_prep.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Interview Preparation</a>
-          <a href="history.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Resume History</a>
-          <a href="reports.html" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Saved Reports</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Resources</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub Repository</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Documentation</a>
-          <a href="#" style="color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Privacy Policy</a>
-        </div>
-      </div>
-      
-      <div>
-        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1.25rem; text-transform: uppercase; letter-spacing: 0.05em;">Tech Stack</h4>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <span style="color: var(--muted); font-size: 0.95rem;">FastAPI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Python</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">Gemini AI</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLAlchemy</span>
-          <span style="color: var(--muted); font-size: 0.95rem;">SQLite / PostgreSQL</span>
-        </div>
-      </div>
-    </div>
+  <main class="page-container">
     
-    <div style="border-top: 1px solid var(--border); padding-top: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-      <div style="color: var(--muted); font-size: 0.9rem;">
-        &copy; 2026 TalentLens AI. Built with ❤️ using FastAPI &bull; Python &bull; Gemini AI
-      </div>
-      <div style="display: flex; gap: 1.5rem;">
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">GitHub</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">LinkedIn</a>
-        <a href="#" style="color: var(--muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--muted)'">Email</a>
+    <!-- Left Column: Resume Input -->
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Parsed Resume JSON</label>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.75rem;">Paste the raw JSON from the Dashboard or your saved history.</p>
+        <textarea id="resumeJsonInput" class="textarea-field" placeholder='{ "name": "John Doe", "skills": {...} }'></textarea>
       </div>
     </div>
-  </div>
-</footer>
 
-
-
-<script>
-// ── Navbar & Toast Logic ──────────────────────────────────────────────────
-const API = 'http://localhost:8000';
-
-function getToken() { return localStorage.getItem('auth_token'); }
-function getUser()  {
-  const u = localStorage.getItem('auth_user');
-  return u ? JSON.parse(u) : null;
-}
-function doLogout() {
-  const token = getToken();
-  if (token) {
-    fetch(`${API}/auth/logout`, {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    }).catch(() => {});
-  }
-  localStorage.removeItem('auth_token');
-  localStorage.removeItem('auth_user');
-  window.location.href = 'login.html';
-}
-
-function showToast(message, type='success') {
-  let container = document.getElementById('toast-container');
-  if(!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.innerHTML = type === 'success' ? `✅ ${message}` : `❌ ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.animation = 'toast-out 0.3s ease forwards';
-    setTimeout(() => toast.remove(), 300);
-  }, 4000);
-}
-
-function renderNav() {
-  const user = getUser();
-  const navRight = document.getElementById('navRight');
-  const navLeft = document.getElementById('navLeft');
-  const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-  const isActive = (path) => currentPath === path ? 'active' : '';
-
-  if (navLeft) {
-    if (currentPath !== 'index.html') {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
-        </a>
-        <a href="index.html" class="btn-back">← Back to Home</a>
-      `;
-    } else {
-      navLeft.innerHTML = `
-        <a href="index.html" class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          TalentLens<span>AI</span>
-        </a>
-      `;
-    }
-  }
-
-  if (!navRight) return;
-
-  if (user) {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Dashboard</a>
-        <a href="history.html" class="nav-link ${isActive('history.html')}">History</a>
-        <a href="reports.html" class="nav-link ${isActive('reports.html')}">Reports</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
+    <!-- Right Column: JD Input & Submit -->
+    <div class="card">
+      <div id="interviewError"></div>
+      <div class="form-group">
+        <label class="form-label">Target Job Description</label>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:0.75rem;">Paste the requirements and responsibilities for the role.</p>
+        <textarea id="jdInput" class="textarea-field" placeholder="We are looking for a Senior Frontend Engineer with experience in React..."></textarea>
       </div>
-      <div class="profile-dropdown">
-        <button class="nav-badge profile-btn">
-          <span>👤 ${user.name.split(' ')[0]} ▼</span>
-        </button>
-        <div class="profile-menu">
-          <div class="profile-header">
-            <strong>${user.name}</strong>
-            <small>${user.email}</small>
+      <button class="btn-primary btn-full" id="generateBtn" onclick="generateQuestions()">
+        Generate Interview Questions
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="interviewLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p style="color: var(--muted); font-weight: 500;">AI is analyzing the overlap and generating questions...</p>
+    </div>
+
+    <!-- Results Area -->
+    <div id="interviewResults" class="results-container">
+      <div class="results-grid">
+        
+        <div class="q-category-card">
+          <div class="q-category-header header-tech">⚙️ Technical / Hard Skills</div>
+          <div class="q-list" id="technicalList"></div>
+        </div>
+
+        <div class="q-category-card">
+          <div class="q-category-header header-proj">💼 Project Deep-Dives</div>
+          <div class="q-list" id="projectList"></div>
+        </div>
+
+        <div class="q-category-card">
+          <div class="q-category-header header-behav">🤝 Behavioral / Cultural</div>
+          <div class="q-list" id="behavioralList"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" id="main-footer"></footer>
+
+  <script src="shared.js"></script>
+  <script>
+    // ── Check Gemini status on load ───────────────────────────────────────────────
+    async function checkAIStatus() {
+      try {
+        const r = await fetch(`${API}/ai/status`);
+        const d = await r.json();
+        const badge = document.getElementById('aiStatusBadge');
+        if (d.available) {
+          badge.className = 'ai-status-badge ready';
+          badge.innerHTML = `<span class="status-dot dot-green"></span> ${d.active_model.split('/')[1] || 'Gemini Ready'}`;
+        } else {
+          badge.className = 'ai-status-badge fallback';
+          badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
+        }
+      } catch (_) {}
+    }
+    checkAIStatus();
+
+    // Auto-fill from localStorage if available
+    (function() {
+      const savedJson = localStorage.getItem('interview_resume_json');
+      if (savedJson) {
+        document.getElementById('resumeJsonInput').value = savedJson;
+        localStorage.removeItem('interview_resume_json');
+      }
+    })();
+
+    // ── Error / Alert ─────────────────────────────────────────────────────────────
+    function showAlert(id, msg, type = 'error') {
+      document.getElementById(id).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    }
+    function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+
+    // ── Copy to clipboard ─────────────────────────────────────────────────────────
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓ Copied';
+        setTimeout(() => btn.textContent = '⎘ Copy', 1800);
+      });
+    }
+
+    // ── Render Questions ──────────────────────────────────────────────────────────
+    function renderQuestions(containerId, questions) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      if (!questions || !questions.length) {
+        el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;padding:.5rem">No questions generated for this category.</div>';
+        return;
+      }
+      questions.forEach((q, i) => {
+        const item = document.createElement('div');
+        item.className = 'q-item';
+        item.innerHTML = `
+          <span class="q-num">${i + 1}</span>
+          <div style="flex:1">
+            <div class="q-text">${q}</div>
+            <div class="q-actions">
+              <button class="q-copy-btn" onclick="copyText(${JSON.stringify(q)}, this)">⎘ Copy</button>
+            </div>
           </div>
-          <a href="index.html" class="profile-item">Dashboard</a>
-          <a href="history.html" class="profile-item">History</a>
-          <a href="reports.html" class="profile-item">Reports</a>
-          <button class="profile-item logout-btn" onclick="doLogout()">Logout</button>
-        </div>
-      </div>
-    `;
-  } else {
-    navRight.innerHTML = `
-      <div class="nav-links">
-        <a href="index.html" class="nav-link ${isActive('index.html')}">Home</a>
-        <a href="ai_assistant.html" class="nav-link ${isActive('ai_assistant.html')}">AI Assistant</a>
-        <a href="interview_prep.html" class="nav-link ${isActive('interview_prep.html')}">Interview Prep</a>
-        <a href="https://github.com/AbhijaySinghPanwar/resumeAI" target="_blank" class="nav-link">GitHub</a>
-      </div>
-      <div class="auth-buttons">
-        <a href="login.html" class="login-link">Login</a>
-        <button class="btn-nav signup-btn" onclick="window.location.href='signup.html'">Sign Up</button>
-      </div>
-    `;
-  }
-}
-renderNav();
-
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.navbar');
-  if (nav && window.scrollY > 10) {
-    nav.classList.add('scrolled');
-  } else if(nav) {
-    nav.classList.remove('scrolled');
-  }
-});
-</script>
-
-<script>
-const API = 'http://localhost:8000';
-
-async function checkAIStatus() {
-  try {
-    const r = await fetch(`${API}/ai/status`);
-    const d = await r.json();
-    const badge = document.getElementById('aiStatusBadge');
-    if (d.available) {
-      badge.className = 'ai-status-badge ready';
-      badge.innerHTML = `<span class="status-dot dot-green"></span> ${d.active_model.split('/')[1] || 'Gemini Ready'}`;
-    } else {
-      badge.className = 'ai-status-badge fallback';
-      badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
+        `;
+        el.appendChild(item);
+      });
     }
-  } catch (_) {}
-}
-checkAIStatus();
 
-function showAlert(id, msg, type = 'error') {
-  document.getElementById(id).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-}
-function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
+    // ── Generate Logic ────────────────────────────────────────────────────────────
+    async function generateQuestions() {
+      const rawResume = document.getElementById('resumeJsonInput').value.trim();
+      const jd        = document.getElementById('jdInput').value.trim();
 
-function copyText(text, btn) {
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = '✓ Copied';
-    setTimeout(() => btn.textContent = '⎘ Copy', 1800);
-  });
-}
+      if (!rawResume) { showAlert('interviewError', 'Please paste your resume JSON. Parse your resume on the Dashboard first.'); return; }
+      if (!jd)        { showAlert('interviewError', 'Please paste a job description.'); return; }
 
-function renderQuestions(containerId, questions) {
-  const el = document.getElementById(containerId);
-  el.innerHTML = '';
-  if (!questions || !questions.length) {
-    el.innerHTML = '<div style="color:var(--muted);font-size:.88rem;padding:.5rem">No questions generated for this category.</div>';
-    return;
-  }
-  questions.forEach((q, i) => {
-    const item = document.createElement('div');
-    item.className = 'q-item';
-    item.innerHTML = `
-      <span class="q-num">${i + 1}.</span>
-      <div style="flex:1">
-        <div class="q-text">${q}</div>
-        <div class="q-actions">
-          <button class="q-copy-btn" onclick="copyText(${JSON.stringify(q)}, this)">⎘ Copy</button>
-        </div>
-      </div>
-    `;
-    el.appendChild(item);
-  });
-}
+      let resume_data;
+      try {
+        const parsed = JSON.parse(rawResume);
+        // Accept either raw parse result or {result: {...}} wrapper from /api/parse
+        resume_data = parsed.result || parsed;
+      } catch (_) {
+        showAlert('interviewError', 'Invalid JSON. Please paste a valid resume JSON object.');
+        return;
+      }
 
-async function generateQuestions() {
-  const rawResume = document.getElementById('resumeJsonInput').value.trim();
-  const jd        = document.getElementById('jdInput').value.trim();
+      clearAlert('interviewError');
+      document.getElementById('interviewResults').classList.remove('visible');
+      document.getElementById('interviewLoading').classList.add('visible');
+      document.getElementById('generateBtn').disabled = true;
 
-  if (!rawResume) { showAlert('interviewError', 'Please paste your resume JSON. Parse your resume on the Dashboard first.'); return; }
-  if (!jd)        { showAlert('interviewError', 'Please paste a job description.'); return; }
-
-  let resume_data;
-  try {
-    const parsed = JSON.parse(rawResume);
-    // Accept either raw parse result or {result: {...}} wrapper from /api/parse
-    resume_data = parsed.result || parsed;
-  } catch (_) {
-    showAlert('interviewError', 'Invalid JSON. Please paste a valid resume JSON object.');
-    return;
-  }
-
-  clearAlert('interviewError');
-  document.getElementById('interviewResults').classList.remove('visible');
-  document.getElementById('interviewLoading').classList.add('visible');
-  document.getElementById('generateBtn').disabled = true;
-
-  try {
-    const r = await fetch(`${API}/ai/interview-questions`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({resume_data, job_description: jd}),
-    });
-    if (!r.ok) {
-      const err = await r.json();
-      throw new Error(err.detail || `HTTP ${r.status}`);
+      try {
+        const r = await fetch(`${API}/ai/interview-questions`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({resume_data, job_description: jd}),
+        });
+        if (!r.ok) {
+          const err = await r.json();
+          throw new Error(err.detail || `HTTP ${r.status}`);
+        }
+        const d = await r.json();
+        renderQuestions('technicalList',  d.technical_questions);
+        renderQuestions('projectList',    d.project_questions);
+        renderQuestions('behavioralList', d.behavioral_questions);
+        
+        document.getElementById('interviewResults').classList.add('visible');
+        document.getElementById('interviewResults').scrollIntoView({behavior:'smooth', block:'start'});
+      } catch (err) {
+        showAlert('interviewError', `Error: ${err.message}`);
+      } finally {
+        document.getElementById('interviewLoading').classList.remove('visible');
+        document.getElementById('generateBtn').disabled = false;
+      }
     }
-    const d = await r.json();
-    renderQuestions('technicalList',  d.technical_questions);
-    renderQuestions('projectList',    d.project_questions);
-    renderQuestions('behavioralList', d.behavioral_questions);
-    document.getElementById('interviewResults').classList.add('visible');
-    document.getElementById('interviewResults').scrollIntoView({behavior:'smooth', block:'start'});
-  } catch (err) {
-    showAlert('interviewError', `Error: ${err.message}`);
-  } finally {
-    document.getElementById('interviewLoading').classList.remove('visible');
-    document.getElementById('generateBtn').disabled = false;
-  }
-}
-</script>
+  </script>
 </body>
 </html>

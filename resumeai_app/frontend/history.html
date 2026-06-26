@@ -8,93 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-system.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-
-    :root {
-      --primary:   #000000;
-      --secondary: #333333;
-      --accent:    #4F46E5;
-      --accent-hover: #4338CA;
-      --success:   #10B981;
-      --warning:   #F59E0B;
-      --danger:    #EF4444;
-      --bg:        #FAFAFA;
-      --surface:   #FFFFFF;
-      --text:      #111827;
-      --muted:     #6B7280;
-      --border:    #E5E7EB;
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      --radius-md: 8px;
-      --radius-lg: 12px;
-      --radius-xl: 16px;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Navbar (SaaS Style) ─────────────────────────────────────────── */
-    .navbar {
-      position: sticky; top: 0; z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      height: 64px;
-    }
-    .nav-inner {
-      max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
-      display: flex; justify-content: space-between; align-items: center; height: 100%;
-    }
-    .logo {
-      font-size: 1.25rem; font-weight: 800; color: var(--text); text-decoration: none;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; height: 100%; }
-    .nav-link {
-      color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 600;
-      height: 100%; display: flex; align-items: center; border-bottom: 2px solid transparent;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .nav-link:hover, .nav-link.active { color: var(--text); border-bottom-color: var(--text); }
-    
-    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
-    .profile-dropdown { position: relative; }
-    .profile-btn {
-      background: var(--bg); color: var(--text); border: 1px solid var(--border);
-      padding: 0.4rem 1rem; border-radius: 99px; font-weight: 600; font-size: 0.85rem;
-      cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;
-    }
-    .profile-btn:hover { background: var(--border); }
-    .profile-menu {
-      position: absolute; top: calc(100% + 0.5rem); right: 0;
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg); width: 220px;
-      opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.2s; z-index: 1000;
-    }
-    .profile-dropdown:hover .profile-menu { opacity: 1; visibility: visible; transform: translateY(0); }
-    .profile-header { padding: 1rem; border-bottom: 1px solid var(--border); }
-    .profile-header strong { display: block; color: var(--text); font-size: 0.9rem; }
-    .profile-header small { color: var(--muted); font-size: 0.8rem; }
-    .profile-item {
-      display: block; width: 100%; text-align: left; padding: 0.75rem 1rem;
-      border: none; background: none; color: var(--text); text-decoration: none;
-      font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
-    }
-    .profile-item:hover { background: var(--bg); color: var(--text); }
-    .logout-btn { color: var(--danger); border-top: 1px solid var(--border); border-radius: 0 0 var(--radius-md) var(--radius-md); }
-    .logout-btn:hover { background: #FEF2F2; }
-
     /* ── Header ─────────────────────────────────────────────── */
     .dashboard-header {
       padding: 2.5rem 0 1.5rem;
@@ -441,70 +356,13 @@
     </div>
   </div>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
+  <footer class="site-footer" id="main-footer"></footer>
 
+  <script src="shared.js"></script>
   <script>
-    const API = 'http://localhost:8000';
     let allResumes = [];
     let deleteTargetId = null;
     let searchTimer = null;
-
-    // --- Authentication & Navigation ---
-    function getToken() { return localStorage.getItem('auth_token'); }
-    function getUser() { const u = localStorage.getItem('auth_user'); return u ? JSON.parse(u) : null; }
-    
-    function doLogout() {
-      const token = getToken();
-      if (token) fetch(`${API}/auth/logout`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(() => {});
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      window.location.href = 'login.html';
-    }
-
-    function renderNav() {
-      const user = getUser();
-      const navRight = document.getElementById('navRight');
-      if (user && getToken() && getToken() !== 'undefined') {
-        navRight.innerHTML = `
-          <div class="nav-links">
-            <a href="index.html" class="nav-link">Dashboard</a>
-            <a href="history.html" class="nav-link active">History</a>
-          </div>
-          <div class="profile-dropdown">
-            <button class="profile-btn">
-              <span>👤 ${user.name.split(' ')[0]}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-            </button>
-            <div class="profile-menu">
-              <div class="profile-header">
-                <strong>${user.name}</strong>
-                <small>${user.email}</small>
-              </div>
-              <button class="profile-item logout-btn" onclick="doLogout()">Log out</button>
-            </div>
-          </div>
-        `;
-      } else {
-        navRight.innerHTML = `
-          <a href="login.html" class="btn-primary">Sign In</a>
-        `;
-      }
-    }
-
-    // --- Toast Notifications ---
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
-      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
 
     // --- UI States ---
     function renderSkeletons() {
@@ -851,7 +709,6 @@
     document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
 
     // --- Boot ---
-    renderNav();
     fetchResumes();
 
   </script>
