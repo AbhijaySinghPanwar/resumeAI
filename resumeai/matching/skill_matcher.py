@@ -35,7 +35,8 @@ def _score_to_grade(score: int) -> str:
 
 # ── Component 1: Skill Match (40%) ────────────────────────────────────────────
 
-from typing import Dict, Any, List, Optional
+import logging
+from typing import Dict, Any, List, Optional, Union
 
 def _compute_skill_score(
     parsed_resume: Dict[str, Any],
@@ -43,8 +44,8 @@ def _compute_skill_score(
     debug: Dict,
 ) -> Optional[float]:
     """Skill overlap score 0-100 with partial credit for preferred. Returns None if JD has no skills."""
-    required = list(parsed_jd.required_skills)
-    preferred = list(parsed_jd.preferred_skills)
+    required = list(getattr(parsed_jd, "required_skills", []))
+    preferred = list(getattr(parsed_jd, "preferred_skills", []))
 
     if not required and not preferred:
         debug["skill_match_note"] = "No skills extracted from JD — skill match is N/A."
@@ -113,8 +114,8 @@ def _compute_semantic_score(
     debug: Dict,
 ) -> float:
     """Semantic similarity score 0-100 using MiniLM embeddings with keyword fallback."""
-    responsibilities = parsed_jd.responsibilities
-    jd_keywords = parsed_jd.keywords
+    responsibilities = getattr(parsed_jd, "responsibilities", [])
+    jd_keywords = getattr(parsed_jd, "keywords", [])
 
     if not responsibilities and not jd_keywords:
         # No JD text to compare — fall back to skill-based estimate
@@ -170,27 +171,56 @@ def _semantic_fallback(resume_snippets: List[str], jd_texts: List[str]) -> float
 def _compute_experience_score(parsed_resume: Dict[str, Any], parsed_jd: ParsedJD) -> float:
     experience = parsed_resume.get("experience", [])
     projects = parsed_resume.get("projects", [])
-    exp_reqs = parsed_jd.experience_requirements
+    exp_reqs = getattr(parsed_jd, "experience_requirements", [])
+
+    exp_text = " ".join(exp_reqs).lower() if exp_reqs else ""
+    
+    # Try to find required years in JD
+    jd_years = None
+    matches = re.findall(r"(\d+)(?:\+|-|\s+to\s+\d+)?\s*(?:years?|yrs?)", exp_text)
+    if matches:
+        jd_years = max(int(m) for m in matches)
+
+    is_entry = any(kw in exp_text for kw in [
+        "entry", "junior", "fresher", "fresh graduate", "0-1", "0-2", "internship", "intern"
+    ])
+    if is_entry and not jd_years:
+        jd_years = 0
+
+    from resumeai.ats.exporters import _estimate_years_experience
+    resume_years = _estimate_years_experience(experience)
 
     score = 30.0  # base
 
-    # Formal experience
-    if len(experience) >= 3:  score += 30
-    elif len(experience) == 2: score += 22
-    elif len(experience) == 1: score += 14
+    # Base heuristic if no jd_years could be extracted
+    if jd_years is None:
+        if len(experience) >= 3:  score += 30
+        elif len(experience) == 2: score += 22
+        elif len(experience) == 1: score += 14
 
-    # Projects count toward experience (freshers especially)
-    if len(projects) >= 3:   score += 25
-    elif len(projects) >= 2: score += 18
-    elif len(projects) >= 1: score += 10
+        if len(projects) >= 3:   score += 25
+        elif len(projects) >= 2: score += 18
+        elif len(projects) >= 1: score += 10
 
-    if exp_reqs:
-        exp_text = " ".join(exp_reqs).lower()
-        is_entry = any(kw in exp_text for kw in [
-            "entry", "junior", "fresher", "fresh graduate", "0-1", "0-2", "internship", "intern"
-        ])
         if is_entry:
             score = min(100, score + 15)
+
+        return round(min(100.0, score), 1)
+
+    # Compare against jd_years
+    if resume_years is None:
+        # Give partial credit based on projects if fresher
+        if len(projects) >= 2:
+            resume_years = 1
+        else:
+            resume_years = 0
+
+    if resume_years >= jd_years:
+        score = 100.0
+    else:
+        # Scale proportionally but don't drop below 20 for having something
+        ratio = resume_years / jd_years if jd_years > 0 else 1.0
+        score = 20.0 + (ratio * 80.0)
 
     return round(min(100.0, score), 1)
 
@@ -209,26 +239,43 @@ CS_FIELDS = {
 }
 
 
-def _compute_education_score(parsed_resume: Dict[str, Any], parsed_jd: ParsedJD) -> float:
+def _compute_education_score(parsed_resume: Dict[str, Any], parsed_jd: ParsedJD) -> Union[float, str]:
+    edu_reqs = getattr(parsed_jd, "education_requirements", [])
+    if not edu_reqs:
+        return "Not Applicable"
+
     education = parsed_resume.get("education", [])
     if not education:
         return 35.0
 
     score = 40.0
+    
+    edu_text = " ".join(edu_reqs).lower() if edu_reqs else ""
+    
+    jd_requires_master = any(kw in edu_text for kw in ["master", "m.s.", "m.tech", "mtech", "ms"])
+    jd_requires_phd = any(kw in edu_text for kw in ["phd", "ph.d", "doctorate"])
+
+    has_bachelor = False
+    has_master = False
+    has_phd = False
+    has_cs_field = False
+    max_gpa_score = 0.0
 
     for edu in education:
         combined = f"{edu.get('degree','')}{edu.get('field_of_study','')}".lower()
-        if any(kw in combined for kw in DEGREE_KEYWORDS):
-            score += 20
-            break
+        if any(kw in combined for kw in ["phd", "ph.d", "doctorate"]):
+            has_phd = True
+            has_master = True
+            has_bachelor = True
+        elif any(kw in combined for kw in ["m.tech", "mtech", "master", "m.s.", "m.e.", "m.sc"]):
+            has_master = True
+            has_bachelor = True
+        elif any(kw in combined for kw in ["b.tech", "btech", "bachelor", "b.s.", "b.e.", "b.sc", "be ", " be"]):
+            has_bachelor = True
 
-    for edu in education:
-        combined = f"{edu.get('degree','')}{edu.get('field_of_study','')}".lower()
         if any(kw in combined for kw in CS_FIELDS):
-            score += 25
-            break
-
-    for edu in education:
+            has_cs_field = True
+            
         gpa_str = edu.get("gpa", "") or ""
         if gpa_str:
             try:
@@ -236,15 +283,30 @@ def _compute_education_score(parsed_resume: Dict[str, Any], parsed_jd: ParsedJD)
                 if nums:
                     gpa_val = float(nums[0])
                     if gpa_val > 4.0:  # /10 scale
-                        if gpa_val >= 9.0:   score += 15
-                        elif gpa_val >= 8.0: score += 10
-                        elif gpa_val >= 7.0: score += 5
+                        if gpa_val >= 9.0:   max_gpa_score = max(max_gpa_score, 15)
+                        elif gpa_val >= 8.0: max_gpa_score = max(max_gpa_score, 10)
+                        elif gpa_val >= 7.0: max_gpa_score = max(max_gpa_score, 5)
                     else:              # /4 scale
-                        if gpa_val >= 3.7:   score += 15
-                        elif gpa_val >= 3.3: score += 10
+                        if gpa_val >= 3.7:   max_gpa_score = max(max_gpa_score, 15)
+                        elif gpa_val >= 3.3: max_gpa_score = max(max_gpa_score, 10)
             except (ValueError, IndexError):
                 pass
-        break
+
+    if jd_requires_phd:
+        if has_phd: score += 20
+        elif has_master: score += 10
+        elif has_bachelor: score += 5
+    elif jd_requires_master:
+        if has_master or has_phd: score += 20
+        elif has_bachelor: score += 10
+    else:
+        # Default expects bachelor
+        if has_bachelor or has_master or has_phd: score += 20
+
+    if has_cs_field:
+        score += 25
+
+    score += max_gpa_score
 
     return round(min(100.0, score), 1)
 
@@ -284,39 +346,36 @@ class SkillMatcher:
         edu_score    = _compute_education_score(parsed_resume, parsed_jd)
 
         # ── Weighted overall ──────────────────────────────────────────────
+        active_wt = sum(self.WEIGHTS.values())
         if skill_score is None:
-            active_wt = self.WEIGHTS["semantic"] + self.WEIGHTS["experience"] + self.WEIGHTS["education"]
-            overall = (
-                sem_score  * self.WEIGHTS["semantic"]
-                + exp_score  * self.WEIGHTS["experience"]
-                + edu_score  * self.WEIGHTS["education"]
-            ) / active_wt
-            
-            w_skills = "0%"
-            w_semantic = f"{(self.WEIGHTS['semantic']/active_wt)*100:.0f}%"
-            w_experience = f"{(self.WEIGHTS['experience']/active_wt)*100:.0f}%"
-            w_education = f"{(self.WEIGHTS['education']/active_wt)*100:.0f}%"
-            
-            c_skills = None
-            c_semantic = round((sem_score * self.WEIGHTS["semantic"]) / active_wt, 1)
-            c_experience = round((exp_score * self.WEIGHTS["experience"]) / active_wt, 1)
-            c_education = round((edu_score * self.WEIGHTS["education"]) / active_wt, 1)
+            active_wt -= self.WEIGHTS["skills"]
+            skill_score_val = 0.0
         else:
-            overall = (
-                skill_score  * self.WEIGHTS["skills"]
-                + sem_score  * self.WEIGHTS["semantic"]
-                + exp_score  * self.WEIGHTS["experience"]
-                + edu_score  * self.WEIGHTS["education"]
-            )
-            w_skills = f"{self.WEIGHTS['skills']*100:.0f}%"
-            w_semantic = f"{self.WEIGHTS['semantic']*100:.0f}%"
-            w_experience = f"{self.WEIGHTS['experience']*100:.0f}%"
-            w_education = f"{self.WEIGHTS['education']*100:.0f}%"
-            
-            c_skills = round(skill_score * self.WEIGHTS["skills"], 1)
-            c_semantic = round(sem_score * self.WEIGHTS["semantic"], 1)
-            c_experience = round(exp_score * self.WEIGHTS["experience"], 1)
-            c_education = round(edu_score * self.WEIGHTS["education"], 1)
+            skill_score_val = skill_score
+
+        if edu_score == "Not Applicable":
+            active_wt -= self.WEIGHTS["education"]
+            edu_score_val = 0.0
+            c_education = "Not Applicable"
+        else:
+            edu_score_val = edu_score
+            c_education = round((edu_score * self.WEIGHTS["education"]) / active_wt, 1) if active_wt > 0 else 0
+
+        overall = (
+            skill_score_val  * self.WEIGHTS["skills"] * (0 if skill_score is None else 1)
+            + sem_score      * self.WEIGHTS["semantic"]
+            + exp_score      * self.WEIGHTS["experience"]
+            + edu_score_val  * self.WEIGHTS["education"] * (0 if edu_score == "Not Applicable" else 1)
+        ) / active_wt if active_wt > 0 else 0.0
+
+        w_skills = f"{(self.WEIGHTS['skills']/active_wt)*100:.0f}%" if skill_score is not None and active_wt > 0 else "0%"
+        w_semantic = f"{(self.WEIGHTS['semantic']/active_wt)*100:.0f}%" if active_wt > 0 else "0%"
+        w_experience = f"{(self.WEIGHTS['experience']/active_wt)*100:.0f}%" if active_wt > 0 else "0%"
+        w_education = f"{(self.WEIGHTS['education']/active_wt)*100:.0f}%" if edu_score != "Not Applicable" and active_wt > 0 else "0%"
+        
+        c_skills = round((skill_score * self.WEIGHTS["skills"]) / active_wt, 1) if skill_score is not None and active_wt > 0 else None
+        c_semantic = round((sem_score * self.WEIGHTS["semantic"]) / active_wt, 1) if active_wt > 0 else 0
+        c_experience = round((exp_score * self.WEIGHTS["experience"]) / active_wt, 1) if active_wt > 0 else 0
 
         overall = int(round(min(100.0, max(0.0, overall))))
 
@@ -326,7 +385,7 @@ class SkillMatcher:
 
         # ── Debug info (full traceability) ────────────────────────────────
         debug_info = {
-            "jd_skills":          list(parsed_jd.required_skills),
+            "jd_skills":          list(getattr(parsed_jd, "required_skills", [])),
             "resume_skills":      resume_skills_all,
             "matched_skills":     gap.matched_skills,
             "missing_skills":     gap.missing_skills,

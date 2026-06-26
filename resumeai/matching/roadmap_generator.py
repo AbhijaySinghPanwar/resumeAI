@@ -209,6 +209,15 @@ SKILL_ROADMAP_DB: Dict[str, List[Dict]] = {
             "difficulty": "Beginner",
         },
     ],
+    "javascript": [
+        {
+            "resource_type": "course",
+            "recommendation": "The Complete JavaScript Course 2024 (Udemy – Jonas Schmedtmann)",
+            "url": "https://www.udemy.com/course/the-complete-javascript-course/",
+            "estimated_time": "6-8 weeks",
+            "difficulty": "Beginner-Intermediate",
+        },
+    ],
     "node.js": [
         {
             "resource_type": "course",
@@ -328,7 +337,6 @@ SKILL_ALIASES: Dict[str, str] = {
     "kafka": "apache kafka",
     "airflow": "apache kafka",  # suggest kafka for data pipeline skills
     "typescript": "typescript",
-    "javascript": "python",  # fallback to general web course
 }
 
 

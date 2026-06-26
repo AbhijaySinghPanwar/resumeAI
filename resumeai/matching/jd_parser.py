@@ -235,6 +235,11 @@ EXPERIENCE_PATTERNS = [
     re.compile(r"(internship|intern|co-op|fresher|fresh graduate)", re.IGNORECASE),
 ]
 
+EDUCATION_PATTERNS = [
+    re.compile(r"(bachelor|b\.s\.|bs|master|m\.s\.|ms|phd|ph\.d|degree in computer science)", re.IGNORECASE),
+    re.compile(r"(degree|diploma|certification) in", re.IGNORECASE),
+]
+
 
 def _split_sections(text: str) -> Dict[str, str]:
     """Split JD into named sections without mis-tagging bullet content as headers."""
@@ -311,6 +316,21 @@ def _extract_experience_reqs(text: str) -> List[str]:
     return reqs[:10]
 
 
+def _extract_education_reqs(text: str) -> List[str]:
+    """Find education requirement statements."""
+    reqs: List[str] = []
+    seen: Set[str] = set()
+    for line in text.splitlines():
+        for pat in EDUCATION_PATTERNS:
+            if pat.search(line):
+                clean = line.strip()
+                if clean and clean not in seen and len(clean) > 5:
+                    reqs.append(clean)
+                    seen.add(clean)
+                break
+    return reqs[:5]
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
 def parse_job_description(text: str) -> ParsedJD:
@@ -355,6 +375,9 @@ def parse_job_description(text: str) -> ParsedJD:
     # Experience requirements
     experience_requirements = _extract_experience_reqs(text)
 
+    # Education requirements
+    education_requirements = _extract_education_reqs(text)
+
     # Keywords: union of required + preferred skills (clean, canonical)
     keywords = sorted(set(required_skills) | set(pref_skills))
 
@@ -363,6 +386,7 @@ def parse_job_description(text: str) -> ParsedJD:
         required_skills=required_skills,
         preferred_skills=pref_skills,
         experience_requirements=experience_requirements,
+        education_requirements=education_requirements,
         responsibilities=responsibilities,
         keywords=keywords,
     )

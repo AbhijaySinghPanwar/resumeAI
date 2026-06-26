@@ -187,10 +187,14 @@ class TestInterviewGenerator:
         return InterviewGenerator(mock_gemini)
 
     def test_returns_three_categories(self):
+        q_obj = {
+            "question": "Q", "difficulty": "Easy", "duration": "5m", 
+            "why_asked": "W", "good_answer": "G", "sample_outline": "S"
+        }
         payload = json.dumps({
-            "technical_questions": ["Q1", "Q2", "Q3", "Q4", "Q5"],
-            "project_questions": ["P1", "P2", "P3", "P4"],
-            "behavioral_questions": ["B1", "B2", "B3", "B4"],
+            "technical_questions": [q_obj] * 5,
+            "project_questions": [q_obj] * 4,
+            "behavioral_questions": [q_obj] * 4,
         })
         gen = self._make_generator(payload)
         result = gen.generate(SAMPLE_RESUME, SAMPLE_JD)
@@ -199,10 +203,14 @@ class TestInterviewGenerator:
         assert "behavioral_questions" in result
 
     def test_technical_questions_are_list(self):
+        q_obj = {
+            "question": "Q", "difficulty": "Easy", "duration": "5m", 
+            "why_asked": "W", "good_answer": "G", "sample_outline": "S"
+        }
         payload = json.dumps({
-            "technical_questions": ["Q1", "Q2", "Q3", "Q4", "Q5"],
-            "project_questions": ["P1", "P2", "P3", "P4"],
-            "behavioral_questions": ["B1", "B2", "B3", "B4"],
+            "technical_questions": [q_obj] * 5,
+            "project_questions": [q_obj] * 4,
+            "behavioral_questions": [q_obj] * 4,
         })
         gen = self._make_generator(payload)
         result = gen.generate(SAMPLE_RESUME, SAMPLE_JD)

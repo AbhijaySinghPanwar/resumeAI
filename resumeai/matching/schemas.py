@@ -2,7 +2,7 @@
 matching/schemas.py — Pydantic schemas for Phase 2 Job Matching Engine.
 """
 from __future__ import annotations
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -10,7 +10,7 @@ class ComponentScores(BaseModel):
     skills: Optional[float] = Field(None, description="Skill overlap score 0-100. None if no skills extracted.")
     semantic: float = Field(..., description="Semantic similarity score 0-100")
     experience: float = Field(..., description="Experience alignment score 0-100")
-    education: float = Field(..., description="Education alignment score 0-100")
+    education: Union[float, str] = Field(..., description="Education alignment score 0-100 or 'Not Applicable'")
 
 
 class MatchResult(BaseModel):
@@ -49,11 +49,12 @@ class SkillGapResult(BaseModel):
 
 class ParsedJD(BaseModel):
     title: str = ""
-    required_skills: List[str] = []
-    preferred_skills: List[str] = []
-    experience_requirements: List[str] = []
-    responsibilities: List[str] = []
-    keywords: List[str] = []
+    required_skills: List[str] = Field(default_factory=list)
+    preferred_skills: List[str] = Field(default_factory=list)
+    experience_requirements: List[str] = Field(default_factory=list)
+    education_requirements: List[str] = Field(default_factory=list)
+    responsibilities: List[str] = Field(default_factory=list)
+    keywords: List[str] = Field(default_factory=list)
 
     def to_dict(self) -> dict:
         return self.model_dump()

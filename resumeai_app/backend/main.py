@@ -24,6 +24,11 @@ _backend_dir = os.path.dirname(os.path.abspath(__file__))
 if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 
+# ── Environment ────────────────────────────────────────────────────────────────
+from dotenv import load_dotenv
+env_path = os.path.join(_backend_dir, ".env")
+load_dotenv(dotenv_path=env_path, override=True)
+
 # ── Core ───────────────────────────────────────────────────────────────────────
 from core.config import settings
 from core.logger import get_logger
@@ -119,6 +124,9 @@ app.include_router(export_router)
 
 logger.info("ResumeAI v4.0.0 started. Gemini: %s", _gemini.active_model or "fallback")
 
+_masked_key = (settings.GEMINI_API_KEY[:8] + "...") if settings.GEMINI_API_KEY else "Not Configured"
+print("Gemini Key Loaded:", _masked_key, flush=True)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Pydantic Request/Response Models (defined before routes that reference them)
@@ -161,11 +169,20 @@ class ProjectResponse(BaseModel):
 class InterviewRequest(BaseModel):
     resume_data: dict
     job_description: str
+    company_preset: Optional[str] = "Generic"
+
+class RichQuestion(BaseModel):
+    question: str
+    difficulty: str
+    duration: str
+    why_asked: str
+    good_answer: str
+    sample_outline: str
 
 class InterviewResponse(BaseModel):
-    technical_questions: list
-    project_questions: list
-    behavioral_questions: list
+    technical_questions: list[RichQuestion]
+    project_questions: list[RichQuestion]
+    behavioral_questions: list[RichQuestion]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -191,54 +208,67 @@ async def parse_resume(
     current_user               = Depends(get_optional_user),
     db: Session                = Depends(get_db),
 ):
-    if file and file.filename:
-        raw = await file.read()
-        filename = file.filename
-        if file.filename.lower().endswith(".pdf"):
-            result = parser.parse_pdf(raw)
+    try:
+        if file and file.filename:
+            raw = await file.read()
+            filename = file.filename
+            if file.filename.lower().endswith(".pdf"):
+                result = parser.parse_pdf(raw)
+            else:
+                result = parser.parse_text(raw.decode("utf-8", errors="replace"))
+        elif text:
+            result = parser.parse_text(text)
+            filename = "plain_text.txt"
         else:
-            result = parser.parse_text(raw.decode("utf-8", errors="replace"))
-    elif text:
-        result = parser.parse_text(text)
-        filename = "plain_text.txt"
-    else:
-        raise HTTPException(400, "Provide either a file upload or text field.")
+            raise HTTPException(400, "Provide either a file upload or text field.")
 
-    gate_decision = gate.evaluate(result)
+        gate_decision = gate.evaluate(result)
 
-    from resumeai.scoring.ats_scorer import ATSScorer
-    ats_score_result = ATSScorer().score(result)
+        from resumeai.scoring.ats_scorer import ATSScorer
+        ats_score_result = ATSScorer().score(result)
 
-    # ── Auto-save when authenticated ──────────────────────────────────────
-    saved_resume_id = None
-    if current_user:
-        try:
-            resume = ResumeRepository(db).create(
-                user_id=current_user.id,
-                filename=filename,
-                parsed_json=result,
-                ats_score=ats_score_result.get("overall_score"),
-            )
-            ReportRepository(db).create_ats(
-                resume_id=resume.id,
-                ats_score=ats_score_result.get("overall_score", 0),
-                ats_breakdown=ats_score_result.get("breakdown", {}),
-                suggestions=ats_score_result.get("improvements", []),
-            )
-            saved_resume_id = resume.id
-            logger.info("Auto-saved resume: id=%d user_id=%d", resume.id, current_user.id)
-        except Exception as exc:
-            logger.warning("Auto-save failed (non-fatal): %s", exc)
+        # ── Auto-save when authenticated ──────────────────────────────────────
+        saved_resume_id = None
+        if current_user:
+            try:
+                resume = ResumeRepository(db).create(
+                    user_id=current_user.id,
+                    filename=filename,
+                    parsed_json=result,
+                    ats_score=ats_score_result.get("overall_score"),
+                )
+                ReportRepository(db).create_ats(
+                    resume_id=resume.id,
+                    ats_score=ats_score_result.get("overall_score", 0),
+                    ats_breakdown=ats_score_result.get("breakdown", {}),
+                    suggestions=ats_score_result.get("improvements", []),
+                )
+                saved_resume_id = resume.id
+                logger.info("Auto-saved resume: id=%d user_id=%d", resume.id, current_user.id)
+            except Exception as exc:
+                logger.warning("Auto-save failed (non-fatal): %s", exc)
 
-    response = {
-        "result":   result,
-        "gate":     gate_decision.to_dict(),
-        "ats_score": ats_score_result,
-    }
-    if saved_resume_id:
-        response["saved_resume_id"] = saved_resume_id
+        response = {
+            "result":   result,
+            "gate":     gate_decision.to_dict(),
+            "ats_score": ats_score_result,
+        }
+        if saved_resume_id:
+            response["saved_resume_id"] = saved_resume_id
 
-    return response
+        return response
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        user_info = current_user.email if current_user else "Guest"
+        logger.error(
+            "[Resume Parse] User: %s\nEndpoint: /api/parse\nException: %s\nStack Trace:\n%s",
+            user_info, repr(e), traceback.format_exc()
+        )
+        raise HTTPException(status_code=500, detail="Unable to parse resume.")
+
 
 
 @app.post("/api/score", tags=["ATS Scoring"],
@@ -299,6 +329,9 @@ def match_resume(
 
         # Auto-save JD report if authenticated and a resume_id is provided
         if current_user and req.resume_id:
+            if not ResumeRepository(db).exists_for_user(req.resume_id, current_user.id):
+                raise HTTPException(403, "Not authorized to access this resume.")
+                
             try:
                 jd_title = parsed_jd.to_dict().get("title", "")
                 match_dict = result.to_dict()
@@ -308,7 +341,7 @@ def match_resume(
                     match_score=match_dict.get("match_score", 0),
                     matched_skills=match_dict.get("matched_skills", []),
                     missing_skills=match_dict.get("missing_skills", []),
-                    learning_roadmap=match_dict.get("recommended_learning", {}),
+                    learning_roadmap=match_dict.get("recommended_learning", []),
                     job_title=jd_title,
                 )
                 logger.info("Auto-saved JD report: user_id=%d", current_user.id)
@@ -321,8 +354,10 @@ def match_resume(
         }
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(500, f"Matching engine error: {str(e)}")
+    except Exception as exc:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(500, f"Matching engine error: {exc}")
 
 
 # ── Phase 3 AI Endpoints (UNCHANGED) ─────────────────────────────────────────
@@ -339,9 +374,23 @@ def improve_bullet(req: "BulletRequest"):
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc))
+        logger.error(f"Gemini error in improve_bullet: {exc}", exc_info=True)
+        return JSONResponse(status_code=503, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "UNAVAILABLE",
+            "error_message": str(exc),
+            "fallback": True
+        })
     except Exception as exc:
-        raise HTTPException(500, f"Bullet improver error: {str(exc)}")
+        logger.error(f"Bullet improver error: {exc}", exc_info=True)
+        return JSONResponse(status_code=500, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "INTERNAL_ERROR",
+            "error_message": str(exc),
+            "fallback": True
+        })
 
 
 @app.post("/ai/enhance-project", tags=["AI Assistant"],
@@ -358,9 +407,23 @@ def enhance_project(req: "ProjectRequest"):
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc))
+        logger.error(f"Gemini error in enhance_project: {exc}", exc_info=True)
+        return JSONResponse(status_code=503, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "UNAVAILABLE",
+            "error_message": str(exc),
+            "fallback": True
+        })
     except Exception as exc:
-        raise HTTPException(500, f"Project enhancer error: {str(exc)}")
+        logger.error(f"Project enhancer error: {exc}", exc_info=True)
+        return JSONResponse(status_code=500, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "INTERNAL_ERROR",
+            "error_message": str(exc),
+            "fallback": True
+        })
 
 
 @app.post("/ai/interview-questions", tags=["AI Assistant"],
@@ -372,14 +435,28 @@ def generate_interview_questions(req: "InterviewRequest"):
     if not req.job_description or not req.job_description.strip():
         raise HTTPException(400, "job_description must not be empty")
     try:
-        result = _interview.generate(req.resume_data, req.job_description)
+        result = _interview.generate(req.resume_data, req.job_description, req.company_preset)
         return InterviewResponse(**result)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
     except RuntimeError as exc:
-        raise HTTPException(503, str(exc))
+        logger.error(f"Gemini error in generate_interview_questions: {exc}", exc_info=True)
+        return JSONResponse(status_code=503, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "UNAVAILABLE",
+            "error_message": str(exc),
+            "fallback": True
+        })
     except Exception as exc:
-        raise HTTPException(500, f"Interview generator error: {str(exc)}")
+        logger.error(f"Interview generator error: {exc}", exc_info=True)
+        return JSONResponse(status_code=500, content={
+            "available": False,
+            "provider": "Gemini",
+            "error_code": "INTERNAL_ERROR",
+            "error_message": str(exc),
+            "fallback": True
+        })
 
 
 @app.get("/ai/status", tags=["AI Assistant"],

@@ -18,11 +18,11 @@ from .gemini_service import GeminiService
 logger = logging.getLogger(__name__)
 
 PROMPT_TEMPLATE = """\
-You are an experienced technical interviewer at a top technology company.
+You are an elite Senior Technical Recruiter and Hiring Manager conducting an interview for a {company_preset} style company.
 
-Task: Generate realistic interview questions for the candidate below.
+Task: Generate a highly personalized interview preparation guide for the candidate below based on their resume AND the target Job Description (JD).
 
-JOB DESCRIPTION:
+JOB DESCRIPTION (PRIMARY SOURCE - MUST INFLUENCE 70% OF QUESTIONS):
 {job_description}
 
 CANDIDATE RESUME SUMMARY:
@@ -32,18 +32,35 @@ CANDIDATE RESUME SUMMARY:
 - Experience: {experience}
 - Education: {education}
 
-Rules:
-- technical_questions: 5 questions testing technical depth based on the candidate's skills and the JD. Include at least 1 system design question if the JD mentions backend/distributed systems. Include at least 1 data structures/algorithms question if relevant.
-- project_questions: 4 questions — one per major project listed (or repeat projects if fewer than 4). Ask about architecture decisions, challenges, trade-offs, and scalability.
-- behavioral_questions: 4 STAR-format questions tailored to the role. Focus on teamwork, ownership, handling failure, and communication.
+Rules & Strategy:
+1. SEMANTIC MATCHING & GAPS: Analyze the JD for required skills/technologies. If the candidate lacks a required skill, generate specific "Gap-Based" questions (e.g., "Your resume doesn't mention X. How would you approach using X?").
+2. PROJECT AWARENESS: Analyze the candidate's specific projects. Instead of "Tell me about your project", ask deep-dives like "Explain the architecture of your [Project Name] project" or "Why did you choose [Tech] for [Project Name]?".
+3. NO DUPLICATES: Maintain semantic uniqueness. Do not ask the same concept twice.
+4. PROGRESSION: Ensure difficulty progresses naturally (Easy -> Medium -> Hard -> Expert).
+5. COMPANY PRESET: Adapt the style to '{company_preset}'. (e.g., Google = Algorithms/Scalability; Amazon = Leadership Principles).
+6. REQUIRED CATEGORIES (3 categories only):
+   - technical_questions: Questions testing JD-required tech stack, System Design, Coding concepts, and missing skills.
+   - project_questions: Deep dives specifically referencing the candidate's actual projects.
+   - behavioral_questions: STAR format questions, tailored to the role and company style.
 
-Each question must be specific to THIS candidate and THIS role — not generic.
-
-Return ONLY valid JSON in this exact format, no markdown fences:
+Format Requirements:
+Return ONLY a valid JSON object matching this schema. NO markdown formatting.
+Each category must be a list of exactly 4-5 question objects.
+Question Object Schema:
 {{
-  "technical_questions": ["...", "...", "...", "...", "..."],
-  "project_questions": ["...", "...", "...", "..."],
-  "behavioral_questions": ["...", "...", "...", "..."]
+  "question": "The actual interview question.",
+  "difficulty": "Easy", // Must be Easy, Medium, Hard, or Expert
+  "duration": "5 mins",
+  "why_asked": "Why the recruiter is asking this.",
+  "good_answer": "Key concepts a good answer should contain.",
+  "sample_outline": "A brief outline of an ideal answer."
+}}
+
+JSON Output Schema:
+{{
+  "technical_questions": [ {{...}} ],
+  "project_questions": [ {{...}} ],
+  "behavioral_questions": [ {{...}} ]
 }}
 """
 
@@ -55,28 +72,30 @@ def _summarize_resume(resume_data: Dict[str, Any]) -> Dict[str, str]:
 
     skills_obj = resume_data.get("skills", {}) or {}
     skills_flat = skills_obj.get("flat_list", [])
-    skills_str = ", ".join(skills_flat[:20]) if skills_flat else "Not specified"
+    skills_str = ", ".join(skills_flat) if skills_flat else "Not specified"
 
     projects = resume_data.get("projects", []) or []
     proj_parts = []
-    for p in projects[:4]:
+    for p in projects:
         pname = p.get("name", "")
-        pdesc = p.get("description", "")[:80]
-        tech = ", ".join((p.get("technologies", []) or [])[:5])
-        proj_parts.append(f"{pname}: {pdesc}" + (f" [{tech}]" if tech else ""))
+        pdesc = p.get("description", "")
+        tech = ", ".join((p.get("technologies", []) or []))
+        bullets = " ".join((p.get("bullets", []) or []))
+        proj_parts.append(f"Project '{pname}' ({tech}): {pdesc}. Details: {bullets}")
     projects_str = " | ".join(proj_parts) if proj_parts else "None listed"
 
     experience = resume_data.get("experience", []) or []
     exp_parts = []
-    for e in experience[:3]:
+    for e in experience:
         title = e.get("title", "")
         company = e.get("company", "")
-        exp_parts.append(f"{title} at {company}" if company else title)
+        bullets = " ".join((e.get("bullets", []) or []))
+        exp_parts.append(f"Role '{title}' at '{company}': {bullets}")
     experience_str = " | ".join(exp_parts) if exp_parts else "None listed"
 
     education = resume_data.get("education", []) or []
     edu_parts = []
-    for e in education[:2]:
+    for e in education:
         degree = e.get("degree", "")
         field = e.get("field_of_study", "")
         inst = e.get("institution", "")
@@ -103,13 +122,14 @@ class InterviewGenerator:
     def __init__(self, gemini: GeminiService) -> None:
         self._gemini = gemini
 
-    def generate(self, resume_data: Dict[str, Any], job_description: str) -> dict:
+    def generate(self, resume_data: Dict[str, Any], job_description: str, company_preset: str = "Generic") -> dict:
         """
-        Generate categorized interview questions.
+        Generate personalized interview questions.
 
         Args:
             resume_data:     Parsed resume dict from /api/parse
             job_description: Raw JD text
+            company_preset:  The company style preset
 
         Returns:
             dict with technical_questions, project_questions, behavioral_questions
@@ -126,11 +146,13 @@ class InterviewGenerator:
             return self._fallback(summary)
 
         prompt = PROMPT_TEMPLATE.format(
-            job_description=job_description.strip()[:1500],
+            job_description=job_description.strip(),
+            company_preset=company_preset,
             **summary,
         )
         try:
-            raw = self._gemini.generate(prompt, temperature=0.8)
+            # Temperature 0.85 to introduce controlled randomness and semantic variation
+            raw = self._gemini.generate(prompt, temperature=0.85)
             result = _parse_json_response(raw)
 
             for key in ("technical_questions", "project_questions", "behavioral_questions"):
@@ -149,24 +171,29 @@ class InterviewGenerator:
     def _fallback(self, summary: Dict[str, str]) -> dict:
         name = summary.get("name", "you")
         skills = summary.get("skills", "your skills")
+        
+        def _make_q(q: str, diff: str) -> dict:
+            return {
+                "question": q,
+                "difficulty": diff,
+                "duration": "5 mins",
+                "why_asked": "To assess basic competency.",
+                "good_answer": "Structured response.",
+                "sample_outline": "1. Intro. 2. Details. 3. Conclusion."
+            }
+
         return {
             "technical_questions": [
-                f"Can you walk me through your experience with {skills.split(',')[0].strip() if skills != 'Not specified' else 'your primary technology'}?",
-                "Describe a time when you had to debug a complex production issue. What was your approach?",
-                "How would you design a RESTful API for a high-traffic web service?",
-                "Explain the difference between SQL and NoSQL databases and when you'd choose each.",
-                "What is your approach to writing maintainable, testable code?",
+                _make_q(f"Can you walk me through your experience with {skills.split(',')[0].strip() if skills != 'Not specified' else 'your primary technology'}?", "Medium"),
+                _make_q("Describe a time when you had to debug a complex production issue. What was your approach?", "Hard"),
+                _make_q("How would you design a RESTful API for a high-traffic web service?", "Expert"),
             ],
             "project_questions": [
-                "Walk me through your most technically challenging project from start to finish.",
-                "What was the biggest architectural decision you made in one of your projects and why?",
-                "How did you handle unexpected technical challenges during project development?",
-                "If you were to rebuild one of your projects from scratch, what would you do differently?",
+                _make_q("Walk me through your most technically challenging project from start to finish.", "Medium"),
+                _make_q("What was the biggest architectural decision you made in one of your projects and why?", "Hard"),
             ],
             "behavioral_questions": [
-                "Tell me about a time when you had to deliver a project under a tight deadline.",
-                "Describe a situation where you disagreed with a teammate's technical decision. How did you handle it?",
-                "Give an example of when you proactively identified and fixed a problem before it became critical.",
-                "Tell me about a project that failed or didn't meet expectations. What did you learn from it?",
+                _make_q("Tell me about a time when you had to deliver a project under a tight deadline.", "Medium"),
+                _make_q("Describe a situation where you disagreed with a teammate's technical decision.", "Hard"),
             ],
         }

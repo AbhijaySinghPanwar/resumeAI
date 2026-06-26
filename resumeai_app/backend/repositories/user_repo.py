@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from database.models import User
 from core.logger import get_logger
@@ -31,10 +32,10 @@ class UserRepository:
         return self.db.query(User).filter(User.id == user_id).first()
 
     def get_by_email(self, email: str) -> Optional[User]:
-        return self.db.query(User).filter(User.email == email).first()
+        return self.db.query(User).filter(func.lower(User.email) == email.lower()).first()
 
     def email_exists(self, email: str) -> bool:
-        return self.db.query(User.id).filter(User.email == email).first() is not None
+        return self.db.query(User.id).filter(func.lower(User.email) == email.lower()).first() is not None
 
     def deactivate(self, user_id: int) -> bool:
         user = self.get_by_id(user_id)

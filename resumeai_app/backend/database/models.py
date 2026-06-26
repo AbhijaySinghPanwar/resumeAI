@@ -91,10 +91,15 @@ class Resume(Base):
         return json.loads(self.parsed_json)
 
     def to_dict(self, include_parsed: bool = False) -> dict:
+        jd_score = None
+        if self.jd_reports:
+            jd_score = max(r.match_score for r in self.jd_reports)
+            
         d = {
             "id": self.id,
             "filename": self.filename,
             "ats_score": self.ats_score,
+            "jd_score": jd_score,
             "uploaded_at": self.uploaded_at.isoformat(),
             "user_id": self.user_id,
             "ats_report_count": len(self.ats_reports) if self.ats_reports else 0,

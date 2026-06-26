@@ -168,7 +168,31 @@ class GeminiService:
 
     def status_dict(self) -> dict:
         """Return a JSON-serialisable status dictionary for /ai/status."""
+        if self.is_available:
+            return {
+                "available": True,
+                "provider": "Gemini",
+                "initialized": True,
+                "fallback": False
+            }
+        
+        # Determine error code
+        err_code = "UNKNOWN_ERROR"
+        if self._init_error:
+            if "leaked" in self._init_error.lower() or "permission_denied" in self._init_error.lower():
+                err_code = "PERMISSION_DENIED"
+            elif "not configured" in self._init_error.lower() or "not set" in self._init_error.lower():
+                err_code = "NOT_CONFIGURED"
+            elif "google-genai package" in self._init_error.lower():
+                err_code = "MISSING_DEPENDENCY"
+            else:
+                err_code = "INIT_FAILED"
+
         return {
-            "available": self.is_available,
-            "active_model": self.active_model,
+            "available": False,
+            "provider": "Gemini",
+            "initialized": self._client is not None,
+            "fallback": True,
+            "error_code": err_code,
+            "error_message": self._init_error or "Service failed to initialize."
         }

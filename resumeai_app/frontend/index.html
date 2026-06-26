@@ -1147,30 +1147,20 @@ async function doParseAndScore(source, jd) {
     }
 
     const data = await parseRes.json();
-    lastResult = data.result;
-    const atsScore = data.ats_score;
-
-    // 2. Legacy JD score card (uses old ATS scorer)
-    let scoreData = null;
-    if (jd) {
-      const scoreRes = await fetch(`${API_BASE}/api/score`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ parse_result: lastResult, job_description: jd }),
-      });
-      if (scoreRes.ok) scoreData = await scoreRes.json();
-    }
+    lastResult = data.result ?? {};
+    const atsScore = data.ats_score ?? null;
 
     showLoading(false);
-    renderResults(lastResult, data.gate, atsScore, scoreData);
+    renderResults(lastResult, data.gate, atsScore);
 
     // 3. Phase 2: Job Match Analysis — async, shows below results
     if (jd) runMatchAnalysis(lastResult, jd, data.saved_resume_id);
 
   } catch (e) {
-    showLoading(false);
     showToast('Parse failed: ' + e.message, 'error');
     console.error(e);
+  } finally {
+    showLoading(false);
   }
 }
 
@@ -1185,7 +1175,7 @@ async function runMatchAnalysis(parseResult, jd, resumeId = null) {
   badge.style.cssText = 'background:#F1F5F9;color:#475569;font-size:0.75rem;font-weight:700;padding:0.3rem 0.9rem;border-radius:99px';
   grid.innerHTML = `<div class="match-loading">
     <div class="spinner" style="margin:0 auto 1rem"></div>
-    <div style="font-size:0.875rem;font-weight:600;color:var(--muted)">Running AI-powered match analysis…</div>
+    <div style="font-size:0.875rem;font-weight:600;color:var(--muted)">Running semantic match analysis…</div>
   </div>`;
 
   try {
@@ -1217,10 +1207,12 @@ async function runMatchAnalysis(parseResult, jd, resumeId = null) {
     sec.scrollIntoView({ behavior:'smooth', block:'start' });
     showToast(`Match complete — ${sc}% match!`, 'success');
   } catch(e) {
-    grid.innerHTML = `<div class="match-loading" style="color:#991B1B">⚠ Match analysis failed: ${e.message}</div>`;
+    showToast(`Match analysis failed: ${e.message}`, 'error');
     badge.textContent = 'Analysis failed';
     badge.style.cssText = 'background:#FEE2E2;color:#991B1B;font-size:0.75rem;font-weight:700;padding:0.3rem 0.9rem;border-radius:99px';
     console.error('Match error:', e);
+  } finally {
+    // Ensuring loading states can be cleared if any exist
   }
 }
 
@@ -1266,10 +1258,10 @@ function renderMatchDashboard(d) {
   c2.innerHTML = `<div class="mc-title">Component Breakdown</div>` +
     comps.map(c => {
       const rawVal = cs[c.key];
-      const isNA = rawVal === null || rawVal === undefined;
+      const isNA = rawVal === null || rawVal === undefined || rawVal === 'Not Applicable';
       const v = isNA ? 0 : Math.round(rawVal);
       const col = isNA ? '#9CA3AF' : compColor(v);
-      const displayVal = isNA ? 'N/A' : `${v}%`;
+      const displayVal = rawVal === 'Not Applicable' ? 'N/A' : (isNA ? 'N/A' : `${v}%`);
       return `<div class="mc-row">
         <div class="mc-row-header">
           <span class="mc-name">${c.icon} ${c.label} <span style="color:var(--muted);font-weight:400">(${c.w})</span></span>
@@ -1337,12 +1329,11 @@ function renderMatchDashboard(d) {
       const t = setInterval(() => { cur=Math.min(cur+step,sc); numEl.textContent=cur+'%'; if(cur>=sc) clearInterval(t); }, 25);
     }
     document.querySelectorAll('.mc-bar-fill[data-val]').forEach(el => { el.style.width = el.dataset.val+'%'; });
-    document.querySelectorAll('.cat-bar-fill[data-pct]').forEach(el => { el.style.width = el.dataset.pct+'%'; });
   });
 }
 
 /* ── Render results ──────────────────────────────────────────────────── */
-function renderResults(r, gate, atsScore, score) {
+function renderResults(r, gate, atsScore) {
   const grid = document.getElementById('results-grid');
   grid.innerHTML = '';
 
@@ -1449,18 +1440,7 @@ function renderResults(r, gate, atsScore, score) {
   skillCard.classList.add('full');
   grid.appendChild(skillCard);
 
-  // Score card
-  if (score) {
-    const scoreCard = makeCard('trending-up', 'JD Match Score', null, renderScore(score));
-    scoreCard.classList.add('full');
-    grid.appendChild(scoreCard);
-    // Animate bars
-    setTimeout(() => {
-      document.querySelectorAll('.cat-bar-fill[data-pct]').forEach(el => {
-        el.style.width = el.dataset.pct + '%';
-      });
-    }, 100);
-  }
+
 
   // Anomalies
   const anomalies = (r.debug||{}).anomalies || [];
@@ -1609,39 +1589,6 @@ function renderAtsScore(s) {
   `;
 }
 
-function renderScore(s) {
-  const pct = Math.round(s.overall_score);
-  const deg = Math.round(pct * 3.6);
-  return `
-    <div class="overall-score">
-      <div class="score-ring" style="--pct:${pct}%; background: conic-gradient(var(--primary) ${deg}deg, #E2E8F0 0deg)">
-        <div class="score-ring-inner">${pct}</div>
-      </div>
-      <div class="score-grade">Grade: ${s.grade}</div>
-      <div class="score-rec">${s.recommendation}</div>
-    </div>
-    <div class="cat-scores">
-      ${(s.category_scores||[]).map(c => `
-        <div class="cat-row">
-          <div class="cat-row-header">
-            <span class="cat-row-name">${cap(c.category)}</span>
-            <span class="cat-row-pct">${Math.round(c.score)}%</span>
-          </div>
-          <div class="cat-bar"><div class="cat-bar-fill" data-pct="${Math.round(c.score)}" style="width:0%"></div></div>
-        </div>`).join('')}
-    </div>
-    ${s.matched_skills&&s.matched_skills.length ? `
-      <div style="margin-top:1rem">
-        <div class="skill-cat-name" style="margin-bottom:0.5rem">Matched Skills</div>
-        <div class="skill-chips">${s.matched_skills.map(sk=>`<span class="skill-chip" style="border-color:#10B981;color:#065F46">${sk}</span>`).join('')}</div>
-      </div>` : ''}
-    ${s.missing_skills&&s.missing_skills.length ? `
-      <div style="margin-top:0.75rem">
-        <div class="skill-cat-name" style="margin-bottom:0.5rem">Missing Skills</div>
-        <div class="skill-chips">${s.missing_skills.slice(0,10).map(sk=>`<span class="skill-chip" style="border-color:#EF4444;color:#991B1B">${sk}</span>`).join('')}</div>
-      </div>` : ''}
-  `;
-}
 
 /* ── Card builder ─────────────────────────────────────────────────────── */
 const ICON_MAP = {

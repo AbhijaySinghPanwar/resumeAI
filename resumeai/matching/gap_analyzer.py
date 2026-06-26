@@ -23,14 +23,6 @@ from .jd_parser import extract_skills_from_text, normalize_skill, _ALIAS_TO_CANO
 
 # ── Constants for Phase 2 Patch ────────────────────────────────────────────────
 SKILL_ALIASES = {
-    "mysql": "sql",
-    "postgresql": "sql",
-    "sqlite": "sql",
-    "oracle": "sql",
-    "database": "sql",
-
-    "github": "git",
-    "gitlab": "git",
     "version control": "git",
 
     "dsa": "data structures",
@@ -184,12 +176,12 @@ def generate_skill_gap(
     """
     Compute skill gap between a parsed resume and a parsed JD.
     """
-    if hasattr(parsed_jd, "required_skills"):
-        required = list(parsed_jd.required_skills)
-        preferred = list(parsed_jd.preferred_skills)
-    else:
+    if isinstance(parsed_jd, dict):
         required = parsed_jd.get("required_skills", [])
         preferred = parsed_jd.get("preferred_skills", [])
+    else:
+        required = list(getattr(parsed_jd, "required_skills", []))
+        preferred = list(getattr(parsed_jd, "preferred_skills", []))
 
     # Filter generic non-skill words from JD requirements
     required = [s for s in required if _norm(s) not in GENERIC_WORDS]
@@ -201,18 +193,27 @@ def generate_skill_gap(
     matched: List[str] = []
     missing: List[str] = []
 
-    for jd_skill in required:
+    # If no required skills but there are preferred skills, use preferred skills as the benchmark
+    if not required and preferred:
+        benchmark_skills = preferred
+        is_preferred_only = True
+    else:
+        benchmark_skills = required
+        is_preferred_only = False
+
+    for jd_skill in benchmark_skills:
         if _is_match(jd_skill, resume_skills_raw, resume_skills_norm):
             matched.append(jd_skill)
         else:
             missing.append(jd_skill)
 
     recommended: List[str] = []
-    for pref_skill in preferred:
-        if not _is_match(pref_skill, resume_skills_raw, resume_skills_norm):
-            recommended.append(pref_skill)
+    if not is_preferred_only:
+        for pref_skill in preferred:
+            if not _is_match(pref_skill, resume_skills_raw, resume_skills_norm):
+                recommended.append(pref_skill)
 
-    total = len(required)
+    total = len(benchmark_skills)
     match_pct = round((len(matched) / total * 100), 1) if total > 0 else 0.0
 
     return SkillGapResult(
