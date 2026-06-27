@@ -688,15 +688,28 @@
       downloadJSON(id); // Since we only store parsed JSON, we download that.
     }
     
-    function downloadJSON(id) {
-      const resume = allResumes.find(r => r.id === id);
-      if (!resume || !resume.parsed_json) {
-        showToast('Parsed resume data is unavailable for this resume.', 'error');
+    async function downloadJSON(id) {
+      const resumeListItem = allResumes.find(r => r.id === id);
+      if (!resumeListItem) {
+        showToast('Resume not found.', 'error');
         return;
       }
       
       try {
-        const jsonStr = JSON.stringify(resume.parsed_json, null, 2);
+        // Fetch the full resume object which includes parsed_json
+        const res = await fetch(`${API}/history/resumes/${id}`, {
+          headers: { 'Authorization': 'Bearer ' + getToken() }
+        });
+        if (!res.ok) throw new Error('Failed to fetch full resume data');
+        const payload = await res.json();
+        
+        // Ensure parsed_json is available in the retrieved data
+        if (!payload.data || !payload.data.parsed_json) {
+          showToast('Parsed resume data is unavailable for this resume.', 'error');
+          return;
+        }
+
+        const jsonStr = JSON.stringify(payload.data.parsed_json, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         
@@ -704,7 +717,7 @@
         a.href = url;
         
         // Generate a clean filename: replace spaces with underscores, remove extension
-        let safeName = (resume.filename || 'resume').replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
+        let safeName = (resumeListItem.filename || 'resume').replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
         a.download = `${safeName}_parsed.json`;
         
         document.body.appendChild(a);
