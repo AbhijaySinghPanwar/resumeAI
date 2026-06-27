@@ -806,10 +806,10 @@ window.addEventListener('scroll', () => {
       const res = await fetch(`${API}/reports/ats?${params}`, { headers: authHeaders() });
       if (res.status === 401) { logout(); return; }
       if (!res.ok) throw new Error('Failed to load ATS reports');
-      const data = await res.json();
+      const payload = await res.json();
 
-      const reports = data.reports || data.items || data || [];
-      state.ats.total      = data.total || reports.length;
+      const reports = payload.data || payload.items || payload.reports || (Array.isArray(payload) ? payload : []);
+      state.ats.total      = payload.meta?.total_records || payload.total || reports.length;
       state.ats.totalPages = Math.max(1, Math.ceil(state.ats.total / PAGE_SIZE));
       state.ats.loaded     = true;
 
@@ -819,11 +819,12 @@ window.addEventListener('scroll', () => {
       renderAtsPagination();
 
     } catch (err) {
+      console.error(err);
       contentEl.innerHTML = `
         <div class="empty-state" role="alert">
           <div class="empty-icon">⚠️</div>
           <h3>Error Loading Reports</h3>
-          <p>${err.message}</p>
+          <p>Unable to load reports. Please try again.</p>
           <button class="btn-primary" onclick="state.ats.loaded=false;loadAts()">Try Again</button>
         </div>`;
     }
@@ -917,10 +918,10 @@ window.addEventListener('scroll', () => {
       const res = await fetch(`${API}/reports/jd?${params}`, { headers: authHeaders() });
       if (res.status === 401) { logout(); return; }
       if (!res.ok) throw new Error('Failed to load JD reports');
-      const data = await res.json();
+      const payload = await res.json();
 
-      const reports = data.reports || data.items || data || [];
-      state.jd.total      = data.total || reports.length;
+      const reports = payload.data || payload.items || payload.reports || (Array.isArray(payload) ? payload : []);
+      state.jd.total      = payload.meta?.total_records || payload.total || reports.length;
       state.jd.totalPages = Math.max(1, Math.ceil(state.jd.total / PAGE_SIZE));
       state.jd.loaded     = true;
 
@@ -930,11 +931,12 @@ window.addEventListener('scroll', () => {
       renderJdPagination();
 
     } catch (err) {
+      console.error(err);
       contentEl.innerHTML = `
         <div class="empty-state" role="alert">
           <div class="empty-icon">⚠️</div>
           <h3>Error Loading Reports</h3>
-          <p>${err.message}</p>
+          <p>Unable to load reports. Please try again.</p>
           <button class="btn-primary" onclick="state.jd.loaded=false;loadJd()">Try Again</button>
         </div>`;
     }

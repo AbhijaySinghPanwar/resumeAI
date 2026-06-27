@@ -238,16 +238,8 @@
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-inner">
-      <a href="index.html" class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        TalentLens AI
-      </a>
-      <div class="nav-right" id="navRight">
-        <!-- Injected via JS -->
-      </div>
-    </div>
+  <nav id="main-nav" class="navbar">
+    <!-- Injected via shared.js -->
   </nav>
 
   <!-- Header -->
@@ -693,11 +685,39 @@
 
     // --- Future Actions ---
     function downloadResume(id) {
-      showToast('File download will be available in v4.1', 'info');
+      downloadJSON(id); // Since we only store parsed JSON, we download that.
     }
     
     function downloadJSON(id) {
-      showToast('JSON export will be available in v4.1', 'info');
+      const resume = allResumes.find(r => r.id === id);
+      if (!resume || !resume.parsed_json) {
+        showToast('Parsed resume data is unavailable for this resume.', 'error');
+        return;
+      }
+      
+      try {
+        const jsonStr = JSON.stringify(resume.parsed_json, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Generate a clean filename: replace spaces with underscores, remove extension
+        let safeName = (resume.filename || 'resume').replace(/\.[^/.]+$/, "").replace(/\s+/g, '_');
+        a.download = `${safeName}_parsed.json`;
+        
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 100);
+      } catch (err) {
+        console.error('Download error:', err);
+        showToast('Failed to generate download file.', 'error');
+      }
     }
 
     // --- Events ---
@@ -709,6 +729,7 @@
     document.getElementById('sortSelect').addEventListener('change', applyFiltersAndSort);
 
     // --- Boot ---
+    renderNav();
     fetchResumes();
 
   </script>
