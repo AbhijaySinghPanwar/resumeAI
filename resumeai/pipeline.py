@@ -180,6 +180,48 @@ class ResumeParser:
             ownership.all_lines_for_section("certifications"),
             default=[],
         )
+        
+        result["open_source"] = self._safe_extract(
+            "open_source",
+            extract_projects,
+            ownership.all_lines_for_section("open_source"),
+            default=[],
+        )
+        
+        result["achievements"] = self._safe_extract(
+            "achievements",
+            extract_leadership,
+            ownership.all_lines_for_section("achievements"),
+            default=[],
+        )
+        
+        result["publications"] = self._safe_extract(
+            "publications",
+            extract_leadership,
+            ownership.all_lines_for_section("publications"),
+            default=[],
+        )
+        
+        result["hackathons"] = self._safe_extract(
+            "hackathons",
+            extract_projects,
+            ownership.all_lines_for_section("hackathons"),
+            default=[],
+        )
+        
+        result["research"] = self._safe_extract(
+            "research",
+            extract_projects,
+            ownership.all_lines_for_section("research"),
+            default=[],
+        )
+        
+        result["tech_blogs"] = self._safe_extract(
+            "tech_blogs",
+            extract_projects,
+            ownership.all_lines_for_section("tech_blogs"),
+            default=[],
+        )
 
         result["skills"] = self._safe_extract(
             "skills",

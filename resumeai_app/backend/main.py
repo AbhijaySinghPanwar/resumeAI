@@ -325,7 +325,23 @@ def match_resume(
 
     try:
         parsed_jd = parse_job_description(req.job_description)
+        logger.info(f"[TRACE] JD parsed. Title: {parsed_jd.title}")
+        logger.info(f"[TRACE] JD required_skills count: {len(parsed_jd.required_skills)}")
+        
+        logger.info("[TRACE] Calling SkillMatcher")
         result = matcher.calculate_match_score(req.parse_result, parsed_jd)
+        
+        logger.info(f"[TRACE] Matched skills count: {len(result.matched_skills)}")
+        logger.info(f"[TRACE] Missing skills count: {len(result.missing_skills)}")
+        logger.info(f"[TRACE] Component skills score: {result.component_scores.skills}")
+        
+        import resumeai.matching.skill_matcher as sm_mod
+        import resumeai.matching.gap_analyzer as ga_mod
+        import resumeai.matching.jd_parser as jp_mod
+        
+        logger.info(f"[TRACE] skill_matcher.__file__ = {sm_mod.__file__}")
+        logger.info(f"[TRACE] gap_analyzer.__file__ = {ga_mod.__file__}")
+        logger.info(f"[TRACE] jd_parser.__file__ = {jp_mod.__file__}")
 
         # Auto-save JD report if authenticated and a resume_id is provided
         if current_user and req.resume_id:
@@ -348,8 +364,18 @@ def match_resume(
             except Exception as exc:
                 logger.warning("JD auto-save failed (non-fatal): %s", exc)
 
+        res_dict = result.to_dict()
+        if "debug_info" not in res_dict:
+            res_dict["debug_info"] = {}
+        res_dict["debug_info"]["module_paths"] = {
+            "skill_matcher": sm_mod.__file__,
+            "gap_analyzer": ga_mod.__file__,
+            "jd_parser": jp_mod.__file__,
+            "sys_path": sys.path
+        }
+
         return {
-            **result.to_dict(),
+            **res_dict,
             "parsed_jd": parsed_jd.to_dict(),
         }
     except HTTPException:

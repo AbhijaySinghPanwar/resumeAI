@@ -18,7 +18,6 @@ from .schemas import MatchResult, ComponentScores
 from .jd_parser import ParsedJD, extract_skills_from_text
 from .gap_analyzer import (
     generate_skill_gap,
-    extract_all_resume_skills,
     _norm,
 )
 
@@ -37,13 +36,14 @@ def _score_to_grade(score: int) -> str:
 
 import logging
 from typing import Dict, Any, List, Optional, Union
+from resumeai.core.skill_intelligence import SkillIntelligenceEngine
 
 def _compute_skill_score(
-    parsed_resume: Dict[str, Any],
-    parsed_jd: ParsedJD,
+    gap: Any,
+    parsed_jd: Any,
     debug: Dict,
 ) -> Optional[float]:
-    """Skill overlap score 0-100 with partial credit for preferred. Returns None if JD has no skills."""
+    """Skill overlap score 0-100 utilizing domain weights and skill evidence confidence. Returns None if JD has no skills."""
     required = list(getattr(parsed_jd, "required_skills", []))
     preferred = list(getattr(parsed_jd, "preferred_skills", []))
 
@@ -51,25 +51,60 @@ def _compute_skill_score(
         debug["skill_match_note"] = "No skills extracted from JD — skill match is N/A."
         return None
 
-    gap = generate_skill_gap(parsed_resume, parsed_jd)
     matched_count = len(gap.matched_skills)
     total_required = len(required)
-
-    base = (matched_count / total_required * 100) if total_required > 0 else 50.0
+    
+    # Adaptive Scoring based on Domain Classification weights
+    domain_class = getattr(parsed_jd, "domain_classification", {})
+    weights = domain_class.get("weights", {}) if domain_class else {}
+    
+    engine = SkillIntelligenceEngine()
+    
+    # Calculate score using confidence logic
+    score_acc = 0.0
+    total_weight = 0.0
+    
+    evidence_map = {ev.skill: ev for ev in (gap.skill_evidence or [])}
+    contributions = []
+    
+    # Required skills
+    for req in required:
+        norm = engine.normalize_skill(req)
+        weight = weights.get(norm, 10.0) # Default weight 10
+        total_weight += weight
+        
+        if req in evidence_map:
+            conf = evidence_map[req].confidence / 100.0
+            pts = weight * conf
+            score_acc += pts
+            contributions.append(f"+{round(pts, 1)} {req}")
+        else:
+            contributions.append(f"-{round(weight, 1)} {req} Missing")
+            
+    base = (score_acc / total_weight * 100) if total_weight > 0 else 50.0
 
     # Preferred bonus (up to +15)
     pref_bonus = 0.0
     if preferred:
-        resume_skills_raw = extract_all_resume_skills(parsed_resume)
-        resume_norm = {_norm(s) for s in resume_skills_raw}
-        from .gap_analyzer import _is_match
-        pref_matched = sum(1 for s in preferred if _is_match(s, resume_skills_raw, resume_norm))
-        pref_bonus = (pref_matched / len(preferred)) * 15
+        pref_acc = 0.0
+        pref_weight_total = 0.0
+        for pref in preferred:
+            norm = engine.normalize_skill(pref)
+            weight = weights.get(norm, 8.0)
+            pref_weight_total += weight
+            if pref in evidence_map:
+                conf = evidence_map[pref].confidence / 100.0
+                pref_acc += (weight * conf)
+                
+        if pref_weight_total > 0:
+            pref_bonus = (pref_acc / pref_weight_total) * 15
+            
         base = min(100.0, base + pref_bonus)
 
     debug["skill_match_score"] = round(base, 1)
     debug["required_matched"] = f"{matched_count}/{total_required}"
     debug["preferred_bonus"] = round(pref_bonus, 1)
+    debug["score_contributions"] = contributions
     return round(base, 1)
 
 
@@ -335,12 +370,15 @@ class SkillMatcher:
     ) -> MatchResult:
         debug: Dict = {}
 
+        # ── Unwrap frontend payload if wrapped ────────────────────────────
+        if "result" in parsed_resume and isinstance(parsed_resume["result"], dict) and "version" in parsed_resume["result"]:
+            parsed_resume = parsed_resume["result"]
+
         # ── Skill gap (used by multiple components) ───────────────────────
         gap = generate_skill_gap(parsed_resume, parsed_jd)
-        resume_skills_all = sorted(extract_all_resume_skills(parsed_resume))
 
         # ── Component scores ──────────────────────────────────────────────
-        skill_score  = _compute_skill_score(parsed_resume, parsed_jd, debug)
+        skill_score  = _compute_skill_score(gap, parsed_jd, debug)
         sem_score    = _compute_semantic_score(parsed_resume, parsed_jd, debug)
         exp_score    = _compute_experience_score(parsed_resume, parsed_jd)
         edu_score    = _compute_education_score(parsed_resume, parsed_jd)
@@ -384,9 +422,30 @@ class SkillMatcher:
         roadmap = generate_learning_roadmap(gap.missing_skills)
 
         # ── Debug info (full traceability) ────────────────────────────────
+        engine = SkillIntelligenceEngine()
+        evidence_list = getattr(gap, "skill_evidence", [])
+        evidence_map = {e.skill: e for e in evidence_list} if evidence_list else {}
+        
+        tech_depth = len(evidence_map) / 5.0
+        proj_diversity = len(parsed_resume.get("projects", []))
+        backend_strength = sum(1 for e in evidence_map.values() if e.confidence > 90 and engine._skill_to_families.get(e.skill) and "Backend" in engine._skill_to_families[e.skill])
+        cloud_readiness = sum(1 for e in evidence_map.values() if e.confidence > 80 and engine._skill_to_families.get(e.skill) and "Cloud" in engine._skill_to_families[e.skill])
+        
+        resume_metrics = {
+            "Technical Depth": min(10.0, tech_depth),
+            "Project Diversity": min(10.0, proj_diversity * 2.5),
+            "Backend Strength": min(10.0, backend_strength * 2.0),
+            "Cloud Readiness": min(10.0, cloud_readiness * 3.3),
+            "AI Readiness": min(10.0, sum(1 for e in evidence_map.values() if "AI" in engine._skill_to_families.get(e.skill, set())) * 3.3),
+            "DevOps Readiness": min(10.0, sum(1 for e in evidence_map.values() if "DevOps" in engine._skill_to_families.get(e.skill, set())) * 3.3)
+        }
+
+        resume_skills_all = [e.skill for e in evidence_list] if evidence_list else []
+
         debug_info = {
             "jd_skills":          list(getattr(parsed_jd, "required_skills", [])),
             "resume_skills":      resume_skills_all,
+            "resume_metrics":     resume_metrics,
             "matched_skills":     gap.matched_skills,
             "missing_skills":     gap.missing_skills,
             "skill_match_score":  skill_score if skill_score is not None else "N/A",
@@ -420,6 +479,8 @@ class SkillMatcher:
             ),
             matched_skills=gap.matched_skills,
             missing_skills=gap.missing_skills,
+            missing_skills_analysis=getattr(gap, 'missing_skills_analysis', None),
+            skill_evidence=getattr(gap, 'skill_evidence', None),
             recommended_skills=gap.recommended_skills,
             recommended_learning=roadmap,
             debug_info=debug_info,

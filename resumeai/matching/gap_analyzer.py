@@ -1,181 +1,37 @@
 """
-matching/gap_analyzer.py — Skill Gap Analyzer v2.
+matching/gap_analyzer.py — Skill Gap Analyzer v3.0
 
-Extracts skills from ALL resume sections:
-  - skills.flat_list and skills.categories
-  - projects: technologies array + text scan
-  - experience: bullets text scan
-  - certifications: name + issuer scan
-  - leadership: bullets + descriptions
-  - summary
-
-Uses the same CANONICAL_SKILLS dictionary as the JD parser for consistency.
-Fuzzy matching (rapidfuzz) handles aliases: DSA → Data Structures.
+Uses Central Skill Intelligence Engine for Semantic Inference and 4-Level Matching.
 """
 from __future__ import annotations
 
-from typing import Dict, Any, List, Set
-from rapidfuzz import fuzz
+from typing import Dict, Any, List
 
-from .schemas import SkillGapResult
-from .jd_parser import extract_skills_from_text, normalize_skill, _ALIAS_TO_CANONICAL
+from .schemas import SkillGapResult, MissingSkill
+from resumeai.core.skill_intelligence import SkillIntelligenceEngine
+from resumeai.core.resume_intelligence import ResumeIntelligenceEngine
 
-
-# ── Constants for Phase 2 Patch ────────────────────────────────────────────────
-SKILL_ALIASES = {
-    "version control": "git",
-
-    "dsa": "data structures",
-    "data structure and algorithms": "data structures",
-    "data structures and algorithms": "data structures",
-
-    "rest api": "rest apis",
-    "api development": "rest apis",
-    "backend api": "rest apis",
-
-    "js": "javascript",
-    "nodejs": "node.js",
-    "problem-solving": "problem solving",
-
-    "ai": "artificial intelligence",
-    "machine learning": "artificial intelligence",
-}
-
+# ── Generic Words Filter ───────────────────────────────────────────────────────
 GENERIC_WORDS = {
     "backend", "developer", "engineer", "intern", "requirements",
     "responsibilities", "candidate", "position", "role", "team",
     "work", "experience", "company", "software", "data"
 }
 
-
-# ── Normalize helper ─────────────────────────────────────────────────────────
-
 def _norm(skill: str) -> str:
-    """Lowercase + strip + manual alias lookup."""
     s = skill.lower().strip()
-    return SKILL_ALIASES.get(s, s)
-
-
-# ── Unified resume skill extractor ───────────────────────────────────────────
-
-def extract_all_resume_skills(parsed_resume: Dict[str, Any]) -> Set[str]:
-    """
-    Extract ALL canonical skills from a parsed resume dict.
-    """
-    found: Set[str] = set()
-
-    # ── 1. Skills section ─────────────────────────────────────────────────
-    skills_sec = parsed_resume.get("skills", {})
-    for s in skills_sec.get("flat_list", []):
-        found.add(s)
-        for c in extract_skills_from_text(s):
-            found.add(c)
-
-    for cat in skills_sec.get("categories", []):
-        for s in cat.get("skills", []):
-            found.add(s)
-            for c in extract_skills_from_text(s):
-                found.add(c)
-
-    # ── 2. Projects ───────────────────────────────────────────────────────
-    for proj in parsed_resume.get("projects", []):
-        for t in proj.get("technologies", []):
-            found.add(t)
-        proj_text = " ".join(filter(None, [
-            proj.get("name", ""),
-            proj.get("description", ""),
-            " ".join(proj.get("bullets", [])),
-            " ".join(proj.get("technologies", [])),
-        ]))
-        for c in extract_skills_from_text(proj_text):
-            found.add(c)
-
-    # ── 3. Experience ─────────────────────────────────────────────────────
-    for exp in parsed_resume.get("experience", []):
-        exp_text = " ".join(filter(None, [
-            exp.get("title", ""),
-            exp.get("description", ""),
-            " ".join(exp.get("bullets", [])),
-        ]))
-        for c in extract_skills_from_text(exp_text):
-            found.add(c)
-
-    # ── 4. Certifications ─────────────────────────────────────────────────
-    for cert in parsed_resume.get("certifications", []):
-        cert_text = " ".join(filter(None, [
-            cert.get("name", ""),
-            cert.get("issuer", ""),
-            cert.get("description", ""),
-        ]))
-        for c in extract_skills_from_text(cert_text):
-            found.add(c)
-
-    # ── 5. Leadership ─────────────────────────────────────────────────────
-    for lead in parsed_resume.get("leadership", []):
-        lead_text = " ".join(filter(None, [
-            lead.get("role", ""),
-            lead.get("organization", ""),
-            " ".join(lead.get("bullets", [])),
-        ]))
-        for c in extract_skills_from_text(lead_text):
-            found.add(c)
-
-    # ── 6. Summary ────────────────────────────────────────────────────────
-    summary = parsed_resume.get("summary", "") or ""
-    if summary:
-        for c in extract_skills_from_text(summary):
-            found.add(c)
-
-    found.discard("")
-    found.discard(None)
-    return found
-
-
-def _is_match(jd_skill: str, resume_skills: Set[str], resume_skills_norm: Set[str]) -> bool:
-    """
-    Check if a JD skill matches any resume skill via:
-    1. Exact string match (raw)
-    2. Exact normalized/alias match (intersection)
-    3. Fuzzy string matching
-    4. Semantic SentenceTransformer similarity (> 0.75)
-    """
-    raw_jd = jd_skill.strip()
-    jd_norm = _norm(jd_skill)
-
-    # 1. Raw exact match
-    if raw_jd in resume_skills:
-        return True
-
-    # 2. Normalized exact alias match
-    if jd_norm in resume_skills_norm:
-        return True
-
-    # 3. Fuzzy match on normalized strings
-    for rs_norm in resume_skills_norm:
-        score = fuzz.token_sort_ratio(jd_norm, rs_norm)
-        if score >= 85:
-            return True
-
-    # 4. Semantic similarity match (threshold > 0.75)
-    try:
-        from .embedding_engine import semantic_similarity
-        # We compare against the raw original resume skills to preserve semantic context
-        for rs in resume_skills:
-            if semantic_similarity(raw_jd, rs) >= 0.75:
-                return True
-    except Exception:
-        pass
-
-    return False
-
+    return s
 
 def generate_skill_gap(
     parsed_resume: Dict[str, Any],
     parsed_jd: Any,  # ParsedJD or dict
 ) -> SkillGapResult:
     """
-    Compute skill gap between a parsed resume and a parsed JD.
+    Compute semantic skill gap between a parsed resume and a parsed JD.
     """
+    skill_engine = SkillIntelligenceEngine()
+    resume_engine = ResumeIntelligenceEngine()
+    
     if isinstance(parsed_jd, dict):
         required = parsed_jd.get("required_skills", [])
         preferred = parsed_jd.get("preferred_skills", [])
@@ -183,35 +39,59 @@ def generate_skill_gap(
         required = list(getattr(parsed_jd, "required_skills", []))
         preferred = list(getattr(parsed_jd, "preferred_skills", []))
 
-    # Filter generic non-skill words from JD requirements
     required = [s for s in required if _norm(s) not in GENERIC_WORDS]
     preferred = [s for s in preferred if _norm(s) not in GENERIC_WORDS]
 
-    resume_skills_raw = extract_all_resume_skills(parsed_resume)
-    resume_skills_norm = {_norm(s) for s in resume_skills_raw}
-
+    # Extract all evidence from the resume (Dictionary of Skill -> List[SkillEvidence])
+    evidence_map = resume_engine.extract_resume_evidence(parsed_resume)
+    
     matched: List[str] = []
     missing: List[str] = []
+    skill_evidence = []
+    missing_analysis = []
 
-    # If no required skills but there are preferred skills, use preferred skills as the benchmark
     if not required and preferred:
         benchmark_skills = preferred
         is_preferred_only = True
     else:
         benchmark_skills = required
         is_preferred_only = False
+        
+    domain_weights = {}
+    if not isinstance(parsed_jd, dict):
+        domain_class = getattr(parsed_jd, "domain_classification", {})
+        if domain_class:
+            domain_weights = domain_class.get("weights", {})
 
     for jd_skill in benchmark_skills:
-        if _is_match(jd_skill, resume_skills_raw, resume_skills_norm):
+        # Match using the new intelligence engine!
+        evidence = skill_engine.match_skill(jd_skill, evidence_map)
+        if evidence:
             matched.append(jd_skill)
+            skill_evidence.append(evidence.to_dict())
         else:
             missing.append(jd_skill)
+            
+            # Intelligent Missing Analysis
+            weight = domain_weights.get(skill_engine.normalize_skill(jd_skill), 0)
+            importance = "Critical" if weight >= 14 else "High" if weight >= 10 else "Medium"
+            
+            missing_analysis.append(MissingSkill(
+                skill=jd_skill,
+                importance=importance,
+                reason=f"Appears in Required Skills. Also supported by JD Domain weighting ({weight} pts)." if weight > 0 else "Required by JD.",
+                learning_time="~2-4 weeks (est)" if importance != "Critical" else "~1-2 months (est)",
+                suggested_project=f"Build a small project using {jd_skill} to boost resume visibility."
+            ))
 
     recommended: List[str] = []
     if not is_preferred_only:
         for pref_skill in preferred:
-            if not _is_match(pref_skill, resume_skills_raw, resume_skills_norm):
+            evidence = skill_engine.match_skill(pref_skill, evidence_map)
+            if not evidence:
                 recommended.append(pref_skill)
+            else:
+                skill_evidence.append(evidence.to_dict())
 
     total = len(benchmark_skills)
     match_pct = round((len(matched) / total * 100), 1) if total > 0 else 0.0
@@ -221,4 +101,6 @@ def generate_skill_gap(
         missing_skills=missing,
         recommended_skills=recommended[:10],
         match_percentage=match_pct,
+        skill_evidence=skill_evidence,
+        missing_skills_analysis=missing_analysis
     )

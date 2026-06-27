@@ -1,225 +1,36 @@
 """
-matching/jd_parser.py — Job Description Parser for Phase 2 (v2).
+matching/jd_parser.py — Job Description Parser for Phase 2 (v2) and Phase 4.
 
-Uses a curated CANONICAL_SKILLS dictionary for phrase-first skill extraction.
-Generic words (engineer, intern, software, data, problem, solving, apis, etc.)
-are NEVER extracted as standalone skills.
-
-Multi-word skills are always kept together:
-  "REST API" → one skill
-  "Problem Solving" → one skill
-  "Data Structures" → one skill
-  "Machine Learning" → one skill
-  "System Design" → one skill
+Uses Central Skill Intelligence Engine for semantic parsing and domain classification.
 """
 from __future__ import annotations
 
 import re
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
 from .schemas import ParsedJD
+from resumeai.core.skill_intelligence import SkillIntelligenceEngine
 
-
-# ── CANONICAL SKILLS — curated, phrase-first dictionary ──────────────────────
-# Format: (canonical_display_name, [aliases_lowercase])
-# Sorted LONGEST-FIRST at extraction time to prevent partial matches.
-
-CANONICAL_SKILLS: List[tuple] = [
-    # ── CS Fundamentals & Concepts ───────────────────────────────────────
-    ("Data Structures and Algorithms", ["data structures and algorithms", "data structures & algorithms"]),
-    ("Data Structures", ["data structures", "data structure"]),
-    ("Algorithms", ["algorithms", "algorithm design"]),
-    ("Problem Solving", ["problem solving", "problem-solving", "analytical skills"]),
-    ("System Design", ["system design", "systems design", "high level design", "hld", "lld", "low level design"]),
-    ("Object-Oriented Programming", ["object-oriented programming", "object oriented programming", "oop", "oops", "object-oriented design", "ood"]),
-    ("Distributed Systems", ["distributed systems", "distributed computing"]),
-    ("Operating Systems", ["operating systems", "os concepts"]),
-    ("Computer Networks", ["computer networks", "networking", "network programming"]),
-    ("Database Management Systems", ["database management systems", "dbms", "rdbms"]),
-    ("Design Patterns", ["design patterns", "software design patterns"]),
-    ("Competitive Programming", ["competitive programming", "cp", "competitive coding"]),
-
-    # ── Programming Languages ─────────────────────────────────────────────
-    ("Python", ["python", "python3", "python 3"]),
-    ("JavaScript", ["javascript", "js", "es6", "es2015", "ecmascript"]),
-    ("TypeScript", ["typescript", "ts"]),
-    ("Java", ["java", "java 8", "java 11", "java 17"]),
-    ("C++", ["c++", "cpp", "c plus plus"]),
-    ("C", ["c programming", "c language"]),
-    ("C#", ["c#", "csharp", "c sharp"]),
-    ("Go", ["golang", "go language"]),
-    ("Rust", ["rust", "rust-lang"]),
-    ("Ruby", ["ruby", "ruby on rails"]),
-    ("Kotlin", ["kotlin"]),
-    ("Swift", ["swift", "swiftui"]),
-    ("Scala", ["scala"]),
-    ("PHP", ["php", "php7", "php8"]),
-    ("R", ["r programming", "r language"]),
-    ("MATLAB", ["matlab"]),
-    ("Bash", ["bash", "bash scripting", "shell scripting", "shell script", "zsh"]),
-    ("SQL", ["sql", "structured query language", "pl/sql", "plpgsql"]),
-    ("HTML/CSS", ["html", "css", "html5", "css3", "html/css"]),
-
-    # ── Web Frameworks & Libraries ────────────────────────────────────────
-    ("FastAPI", ["fastapi", "fast api"]),
-    ("Django", ["django", "django rest framework", "drf"]),
-    ("Flask", ["flask"]),
-    ("Spring Boot", ["spring boot", "springboot"]),
-    ("Spring", ["spring framework", "spring mvc"]),
-    ("React", ["react", "reactjs", "react.js", "react js"]),
-    ("Next.js", ["next.js", "nextjs", "next js"]),
-    ("Vue.js", ["vue.js", "vuejs", "vue js", "vue"]),
-    ("Angular", ["angular", "angularjs", "angular.js"]),
-    ("Node.js", ["node.js", "nodejs", "node js"]),
-    ("Express.js", ["express.js", "expressjs", "express js", "express"]),
-    ("Svelte", ["svelte", "sveltekit"]),
-    ("Ruby on Rails", ["ruby on rails", "rails", "ror"]),
-    ("Laravel", ["laravel"]),
-    ("FastAPI", ["fastapi"]),
-
-    # ── Databases ─────────────────────────────────────────────────────────
-    ("PostgreSQL", ["postgresql", "postgres", "psql"]),
-    ("MySQL", ["mysql", "mariadb"]),
-    ("MongoDB", ["mongodb", "mongo"]),
-    ("Redis", ["redis"]),
-    ("SQLite", ["sqlite"]),
-    ("Elasticsearch", ["elasticsearch", "elastic search", "opensearch"]),
-    ("Cassandra", ["cassandra", "apache cassandra"]),
-    ("DynamoDB", ["dynamodb", "amazon dynamodb"]),
-    ("BigQuery", ["bigquery", "google bigquery"]),
-    ("Snowflake", ["snowflake"]),
-    ("Neo4j", ["neo4j", "graph database"]),
-    ("Oracle", ["oracle", "oracle db", "oracle database"]),
-
-    # ── Cloud & DevOps ────────────────────────────────────────────────────
-    ("AWS", ["aws", "amazon web services", "amazon aws"]),
-    ("GCP", ["gcp", "google cloud platform", "google cloud"]),
-    ("Azure", ["azure", "microsoft azure"]),
-    ("Docker", ["docker", "docker containers", "containerization"]),
-    ("Kubernetes", ["kubernetes", "k8s"]),
-    ("Terraform", ["terraform"]),
-    ("Ansible", ["ansible"]),
-    ("CI/CD", ["ci/cd", "continuous integration", "continuous deployment", "continuous delivery", "github actions", "gitlab ci", "jenkins", "circleci"]),
-    ("GitHub Actions", ["github actions"]),
-    ("Jenkins", ["jenkins"]),
-    ("Nginx", ["nginx"]),
-    ("Linux", ["linux", "ubuntu", "centos", "debian"]),
-    ("Git", ["git", "version control"]),
-    ("GitHub", ["github"]),
-    ("GitLab", ["gitlab"]),
-
-    # ── APIs & Integration ────────────────────────────────────────────────
-    ("REST APIs", ["rest apis", "rest api", "restful api", "restful apis", "restful", "rest", "http api"]),
-    ("GraphQL", ["graphql", "graph ql"]),
-    ("gRPC", ["grpc"]),
-    ("WebSockets", ["websockets", "websocket", "ws"]),
-    ("OAuth", ["oauth", "oauth2", "oauth 2.0"]),
-    ("JWT", ["jwt", "json web token"]),
-
-    # ── Data Science & ML/AI ──────────────────────────────────────────────
-    ("Machine Learning", ["machine learning", "ml algorithms", "supervised learning", "unsupervised learning"]),
-    ("Deep Learning", ["deep learning", "dl", "neural networks", "neural network"]),
-    ("NLP", ["nlp", "natural language processing", "text processing"]),
-    ("Computer Vision", ["computer vision", "image processing", "cv"]),
-    ("LLM", ["llm", "large language model", "large language models", "language models"]),
-    ("LangChain", ["langchain", "lang chain"]),
-    ("RAG", ["rag", "retrieval augmented generation"]),
-    ("GenAI", ["genai", "generative ai", "gen ai"]),
-    ("OpenAI", ["openai", "open ai", "gpt", "gpt-4", "chatgpt"]),
-    ("Hugging Face", ["hugging face", "huggingface", "transformers"]),
-    ("TensorFlow", ["tensorflow", "tf"]),
-    ("PyTorch", ["pytorch", "torch"]),
-    ("Scikit-learn", ["scikit-learn", "sklearn", "scikit learn"]),
-    ("Pandas", ["pandas"]),
-    ("NumPy", ["numpy", "numpy arrays"]),
-    ("Matplotlib", ["matplotlib", "seaborn", "plotly"]),
-    ("Apache Spark", ["apache spark", "pyspark", "spark"]),
-    ("Apache Kafka", ["apache kafka", "kafka"]),
-    ("Apache Airflow", ["apache airflow", "airflow"]),
-
-    # ── Tools & Testing ───────────────────────────────────────────────────
-    ("Postman", ["postman"]),
-    ("Swagger", ["swagger", "openapi"]),
-    ("Jira", ["jira"]),
-    ("Figma", ["figma"]),
-    ("Selenium", ["selenium"]),
-    ("Jest", ["jest"]),
-    ("Pytest", ["pytest"]),
-    ("JUnit", ["junit"]),
-    ("Cypress", ["cypress"]),
-    ("Tableau", ["tableau"]),
-    ("Power BI", ["power bi", "powerbi"]),
-
-    # ── Methodologies & Soft Skills (technical context) ───────────────────
-    ("Agile", ["agile", "agile methodology", "agile development"]),
-    ("Scrum", ["scrum", "scrum master"]),
-    ("Microservices", ["microservices", "microservice architecture", "service mesh"]),
-    ("Test-Driven Development", ["test-driven development", "tdd", "test driven development"]),
-    ("DevOps", ["devops"]),
-    ("MLOps", ["mlops", "ml ops"]),
-    ("Data Structures", ["dsa", "ds&a"]),  # alias: DSA matches Data Structures
-]
-
-# ── Build lookup structures ───────────────────────────────────────────────────
-
-# Map: lowercase_alias → canonical_display_name
-_ALIAS_TO_CANONICAL: Dict[str, str] = {}
-# All aliases sorted by length descending (for greedy phrase matching)
-_ALL_ALIASES_SORTED: List[tuple] = []   # (alias_lower, canonical)
-
-for canonical, aliases in CANONICAL_SKILLS:
-    for alias in aliases:
-        _ALIAS_TO_CANONICAL[alias.lower()] = canonical
-
-# Sort all aliases by length descending so multi-word skills match before sub-words
-_ALL_ALIASES_SORTED = sorted(
-    _ALIAS_TO_CANONICAL.items(),
-    key=lambda x: len(x[0]),
-    reverse=True,
-)
-
+# ── Public helpers wrapping the Intelligence Engine ───────────────────────────
 
 def normalize_skill(raw: str) -> str:
     """Return canonical form of a skill string."""
-    return _ALIAS_TO_CANONICAL.get(raw.strip().lower(), raw.strip())
-
+    return SkillIntelligenceEngine().normalize_skill(raw)
 
 def extract_skills_from_text(text: str) -> List[str]:
     """
-    Extract canonical skills from text using phrase-first matching.
-
-    Uses the CANONICAL_SKILLS dictionary:
-    - Multi-word phrases matched first (longest match wins)
-    - Generic words never extracted standalone
-    - Returns deduplicated, canonical skill names
+    Extract canonical skills from text using phrase-first matching via Intelligence Engine.
     """
-    if not text:
-        return []
-    text_lower = text.lower()
-    found: Set[str] = set()
-    consumed_spans: List[tuple] = []  # (start, end) of already-matched spans
-
-    for alias, canonical in _ALL_ALIASES_SORTED:
-        # Find all occurrences of this alias in text
-        pattern = r"(?<![a-zA-Z0-9/\-])" + re.escape(alias) + r"(?![a-zA-Z0-9/\-])"
-        for m in re.finditer(pattern, text_lower):
-            start, end = m.start(), m.end()
-            # Check no overlap with already-consumed span
-            overlaps = any(s < end and start < e for s, e in consumed_spans)
-            if not overlaps:
-                found.add(canonical)
-                consumed_spans.append((start, end))
-
-    return sorted(found)
+    return SkillIntelligenceEngine().extract_skills_from_text(text)
 
 
 # ── Section header patterns ───────────────────────────────────────────────────
 REQUIRED_HEADERS = re.compile(
-    r"^(required|requirements|must have|must-have|mandatory|qualifications?|"
+    r"^(required skills?|requirements|required|must have|must-have|mandatory|qualifications?|"
     r"minimum qualifications?|basic qualifications?|what you.ll need|what we need):?\s*$",
     re.IGNORECASE,
 )
 PREFERRED_HEADERS = re.compile(
-    r"^(preferred|nice to have|nice-to-have|bonus|plus|desired|"
+    r"^(preferred skills?|preferred|nice to have|nice-to-have|bonus|plus|desired|"
     r"additional qualifications?|preferred qualifications?|good to have|advantages?):?\s*$",
     re.IGNORECASE,
 )
@@ -359,6 +170,11 @@ def parse_job_description(text: str) -> ParsedJD:
     # Required skills: scan required section + general section (full text scan)
     required_text = sections.get("required", "") + "\n" + sections.get("general", "")
     all_required = extract_skills_from_text(required_text)
+    
+    # Fallback: if no required skills found, the JD might not have clear section headers
+    # so we extract from the entire text
+    if not all_required:
+        all_required = extract_skills_from_text(text)
 
     # Preferred skills: scan preferred section only
     pref_skills = extract_skills_from_text(sections.get("preferred", ""))
@@ -381,7 +197,7 @@ def parse_job_description(text: str) -> ParsedJD:
     # Keywords: union of required + preferred skills (clean, canonical)
     keywords = sorted(set(required_skills) | set(pref_skills))
 
-    return ParsedJD(
+    parsed = ParsedJD(
         title=title,
         required_skills=required_skills,
         preferred_skills=pref_skills,
@@ -390,3 +206,7 @@ def parse_job_description(text: str) -> ParsedJD:
         responsibilities=responsibilities,
         keywords=keywords,
     )
+    
+    # Classify domain
+    parsed.domain_classification = SkillIntelligenceEngine().classify_jd_domain(parsed)
+    return parsed

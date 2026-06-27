@@ -22,6 +22,12 @@ CANONICAL_SECTIONS = frozenset({
     "leadership",
     "certifications",
     "skills",
+    "open_source",
+    "achievements",
+    "publications",
+    "hackathons",
+    "research",
+    "tech_blogs",
     "other_section",
 })
 
@@ -29,11 +35,17 @@ CANONICAL_SECTIONS = frozenset({
 SECTION_PRIORITY = [
     "contact",
     "skills",
-    "projects",
-    "certifications",
-    "leadership",
-    "education",
     "experience",
+    "projects",
+    "open_source",
+    "research",
+    "publications",
+    "hackathons",
+    "certifications",
+    "achievements",
+    "leadership",
+    "tech_blogs",
+    "education",
     "summary",
 ]
 
@@ -108,7 +120,12 @@ SECTION_REGISTRY: List[AliasEntry] = [
         "projects", "personal projects", "academic projects",
         "key projects", "notable projects", "project work",
         "project experience", "technical projects", "selected projects",
-        "side projects", "open source", "portfolio",
+        "side projects", "portfolio",
+    ]),
+
+    AliasEntry("open_source", aliases=[
+        "open source", "open source contributions", "open-source",
+        "github contributions", "open source projects",
     ]),
 
     AliasEntry("leadership", aliases=[
@@ -121,8 +138,32 @@ SECTION_REGISTRY: List[AliasEntry] = [
         "community involvement", "social work", "nss", "ncc",
         "student leadership", "organizational roles",
         "responsibilities", "roles and responsibilities",
-        "achievements and activities", "awards", "honors",
-        "awards and honors", "awards & scholarships",
+    ]),
+
+    AliasEntry("achievements", aliases=[
+        "achievements", "achievements and activities", "awards", "honors",
+        "awards and honors", "awards & scholarships", "recognitions",
+        "key achievements", "notable achievements",
+    ]),
+
+    AliasEntry("publications", aliases=[
+        "publications", "research publications", "papers",
+        "published papers", "articles", "journals", "conferences",
+    ]),
+
+    AliasEntry("hackathons", aliases=[
+        "hackathons", "hackathon experience", "competitions",
+        "coding competitions", "programming contests", "competitive programming",
+    ]),
+
+    AliasEntry("research", aliases=[
+        "research", "research experience", "research projects",
+        "academic research",
+    ]),
+
+    AliasEntry("tech_blogs", aliases=[
+        "tech blogs", "technical blogs", "blogging", "articles and blogs",
+        "writing", "technical writing",
     ]),
 
     AliasEntry("certifications", aliases=[

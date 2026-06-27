@@ -39,6 +39,12 @@ EMPTY_SCHEMA: Dict[str, Any] = {
     "projects": [],
     "leadership": [],
     "certifications": [],
+    "open_source": [],
+    "achievements": [],
+    "publications": [],
+    "hackathons": [],
+    "research": [],
+    "tech_blogs": [],
     "skills": {
         "categories": [],
         "flat_list": [],
@@ -93,7 +99,8 @@ def validate_result(result: Dict[str, Any]) -> List[str]:
               f"Version mismatch: expected {PARSER_VERSION!r}, got {result['version']!r}")
 
     # Arrays must be lists (never None)
-    for array_key in ["education", "experience", "projects", "leadership", "certifications"]:
+    for array_key in ["education", "experience", "projects", "leadership", "certifications", 
+                      "open_source", "achievements", "publications", "hackathons", "research", "tech_blogs"]:
         if array_key in result:
             check(isinstance(result[array_key], list),
                   f"{array_key!r} must be a list, got {type(result[array_key]).__name__}")

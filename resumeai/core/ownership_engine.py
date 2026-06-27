@@ -152,7 +152,9 @@ class OwnershipResult:
         for block in self.blocks:
             if block.section_name not in {
                 "contact", "summary", "education", "experience",
-                "projects", "leadership", "certifications", "skills", "other_section"
+                "projects", "leadership", "certifications", "skills", 
+                "open_source", "achievements", "publications", 
+                "hackathons", "research", "tech_blogs", "other_section"
             }:
                 violations.append(
                     f"Block has invalid section_name: {block.section_name!r}"
