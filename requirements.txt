@@ -1,10 +1,45 @@
+-e .
+
+# Web Framework
 fastapi
-uvicorn
+uvicorn[standard]
+
+# Database
+SQLAlchemy
+alembic
+psycopg2-binary
+
+# Authentication
+bcrypt
+passlib[bcrypt]
+python-jose[cryptography]
 python-multipart
-pdfplumber
-rapidfuzz
-python-dateutil
+email-validator
+
+# Configuration
+python-dotenv
+pydantic
+pydantic-settings
+
+# AI
+google-genai
 sentence-transformers>=2.2.0
 numpy>=1.24.0
-python-dotenv
-pydantic-settings
+rapidfuzz
+
+# PDF Processing
+pdfplumber
+pypdf
+PyPDF2
+
+# Reporting
+reportlab
+
+# HTTP
+requests
+
+# Date Utilities
+python-dateutil
+
+# Testing
+pytest
