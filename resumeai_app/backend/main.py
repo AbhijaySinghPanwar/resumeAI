@@ -82,7 +82,7 @@ from repositories.report_repo import ReportRepository
 from sqlalchemy.orm import Session
 
 # ── App ────────────────────────────────────────────────────────────────────────
-logger.info("Before creating FastAPI app")
+print("Before creating FastAPI app", flush=True)
 app = FastAPI(
     title="ResumeAI API",
     version="4.0.0",
@@ -105,7 +105,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def _startup_preload_embeddings():
     """Preload sentence-transformers model at startup so first request is fast."""
-    logger.info("Beginning of startup event")
+    print("Beginning of startup event", flush=True)
     try:
         from resumeai.matching.embedding_engine import preload_model, get_status
         success = preload_model()
@@ -121,7 +121,7 @@ async def _startup_preload_embeddings():
             )
     except Exception as e:
         logger.error("✗ Embedding preload exception: %s", e)
-    logger.info("End of startup event")
+    print("End of startup event", flush=True)
 
 
 @app.get("/api/health/embeddings")
@@ -136,37 +136,37 @@ def _health_embeddings():
 
 
 # ── Singletons ────────────────────────────────────────────────────────────────
-logger.info("Before initializing ResumeParser")
+print("Before initializing ResumeParser", flush=True)
 parser  = ResumeParser(strict_schema=False, include_debug=True)
-logger.info("After initializing ResumeParser")
+print("After initializing ResumeParser", flush=True)
 
-logger.info("Before initializing ATSGate")
+print("Before initializing ATSGate", flush=True)
 gate    = ATSGate()
-logger.info("After initializing ATSGate")
+print("After initializing ATSGate", flush=True)
 
-logger.info("Before initializing ResumeScorer")
+print("Before initializing ResumeScorer", flush=True)
 scorer  = ResumeScorer()
-logger.info("After initializing ResumeScorer")
+print("After initializing ResumeScorer", flush=True)
 
-logger.info("Before initializing SkillMatcher")
+print("Before initializing SkillMatcher", flush=True)
 matcher = SkillMatcher()
-logger.info("After initializing SkillMatcher")
+print("After initializing SkillMatcher", flush=True)
 
-logger.info("Before initializing GeminiService")
+print("Before initializing GeminiService", flush=True)
 _gemini    = GeminiService()
-logger.info("After initializing GeminiService")
+print("After initializing GeminiService", flush=True)
 
-logger.info("Before initializing BulletImprover")
+print("Before initializing BulletImprover", flush=True)
 _bullet    = BulletImprover(_gemini)
-logger.info("After initializing BulletImprover")
+print("After initializing BulletImprover", flush=True)
 
-logger.info("Before initializing ProjectEnhancer")
+print("Before initializing ProjectEnhancer", flush=True)
 _enhancer  = ProjectEnhancer(_gemini)
-logger.info("After initializing ProjectEnhancer")
+print("After initializing ProjectEnhancer", flush=True)
 
-logger.info("Before initializing InterviewGenerator")
+print("Before initializing InterviewGenerator", flush=True)
 _interview = InterviewGenerator(_gemini)
-logger.info("After initializing InterviewGenerator")
+print("After initializing InterviewGenerator", flush=True)
 
 # ── Phase 4 Routers ───────────────────────────────────────────────────────────
 from routers.auth    import router as auth_router
@@ -174,12 +174,12 @@ from routers.history import router as history_router
 from routers.reports import router as reports_router
 from routers.export  import router as export_router
 
-logger.info("Before router registration")
+print("Before router registration", flush=True)
 app.include_router(auth_router)
 app.include_router(history_router)
 app.include_router(reports_router)
 app.include_router(export_router)
-logger.info("After router registration")
+print("After router registration", flush=True)
 
 logger.info("ResumeAI v4.0.0 started. Gemini: %s", _gemini.active_model or "fallback")
 
