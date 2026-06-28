@@ -523,3 +523,11 @@ def generate_interview_questions(req: "InterviewRequest"):
          description="Returns availability and the currently active model name.")
 def ai_status():
     return _gemini.status_dict()
+
+# ── Static Files (Frontend) ────────────────────────────────────────────────────
+# Mounted last so API routes take precedence
+from fastapi.staticfiles import StaticFiles
+frontend_path = os.path.join(os.path.dirname(_backend_dir), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
