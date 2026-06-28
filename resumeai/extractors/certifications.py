@@ -1,200 +1,238 @@
 """
-certifications.py — Extract certification entries.
+extractors/certifications.py — Phase 1.6 Certification Extraction.
 
-Handles:
-  - "AWS Certified Solutions Architect – Amazon | 2023"
-  - Bullet-listed certs
-  - Cert with credential ID
+Phase 1.6 fix: Uses continuation-line detection so that wrapped description
+lines (e.g., "services, cloud security..." after "AWS Certified...") are
+merged into the current certification instead of becoming a new card.
+
+Each certification → one object: {name, issuer, date, description, credential_id}
 """
 
 import re
-from enum import Enum
 from typing import Dict, List, Optional
 
-from resumeai.extractors.date_utils import parse_date, extract_years, is_date_line
+from resumeai.extractors.date_utils import extract_years, parse_date, is_date_line
+from resumeai.extractors._continuation import is_continuation
 
-BULLET_RE = re.compile(r"^[\-\*\•\·\◦\▸\►\–\—]\s+")
-PIPE_SEP_RE = re.compile(r"\s*[|\-\u2013\u2014/]\s*")
+BULLET_RE     = re.compile(r"^[\-\*\•\·\◦\▸\►\–\—]\s+")
+PIPE_SEP_RE   = re.compile(r"\s*[|\-\u2013\u2014/]\s*")
 CREDENTIAL_RE = re.compile(r"(?:credential|cert(?:ificate)?|license|id)[:\s#]+([A-Z0-9\-]+)", re.IGNORECASE)
-EXPIRY_RE = re.compile(r"(?:expir(?:es|y|ed)|valid(?:\s+until)?|expires)[:\s]+(.+)", re.IGNORECASE)
+DATE_PREFIX_RE= re.compile(r"^(\d{4})\s*[\-–—]\s*(.+)")  # "2026—AWS Certified..."
 
 EXACT_ISSUERS = {
-    "amazon", "aws", "google", "microsoft", "azure", "comptia", "cisco",
-    "oracle", "ibm", "salesforce", "pmi", "isaca", "isc2", "ec-council",
-    "coursera", "udemy", "edx", "nptel", "linkedin", "meta", "mongodb",
-    "databricks", "snowflake", "hashicorp", "red hat", "vmware",
-    "amazon web services", "ibm skills network", "postman",
-    "cfa institute", "garp", "cncf", "iassc", "autodesk"
+    "amazon","aws","google","microsoft","azure","comptia","cisco",
+    "oracle","ibm","salesforce","pmi","isaca","isc2","ec-council",
+    "coursera","udemy","edx","nptel","linkedin","meta","mongodb",
+    "databricks","snowflake","hashicorp","red hat","vmware",
+    "amazon web services","ibm skills network","postman",
+    "cfa institute","garp","cncf","iassc","autodesk","nvidia",
 }
 
-class SegmentType(Enum):
-    TITLE = "title"
-    ISSUER = "issuer"
-    DATE = "date"
-    CREDENTIAL_ID = "credential_id"
+ISSUER_NORMALIZE = {
+    "aws": "AWS", "ibm": "IBM", "cncf": "CNCF", "garp": "GARP",
+    "google": "Google", "microsoft": "Microsoft", "oracle": "Oracle",
+    "meta": "Meta", "nvidia": "NVIDIA", "cisco": "Cisco",
+    "comptia": "CompTIA", "coursera": "Coursera", "udemy": "Udemy",
+}
 
 
-def extract_certifications(raw_lines: List[str]) -> List[Dict]:
-    content_lines = _get_content_lines(raw_lines)
-    return _stateful_grouping(content_lines)
+def _empty_cert() -> Dict:
+    return {"name": None, "issuer": None, "date": None,
+            "description": None, "credential_id": None, "raw_lines": []}
 
 
-def _get_content_lines(raw_lines: List[str]) -> List[str]:
-    while raw_lines and not raw_lines[0].strip():
-        raw_lines = raw_lines[1:]
-    while raw_lines and not raw_lines[-1].strip():
-        raw_lines = raw_lines[:-1]
-        
-    if not raw_lines:
-        return []
-        
-    first_lower = raw_lines[0].strip().lower()
-    skip_keywords = [
-        "certification", "certificate", "credential", "license",
-        "course", "training", "qualification", "accreditation",
-    ]
-    if any(kw in first_lower for kw in skip_keywords) and len(raw_lines[0].strip()) < 50:
-        return raw_lines[1:]
-    return raw_lines
+def _is_new_cert_line(stripped: str, prev_cert: Optional[Dict]) -> bool:
+    """
+    Decide if this line starts a new certification.
+    A line is NOT a new cert if is_continuation() returns True, or if it's
+    a pure date/issuer line that belongs to the current cert.
+    """
+    if not stripped:
+        return False
+
+    # Continuation → never a new cert
+    if is_continuation(stripped):
+        return False
+
+    # Always-new: bullet prefix
+    if BULLET_RE.match(stripped):
+        return True
+
+    # Always-new: date prefix like "2025—Certification Name"
+    if DATE_PREFIX_RE.match(stripped):
+        return True
+
+    # Pure date/year line → metadata for current cert, not a new one
+    years = extract_years(stripped)
+    if years and len(stripped) < 12:
+        return False
+
+    # Known issuer on its own → metadata for current cert
+    lower = stripped.lower()
+    if lower in EXACT_ISSUERS:
+        return False
+
+    # Has a pipe separator + issuer keyword → structured cert line
+    if "|" in stripped and any(kw in lower for kw in EXACT_ISSUERS):
+        return True
+
+    # If there's no current cert → first cert
+    if prev_cert is None or prev_cert["name"] is None:
+        return True
+
+    # Current cert already complete (name + date + issuer) → new cert title
+    if (prev_cert["name"]
+            and prev_cert.get("date")
+            and prev_cert.get("issuer")
+            and not is_date_line(stripped)
+            and lower not in EXACT_ISSUERS):
+        return True
+
+    # Current cert has name + one of {date, issuer} → new title starts new cert
+    if (prev_cert["name"]
+            and (prev_cert.get("date") or prev_cert.get("issuer"))
+            and not is_date_line(stripped)
+            and lower not in EXACT_ISSUERS
+            # But only if this line reads like a title (title-case, short)
+            and stripped[0].isupper()
+            and len(stripped.split()) <= 12
+            and not stripped.endswith((",", ";"))
+            and not any(kw in lower for kw in [
+                "services", "cloud", "studio", "platform", "experience",
+                "hands-on", "covered", "including", "practical",
+            ])):
+        return True
+
+    return False
 
 
-def _classify_segment(seg: str) -> SegmentType:
-    seg_lower = seg.lower()
-    
-    # Credential ID
-    if CREDENTIAL_RE.search(seg):
-        return SegmentType.CREDENTIAL_ID
-        
-    # Date
-    years = extract_years(seg)
-    if years and len(seg) < 20:
-        return SegmentType.DATE
-
-    # Exact issuer
-    if seg_lower in EXACT_ISSUERS:
-        return SegmentType.ISSUER
-
-    # Check for embedded issuer names
-    kw_hits = [kw for kw in EXACT_ISSUERS if kw in seg_lower]
-    if kw_hits:
-        match_len = sum(len(kw) for kw in kw_hits)
-        # If the issuer keyword dominates the string, it's an issuer
-        if match_len / len(seg_lower) > 0.5:
-            return SegmentType.ISSUER
-            
-    return SegmentType.TITLE
+def _infer_issuer_from_name(name: str) -> Optional[str]:
+    """Try to detect the issuer from the certification name."""
+    if not name:
+        return None
+    lower = name.lower()
+    for kw in sorted(EXACT_ISSUERS, key=len, reverse=True):
+        if kw in lower:
+            return ISSUER_NORMALIZE.get(kw, kw.title())
+    return None
 
 
-def _parse_cert_line(cert: Dict, stripped: str):
+def _parse_line_into_cert(cert: Dict, stripped: str) -> None:
+    """Parse a structured cert line (may contain name | issuer | date)."""
+    # Handle credential ID
     cred_m = CREDENTIAL_RE.search(stripped)
     if cred_m:
         cert["credential_id"] = cred_m.group(1)
         stripped = stripped[:cred_m.start()].strip()
 
-    exp_m = EXPIRY_RE.search(stripped)
-    if exp_m:
-        cert["expiry"] = parse_date(exp_m.group(1))
-        stripped = stripped[:exp_m.start()].strip()
+    # Handle date prefix "2026—Content"
+    date_pfx = DATE_PREFIX_RE.match(stripped)
+    if date_pfx:
+        year, rest = date_pfx.group(1), date_pfx.group(2).strip()
+        if not cert["date"]:
+            cert["date"] = year
+        stripped = rest
 
+    # Split on pipe/dash separators
     parts = [p.strip() for p in PIPE_SEP_RE.split(stripped) if p.strip()]
-    
-    line_has_title = False
+
     for part in parts:
-        seg_type = _classify_segment(part)
-        if seg_type == SegmentType.TITLE:
-            if cert["name"]:
-                if line_has_title:
-                    cert["name"] += f" - {part}"
-                else:
-                    # Should not reach here if _parse_cert_line is only called on is_new lines
-                    cert["name"] += f" - {part}"
-            else:
-                cert["name"] = part
-                line_has_title = True
-        elif seg_type == SegmentType.ISSUER:
+        part_lower = part.lower()
+        years = extract_years(part)
+
+        if years and len(part) < 20:
+            # Date/year field
+            if not cert["date"]:
+                cert["date"] = str(years[-1])
+        elif part_lower in EXACT_ISSUERS:
             if not cert["issuer"]:
-                cert["issuer"] = part
-        elif seg_type == SegmentType.DATE:
-            years = extract_years(part)
-            if years and not cert["date"]:
-                cert["date"] = years[-1]
-        elif seg_type == SegmentType.CREDENTIAL_ID:
-            cred_m2 = CREDENTIAL_RE.search(part)
-            if cred_m2 and not cert["credential_id"]:
-                cert["credential_id"] = cred_m2.group(1)
+                cert["issuer"] = ISSUER_NORMALIZE.get(part_lower, part)
+        elif any(kw in part_lower for kw in EXACT_ISSUERS) and len(part) < 40:
+            match_kw = next((kw for kw in EXACT_ISSUERS if kw in part_lower), None)
+            if match_kw and (len(match_kw) / len(part_lower) > 0.4):
+                if not cert["issuer"]:
+                    cert["issuer"] = ISSUER_NORMALIZE.get(match_kw, part)
+            else:
+                if not cert["name"]:
+                    cert["name"] = part
+        else:
+            if not cert["name"]:
+                cert["name"] = part
 
-def _stateful_grouping(lines: List[str]) -> List[Dict]:
-    certs = []
-    current_cert = None
-    prev_line_blank = False
 
-    def finalize_cert():
-        nonlocal current_cert
-        if current_cert and current_cert["name"]:
-            certs.append(current_cert)
-        current_cert = None
+def _get_content_lines(raw_lines: List[str]) -> List[str]:
+    lines = [l for l in raw_lines if l.strip()]
+    if not lines:
+        return []
+    first_lower = lines[0].strip().lower()
+    skip_kw = ["certification","certificate","credential","license",
+                "course","training","qualification","accreditation"]
+    if any(kw in first_lower for kw in skip_kw) and len(lines[0].strip()) < 50:
+        return lines[1:]
+    return lines
 
-    for raw_line in lines:
-        # Split on multiple spaces OR inline bullets/pipes to handle PDF column merging
-        sublines = re.split(r"(?<=\S)\s{2,}(?=\S)|\s+(?=[\•\·\◦\▸\►\|]\s+)", raw_line)
-        for i, line in enumerate(sublines):
+
+def extract_certifications(raw_lines: List[str]) -> List[Dict]:
+    content_lines = _get_content_lines(raw_lines)
+    certs: List[Dict] = []
+    current: Optional[Dict] = None
+    prev_stripped = ""
+
+    def finalize():
+        nonlocal current
+        if current and current["name"]:
+            if not current["issuer"]:
+                current["issuer"] = _infer_issuer_from_name(current["name"])
+            certs.append(current)
+        current = None
+
+    for raw_line in content_lines:
+        # Handle PDF column-merged lines (two certs on one line separated by 2+ spaces)
+        sublines = re.split(r"(?<=\S)\s{3,}(?=\S)", raw_line)
+
+        for line in sublines:
             stripped = line.strip()
             if not stripped:
-                if not sublines: # only mark blank if the whole line was blank
-                    prev_line_blank = True
                 continue
 
             has_bullet = bool(BULLET_RE.match(stripped))
-            has_date = bool(extract_years(stripped))
-            has_cred = bool(CREDENTIAL_RE.search(stripped))
-            
-            has_issuer = False
-            parts = [p.strip() for p in PIPE_SEP_RE.split(stripped) if p.strip()]
-            for p in parts:
-                if p.lower() in EXACT_ISSUERS:
-                    has_issuer = True
-                    break
+            if has_bullet:
+                stripped_nb = BULLET_RE.sub("", stripped).strip()
+            else:
+                stripped_nb = stripped
 
-            is_new = False
-            if has_bullet or prev_line_blank or current_cert is None:
-                is_new = True
-            elif has_date or has_issuer or has_cred:
-                is_new = True
-            elif i > 0 and len(stripped) > 5:
-                # If it's a separate chunk on the same line (columns), treat as new cert
-                is_new = True
-            elif current_cert and (current_cert.get("issuer") or current_cert.get("date") or current_cert.get("credential_id")):
-                # If the previous cert is already fully formed (has issuer/date/cred), and this line is something else,
-                # it's likely a new cert on a new line.
-                is_new = True
+            # Decide: new cert or continuation?
+            if _is_new_cert_line(stripped_nb, current):
+                finalize()
+                current = _empty_cert()
+                current["raw_lines"].append(line)
+                _parse_line_into_cert(current, stripped_nb)
+            else:
+                # Continuation line → append to description or fill missing fields
+                if current is None:
+                    current = _empty_cert()
 
-            if is_new:
-                finalize_cert()
-                if has_bullet:
-                    stripped = BULLET_RE.sub("", stripped).strip()
-                
-                current_cert = {
-                    "name": None, "issuer": None, "date": None, "expiry": None, 
-                    "credential_id": None, "raw_lines": []
-                }
-                _parse_cert_line(current_cert, stripped)
-                
-            current_cert["raw_lines"].append(line)
-            prev_line_blank = False
+                current["raw_lines"].append(line)
 
-    finalize_cert()
-    
-    # Post-process to detect issuer from name if missing
-    for cert in certs:
-        if cert["name"] and not cert["issuer"]:
-            name_lower = cert["name"].lower()
-            for kw in EXACT_ISSUERS:
-                if kw in name_lower:
-                    # special casing to preserve original capitalization if possible, else title()
-                    cert["issuer"] = kw.title()
-                    if cert["issuer"] == "Aws": cert["issuer"] = "AWS"
-                    if cert["issuer"] == "Cncf": cert["issuer"] = "CNCF"
-                    if cert["issuer"] == "Garp": cert["issuer"] = "GARP"
-                    break
-                    
+                # Try to fill issuer/date if not set yet
+                years = extract_years(stripped_nb)
+                lower = stripped_nb.lower()
+                if years and len(stripped_nb) < 20 and not current["date"]:
+                    current["date"] = str(years[-1])
+                elif lower in EXACT_ISSUERS and not current["issuer"]:
+                    current["issuer"] = ISSUER_NORMALIZE.get(lower, stripped_nb)
+                elif any(kw in lower for kw in EXACT_ISSUERS) and len(stripped_nb) < 40 and not current["issuer"]:
+                    match_kw = next((kw for kw in EXACT_ISSUERS if kw in lower), None)
+                    if match_kw:
+                        current["issuer"] = ISSUER_NORMALIZE.get(match_kw, stripped_nb)
+                else:
+                    # It's a description continuation
+                    if current["description"]:
+                        current["description"] += " " + stripped_nb
+                    else:
+                        current["description"] = stripped_nb
+
+            prev_stripped = stripped_nb
+
+    finalize()
     return certs

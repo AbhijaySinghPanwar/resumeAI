@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: resumeai
-Version: 7.0.0
-Requires-Dist: pdfplumber
-Requires-Dist: rapidfuzz
-Requires-Dist: python-dateutil
-Dynamic: requires-dist

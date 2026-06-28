@@ -100,6 +100,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Startup: preload embedding model ─────────────────────────────────────────
+@app.on_event("startup")
+async def _startup_preload_embeddings():
+    """Preload sentence-transformers model at startup so first request is fast."""
+    try:
+        from resumeai.matching.embedding_engine import preload_model, get_status
+        success = preload_model()
+        status = get_status()
+        if success:
+            logger.info("✓ Embedding model loaded: %s", status["model"])
+        else:
+            logger.error(
+                "✗ Embedding model FAILED to load: %s. "
+                "Semantic scoring will use keyword fallback. "
+                "Fix: pip install sentence-transformers numpy",
+                status["error"],
+            )
+    except Exception as e:
+        logger.error("✗ Embedding preload exception: %s", e)
+
+
+@app.get("/api/health/embeddings")
+def _health_embeddings():
+    """Health check endpoint for embedding engine status."""
+    from resumeai.matching.embedding_engine import get_status
+    status = get_status()
+    return {
+        "embedding_engine": status,
+        "semantic_scoring": "active" if status["available"] else "keyword_fallback",
+    }
+
+
 # ── Singletons ────────────────────────────────────────────────────────────────
 parser  = ResumeParser(strict_schema=False, include_debug=True)
 gate    = ATSGate()
@@ -325,23 +357,7 @@ def match_resume(
 
     try:
         parsed_jd = parse_job_description(req.job_description)
-        logger.info(f"[TRACE] JD parsed. Title: {parsed_jd.title}")
-        logger.info(f"[TRACE] JD required_skills count: {len(parsed_jd.required_skills)}")
-        
-        logger.info("[TRACE] Calling SkillMatcher")
         result = matcher.calculate_match_score(req.parse_result, parsed_jd)
-        
-        logger.info(f"[TRACE] Matched skills count: {len(result.matched_skills)}")
-        logger.info(f"[TRACE] Missing skills count: {len(result.missing_skills)}")
-        logger.info(f"[TRACE] Component skills score: {result.component_scores.skills}")
-        
-        import resumeai.matching.skill_matcher as sm_mod
-        import resumeai.matching.gap_analyzer as ga_mod
-        import resumeai.matching.jd_parser as jp_mod
-        
-        logger.info(f"[TRACE] skill_matcher.__file__ = {sm_mod.__file__}")
-        logger.info(f"[TRACE] gap_analyzer.__file__ = {ga_mod.__file__}")
-        logger.info(f"[TRACE] jd_parser.__file__ = {jp_mod.__file__}")
 
         # Auto-save JD report if authenticated and a resume_id is provided
         if current_user and req.resume_id:
@@ -364,18 +380,8 @@ def match_resume(
             except Exception as exc:
                 logger.warning("JD auto-save failed (non-fatal): %s", exc)
 
-        res_dict = result.to_dict()
-        if "debug_info" not in res_dict:
-            res_dict["debug_info"] = {}
-        res_dict["debug_info"]["module_paths"] = {
-            "skill_matcher": sm_mod.__file__,
-            "gap_analyzer": ga_mod.__file__,
-            "jd_parser": jp_mod.__file__,
-            "sys_path": sys.path
-        }
-
         return {
-            **res_dict,
+            **result.to_dict(),
             "parsed_jd": parsed_jd.to_dict(),
         }
     except HTTPException:

@@ -23,7 +23,7 @@ from resumeai.core.schema import assert_valid, empty_result, validate_result
 from resumeai.extractors.contact import extract_contact
 from resumeai.extractors.education import extract_education
 from resumeai.extractors.experience import extract_experience
-from resumeai.extractors.projects import extract_projects
+from resumeai.extractors.projects import extract_projects, build_resume_knowledge_graph
 from resumeai.extractors.leadership import extract_leadership
 from resumeai.extractors.certifications import extract_certifications
 from resumeai.extractors.skills import extract_skills
@@ -160,12 +160,54 @@ class ResumeParser:
             default=[],
         )
 
+        # ── Projects: layout-aware other_section absorption ───────────────────
+        # The ownership engine sometimes routes project content to other_section
+        # when a section header is followed by a blank line before the first project.
+        # We absorb ALL consecutive other_section blocks that directly follow the
+        # projects section (no intervening named section between them).
+        proj_raw_lines = ownership.all_lines_for_section("projects")
+
+        # Sort all blocks by start line to reason about adjacency
+        all_blocks_sorted = sorted(
+            ownership.blocks,
+            key=lambda b: b.start_line,
+        )
+        # Find the end of the last projects block
+        proj_section_end = max(
+            (b.start_line + b.line_count
+             for b in all_blocks_sorted if b.section_name == "projects"),
+            default=0,
+        )
+        # Walk forward through blocks: absorb other_section blocks that are
+        # consecutive (within 2 lines gap) and not interrupted by a named section.
+        extra_lines: List[str] = []
+        expected_start = proj_section_end
+        for block in all_blocks_sorted:
+            if block.start_line < proj_section_end:
+                continue  # before projects end
+            if block.section_name == "projects":
+                continue  # already included
+            if block.section_name == "other_section":
+                if block.start_line <= expected_start + 2:
+                    extra_lines.extend(block.raw_lines)
+                    expected_start = block.start_line + block.line_count
+                else:
+                    break  # gap is too large; stop
+            else:
+                break  # hit a named section (certifications, leadership, etc.)
+
+        if extra_lines:
+            proj_raw_lines = proj_raw_lines + extra_lines
+
         result["projects"] = self._safe_extract(
             "projects",
             extract_projects,
-            ownership.all_lines_for_section("projects"),
+            proj_raw_lines,
             default=[],
         )
+
+        # ── Phase 1.5: Resume Knowledge Graph ────────────────────────────────
+        result["knowledge_graph"] = build_resume_knowledge_graph(result["projects"])
 
         result["leadership"] = self._safe_extract(
             "leadership",
@@ -178,48 +220,6 @@ class ResumeParser:
             "certifications",
             extract_certifications,
             ownership.all_lines_for_section("certifications"),
-            default=[],
-        )
-        
-        result["open_source"] = self._safe_extract(
-            "open_source",
-            extract_projects,
-            ownership.all_lines_for_section("open_source"),
-            default=[],
-        )
-        
-        result["achievements"] = self._safe_extract(
-            "achievements",
-            extract_leadership,
-            ownership.all_lines_for_section("achievements"),
-            default=[],
-        )
-        
-        result["publications"] = self._safe_extract(
-            "publications",
-            extract_leadership,
-            ownership.all_lines_for_section("publications"),
-            default=[],
-        )
-        
-        result["hackathons"] = self._safe_extract(
-            "hackathons",
-            extract_projects,
-            ownership.all_lines_for_section("hackathons"),
-            default=[],
-        )
-        
-        result["research"] = self._safe_extract(
-            "research",
-            extract_projects,
-            ownership.all_lines_for_section("research"),
-            default=[],
-        )
-        
-        result["tech_blogs"] = self._safe_extract(
-            "tech_blogs",
-            extract_projects,
-            ownership.all_lines_for_section("tech_blogs"),
             default=[],
         )
 
