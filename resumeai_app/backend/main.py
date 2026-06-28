@@ -82,6 +82,7 @@ from repositories.report_repo import ReportRepository
 from sqlalchemy.orm import Session
 
 # ── App ────────────────────────────────────────────────────────────────────────
+logger.info("Before creating FastAPI app")
 app = FastAPI(
     title="ResumeAI API",
     version="4.0.0",
@@ -104,6 +105,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def _startup_preload_embeddings():
     """Preload sentence-transformers model at startup so first request is fast."""
+    logger.info("Beginning of startup event")
     try:
         from resumeai.matching.embedding_engine import preload_model, get_status
         success = preload_model()
@@ -119,6 +121,7 @@ async def _startup_preload_embeddings():
             )
     except Exception as e:
         logger.error("✗ Embedding preload exception: %s", e)
+    logger.info("End of startup event")
 
 
 @app.get("/api/health/embeddings")
@@ -133,15 +136,37 @@ def _health_embeddings():
 
 
 # ── Singletons ────────────────────────────────────────────────────────────────
+logger.info("Before initializing ResumeParser")
 parser  = ResumeParser(strict_schema=False, include_debug=True)
-gate    = ATSGate()
-scorer  = ResumeScorer()
-matcher = SkillMatcher()
+logger.info("After initializing ResumeParser")
 
+logger.info("Before initializing ATSGate")
+gate    = ATSGate()
+logger.info("After initializing ATSGate")
+
+logger.info("Before initializing ResumeScorer")
+scorer  = ResumeScorer()
+logger.info("After initializing ResumeScorer")
+
+logger.info("Before initializing SkillMatcher")
+matcher = SkillMatcher()
+logger.info("After initializing SkillMatcher")
+
+logger.info("Before initializing GeminiService")
 _gemini    = GeminiService()
+logger.info("After initializing GeminiService")
+
+logger.info("Before initializing BulletImprover")
 _bullet    = BulletImprover(_gemini)
+logger.info("After initializing BulletImprover")
+
+logger.info("Before initializing ProjectEnhancer")
 _enhancer  = ProjectEnhancer(_gemini)
+logger.info("After initializing ProjectEnhancer")
+
+logger.info("Before initializing InterviewGenerator")
 _interview = InterviewGenerator(_gemini)
+logger.info("After initializing InterviewGenerator")
 
 # ── Phase 4 Routers ───────────────────────────────────────────────────────────
 from routers.auth    import router as auth_router
@@ -149,10 +174,12 @@ from routers.history import router as history_router
 from routers.reports import router as reports_router
 from routers.export  import router as export_router
 
+logger.info("Before router registration")
 app.include_router(auth_router)
 app.include_router(history_router)
 app.include_router(reports_router)
 app.include_router(export_router)
+logger.info("After router registration")
 
 logger.info("ResumeAI v4.0.0 started. Gemini: %s", _gemini.active_model or "fallback")
 

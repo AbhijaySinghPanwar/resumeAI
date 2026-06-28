@@ -2,7 +2,7 @@
    Shared JS Logic (Auth, Nav, Toasts, Footer)
    ========================================================================== */
 
-const API = 'http://localhost:8000';
+const API = 'https://resumeai-production-0442.up.railway.app';
 
 /* ── Authentication Helpers ────────────────────────────────────────────── */
 function getToken() {
