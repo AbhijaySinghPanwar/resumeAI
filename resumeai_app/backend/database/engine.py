@@ -26,12 +26,21 @@ from core.config import settings
 _connect_args = {}
 if settings.DATABASE_URL.startswith("sqlite"):
     _connect_args = {"check_same_thread": False}
-
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args=_connect_args,
-    echo=settings.DEBUG,
-)
+    engine = create_engine(
+        settings.DATABASE_URL,
+        connect_args=_connect_args,
+        echo=settings.DEBUG,
+    )
+else:
+    # PostgreSQL / Neon pooling configurations
+    engine = create_engine(
+        settings.DATABASE_URL,
+        connect_args=_connect_args,
+        echo=settings.DEBUG,
+        pool_pre_ping=True,      # Tests connection liveness before checking out
+        pool_size=5,             # Conservative pool size for 512MB RAM
+        max_overflow=10,         # Allow temporary spikes
+    )
 
 # Enable WAL mode for SQLite — better concurrency
 if settings.DATABASE_URL.startswith("sqlite"):

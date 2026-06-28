@@ -104,23 +104,9 @@ app.add_middleware(
 # ── Startup: preload embedding model ─────────────────────────────────────────
 @app.on_event("startup")
 async def _startup_preload_embeddings():
-    """Preload sentence-transformers model at startup so first request is fast."""
+    """Embedding model loading deferred to first request to save RAM."""
     print("Beginning of startup event", flush=True)
-    try:
-        from resumeai.matching.embedding_engine import preload_model, get_status
-        success = preload_model()
-        status = get_status()
-        if success:
-            logger.info("✓ Embedding model loaded: %s", status["model"])
-        else:
-            logger.error(
-                "✗ Embedding model FAILED to load: %s. "
-                "Semantic scoring will use keyword fallback. "
-                "Fix: pip install sentence-transformers numpy",
-                status["error"],
-            )
-    except Exception as e:
-        logger.error("✗ Embedding preload exception: %s", e)
+    logger.info("Startup complete. SentenceTransformer will lazy-load on first match.")
     print("End of startup event", flush=True)
 
 
