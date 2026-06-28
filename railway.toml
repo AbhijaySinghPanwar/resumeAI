@@ -1,0 +1,6 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install fastapi uvicorn python-multipart pdfplumber rapidfuzz python-dateutil sentence-transformers>=2.2.0 numpy>=1.24.0 && pip install -e ."
+
+[deploy]
+startCommand = "cd resumeai_app && uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
