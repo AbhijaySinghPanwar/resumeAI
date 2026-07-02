@@ -2,7 +2,7 @@
    Shared JS Logic (Auth, Nav, Toasts, Footer)
    ========================================================================== */
 
-const API = '';
+const API = 'http://localhost:8000';
 
 /* ── Authentication Helpers ────────────────────────────────────────────── */
 function getToken() {

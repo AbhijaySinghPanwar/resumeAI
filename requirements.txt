@@ -13,6 +13,11 @@ psycopg2-binary
 bcrypt
 passlib[bcrypt]
 python-jose[cryptography]
+
+# ONNX Proof of Concept
+onnxruntime
+tokenizers
+huggingface-hub
 python-multipart
 email-validator
 
@@ -40,6 +45,9 @@ requests
 
 # Date Utilities
 python-dateutil
+
+# Profiling
+psutil
 
 # Testing
 pytest

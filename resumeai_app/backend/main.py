@@ -85,7 +85,7 @@ from sqlalchemy.orm import Session
 print("Before creating FastAPI app", flush=True)
 app = FastAPI(
     title="ResumeAI API",
-    version="4.0.0",
+    version="1.0.0",
     description=(
         "ResumeAI — Intelligent Resume Intelligence Platform. "
         "Parse, score, match, improve with AI, and manage resume history."
@@ -101,12 +101,91 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi import Request
+import uuid
+from resumeai.utils.memory_profiler import get_rss_memory
+
+_RATE_LIMIT_WINDOW = 60
+_RATE_LIMIT_MAX = 100
+_rate_limits = {}
+START_TIME = time.time()
+
+@app.middleware("http")
+async def production_middleware(request: Request, call_next):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    
+    if not hasattr(app.state, "last_cleanup") or now - app.state.last_cleanup > _RATE_LIMIT_WINDOW:
+        _rate_limits.clear()
+        app.state.last_cleanup = now
+        
+    client_reqs = _rate_limits.get(client_ip, [])
+    client_reqs = [t for t in client_reqs if now - t < _RATE_LIMIT_WINDOW]
+    if len(client_reqs) >= _RATE_LIMIT_MAX:
+        return JSONResponse(status_code=429, content={"detail": "Too Many Requests"})
+    client_reqs.append(now)
+    _rate_limits[client_ip] = client_reqs
+    
+    req_id = str(uuid.uuid4())[:8]
+    start_time = time.time()
+    start_mem = get_rss_memory() if settings.DEBUG else 0
+    
+    try:
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = req_id
+    except Exception as e:
+        logger.error("[Req %s] Uncaught exception: %s", req_id, str(e), exc_info=True)
+        return JSONResponse(status_code=500, content={"detail": "Internal Server Error"}, headers={"X-Request-ID": req_id})
+        
+    duration = (time.time() - start_time) * 1000
+    end_mem = get_rss_memory() if settings.DEBUG else 0
+    
+    if not request.url.path.startswith("/api/health") and not request.url.path.startswith("/static"):
+        mem_str = f" | Mem: {end_mem:.1f}MB ({end_mem-start_mem:+.1f}MB)" if settings.DEBUG else ""
+        logger.info("[Req %s] %s %s - %s - %.2fms%s", 
+                    req_id, request.method, request.url.path, response.status_code, duration, mem_str)
+                    
+    return response
+
 # ── Startup: preload embedding model ─────────────────────────────────────────
 @app.on_event("startup")
 async def _startup_preload_embeddings():
     """Embedding model loading deferred to first request to save RAM."""
     print("Beginning of startup event", flush=True)
     logger.info("Startup complete. SentenceTransformer will lazy-load on first match.")
+
+    # Preload the skill ontology registry now (JSON parse + relationship
+    # closure precompute, ~50-100ms) so the first /api/match request doesn't
+    # pay that cost. This is a small static/local load (no model, no
+    # PyTorch, no network call) -- safe to do eagerly at startup.
+    try:
+        from resumeai.ontology.registry import preload_registry
+        preload_registry()
+        logger.info("Skill ontology registry preloaded.")
+    except Exception as e:
+        logger.error("Failed to preload skill ontology registry: %s", e)
+
+    if settings.ENVIRONMENT == "production":
+        try:
+            db_conn = engine.connect()
+            db_conn.close()
+        except Exception as e:
+            logger.error("Startup failed: Database unavailable. %s", e)
+            sys.exit(1)
+            
+        if not settings.GEMINI_API_KEY:
+            logger.error("Startup failed: GEMINI_API_KEY is missing.")
+            sys.exit(1)
+            
+        if settings.EMBEDDING_ENGINE not in ["onnx", "pytorch"]:
+            logger.error("Startup failed: Invalid EMBEDDING_ENGINE.")
+            sys.exit(1)
+            
+        frontend_index = os.path.join(os.path.dirname(_backend_dir), "frontend", "index.html")
+        if not os.path.exists(frontend_index):
+            logger.error("Startup failed: Frontend static files not found at %s", frontend_index)
+            sys.exit(1)
+            
     print("End of startup event", flush=True)
 
 
@@ -117,7 +196,7 @@ def _health_embeddings():
     status = get_status()
     return {
         "embedding_engine": status,
-        "semantic_scoring": "active" if status["available"] else "keyword_fallback",
+        "semantic_scoring": "active" if status.get("available") else "keyword_fallback",
     }
 
 
@@ -201,6 +280,9 @@ class BulletResponse(BaseModel):
     ats_version: str
     professional_version: str
     concise_version: str
+    provider: str = "gemini"
+    fallback: bool = False
+    reason: Optional[str] = None
 
 class ProjectRequest(BaseModel):
     project_name: str
@@ -210,6 +292,9 @@ class ProjectResponse(BaseModel):
     ats_version: str
     technical_version: str
     recruiter_version: str
+    provider: str = "gemini"
+    fallback: bool = False
+    reason: Optional[str] = None
 
 class InterviewRequest(BaseModel):
     resume_data: dict
@@ -228,6 +313,9 @@ class InterviewResponse(BaseModel):
     technical_questions: list[RichQuestion]
     project_questions: list[RichQuestion]
     behavioral_questions: list[RichQuestion]
+    provider: str = "gemini"
+    fallback: bool = False
+    reason: Optional[str] = None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -237,7 +325,30 @@ class InterviewResponse(BaseModel):
 @app.get("/api/health", tags=["System"],
          summary="Health check", description="Returns server status and version.")
 def health():
-    return {"status": "ok", "version": "4.0.0"}
+    try:
+        db_conn = engine.connect()
+        db_conn.close()
+        db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+        
+    return {
+        "status": "ok",
+        "database": db_status,
+        "embedding_engine": settings.EMBEDDING_ENGINE,
+        "version": settings.APP_VERSION,
+        "uptime": round(time.time() - START_TIME, 2)
+    }
+
+@app.get("/api/version", tags=["System"],
+         summary="Version information", description="Returns detailed version information.")
+def version():
+    return {
+        "version": settings.APP_VERSION,
+        "embedding_engine": settings.EMBEDDING_ENGINE,
+        "build": "RC-1.0.0",
+        "environment": settings.ENVIRONMENT
+    }
 
 
 @app.post("/api/parse", tags=["Resume Parsing"],
@@ -253,9 +364,20 @@ async def parse_resume(
     current_user               = Depends(get_optional_user),
     db: Session                = Depends(get_db),
 ):
+    from resumeai.utils.memory_profiler import log_memory
     try:
+        log_memory("Resume parsing")
         if file and file.filename:
+            # Validate MIME type
+            allowed_mimes = ["application/pdf", "text/plain"]
+            if file.content_type not in allowed_mimes:
+                raise HTTPException(415, f"Unsupported file type: {file.content_type}. Only PDF and TXT are supported.")
+                
             raw = await file.read()
+            # Validate 10 MB limit
+            if len(raw) > 10 * 1024 * 1024:
+                raise HTTPException(413, "File too large. Maximum size is 10 MB.")
+                
             filename = file.filename
             if file.filename.lower().endswith(".pdf"):
                 result = parser.parse_pdf(raw)
@@ -267,6 +389,7 @@ async def parse_resume(
         else:
             raise HTTPException(400, "Provide either a file upload or text field.")
 
+        log_memory("ATS scoring")
         gate_decision = gate.evaluate(result)
 
         from resumeai.scoring.ats_scorer import ATSScorer
@@ -281,16 +404,21 @@ async def parse_resume(
                     filename=filename,
                     parsed_json=result,
                     ats_score=ats_score_result.get("overall_score"),
+                    commit=False
                 )
+                db.flush()
                 ReportRepository(db).create_ats(
                     resume_id=resume.id,
                     ats_score=ats_score_result.get("overall_score", 0),
                     ats_breakdown=ats_score_result.get("breakdown", {}),
                     suggestions=ats_score_result.get("improvements", []),
+                    commit=False
                 )
+                db.commit()
                 saved_resume_id = resume.id
                 logger.info("Auto-saved resume: id=%d user_id=%d", resume.id, current_user.id)
             except Exception as exc:
+                db.rollback()
                 logger.warning("Auto-save failed (non-fatal): %s", exc)
 
         response = {
@@ -309,8 +437,8 @@ async def parse_resume(
         import traceback
         user_info = current_user.email if current_user else "Guest"
         logger.error(
-            "[Resume Parse] User: %s\nEndpoint: /api/parse\nException: %s\nStack Trace:\n%s",
-            user_info, repr(e), traceback.format_exc()
+            "[Resume Parse] User: %s\nEndpoint: /api/parse\nException: %s",
+            user_info, repr(e), exc_info=True
         )
         raise HTTPException(status_code=500, detail="Unable to parse resume.")
 
@@ -363,13 +491,28 @@ def match_resume(
     current_user = Depends(get_optional_user),
     db: Session  = Depends(get_db),
 ):
+    import gc
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+    from resumeai.utils.memory_profiler import log_memory
+
+    log_memory("Request received")
+
     if not req.job_description.strip():
         raise HTTPException(400, "job_description must not be empty.")
     if not req.parse_result:
         raise HTTPException(400, "parse_result must not be empty.")
 
+    log_memory("Resume parsed")  # Provided directly
+
     try:
-        parsed_jd = parse_job_description(req.job_description)
+        # Avoid re-parsing JD if it's already a dict (handled by client)
+        if isinstance(req.job_description, dict):
+            from resumeai.matching.jd_parser import ParsedJD
+            parsed_jd = ParsedJD(**req.job_description)
+        else:
+            parsed_jd = parse_job_description(req.job_description)
+
         result = matcher.calculate_match_score(req.parse_result, parsed_jd)
 
         # Auto-save JD report if authenticated and a resume_id is provided
@@ -388,21 +531,33 @@ def match_resume(
                     missing_skills=match_dict.get("missing_skills", []),
                     learning_roadmap=match_dict.get("recommended_learning", []),
                     job_title=jd_title,
+                    commit=False
                 )
+                db.commit()
                 logger.info("Auto-saved JD report: user_id=%d", current_user.id)
             except Exception as exc:
+                db.rollback()
                 logger.warning("JD auto-save failed (non-fatal): %s", exc)
 
-        return {
+        log_memory("Before response")
+
+        response = {
             **result.to_dict(),
             "parsed_jd": parsed_jd.to_dict(),
         }
+
+        # Cleanup at the very end of request
+        del result
+        del parsed_jd
+        gc.collect()
+        log_memory("After cleanup")
+
+        return response
     except HTTPException:
         raise
     except Exception as exc:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(500, f"Matching engine error: {exc}")
+        logger.error("Matching engine error: %s", repr(exc), exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error during matching.")
 
 
 # ── Phase 3 AI Endpoints (UNCHANGED) ─────────────────────────────────────────
@@ -516,4 +671,10 @@ from fastapi.staticfiles import StaticFiles
 frontend_path = os.path.join(os.path.dirname(_backend_dir), "frontend")
 if os.path.exists(frontend_path):
     app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+from resumeai.utils.memory_profiler import log_memory
+log_memory("Startup")
 

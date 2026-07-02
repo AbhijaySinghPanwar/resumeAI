@@ -1,0 +1,1507 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-06-27",
+  "domains": {
+    "Backend Engineer": {
+      "weights": {
+        "Python": 15,
+        "REST APIs": 12,
+        "Docker": 10,
+        "SQL": 8,
+        "Java": 15,
+        "Node.js": 15
+      },
+      "boosted_families": [
+        "Backend",
+        "Databases",
+        "Cloud"
+      ]
+    },
+    "Machine Learning Engineer": {
+      "weights": {
+        "Python": 15,
+        "TensorFlow": 14,
+        "PyTorch": 14,
+        "Machine Learning": 12,
+        "Statistics": 12
+      },
+      "boosted_families": [
+        "AI",
+        "Databases"
+      ]
+    },
+    "Frontend Engineer": {
+      "weights": {
+        "React": 15,
+        "JavaScript": 14,
+        "TypeScript": 12,
+        "HTML/CSS": 10
+      },
+      "boosted_families": [
+        "Frontend"
+      ]
+    },
+    "Cyber Security Analyst": {
+      "weights": {
+        "Computer Networks": 15,
+        "Linux": 12,
+        "Python": 10
+      },
+      "boosted_families": [
+        "Networking",
+        "DevOps"
+      ]
+    },
+    "Cloud Engineer": {
+      "weights": {
+        "AWS": 15,
+        "Kubernetes": 14,
+        "Docker": 12,
+        "Terraform": 12
+      },
+      "boosted_families": [
+        "Cloud",
+        "DevOps"
+      ]
+    },
+    "Data Engineer": {
+      "weights": {
+        "SQL": 15,
+        "Python": 14,
+        "Apache Spark": 12,
+        "Data Structures": 10
+      },
+      "boosted_families": [
+        "Databases",
+        "Data Engineering",
+        "Cloud"
+      ]
+    },
+    "DevOps Engineer": {
+      "weights": {
+        "Docker": 15,
+        "Kubernetes": 15,
+        "CI/CD": 14,
+        "AWS": 12,
+        "Terraform": 12
+      },
+      "boosted_families": [
+        "DevOps",
+        "Cloud"
+      ]
+    },
+    "Android Developer": {
+      "weights": {
+        "Kotlin": 15,
+        "Java": 14,
+        "Mobile Development": 12
+      },
+      "boosted_families": [
+        "Frontend"
+      ]
+    },
+    "Software Engineer": {
+      "weights": {
+        "Data Structures and Algorithms": 15,
+        "System Design": 12,
+        "Python": 10,
+        "Java": 10,
+        "C++": 10
+      },
+      "boosted_families": [
+        "Backend",
+        "Frontend",
+        "Databases"
+      ]
+    },
+    "Data Science": {
+      "weights": {
+        "Python": 15,
+        "R": 12,
+        "Machine Learning": 10,
+        "Pandas": 10,
+        "Statistics": 12
+      },
+      "boosted_families": [
+        "Data Science",
+        "AI"
+      ]
+    },
+    "AI Engineering": {
+      "weights": {
+        "Python": 15,
+        "Deep Learning": 15,
+        "PyTorch": 12,
+        "LLM": 12,
+        "TensorFlow": 10
+      },
+      "boosted_families": [
+        "AI",
+        "Machine Learning"
+      ]
+    },
+    "Full Stack Engineer": {
+      "weights": {
+        "JavaScript": 15,
+        "React": 12,
+        "Node.js": 12,
+        "SQL": 10,
+        "REST APIs": 10
+      },
+      "boosted_families": [
+        "Frontend",
+        "Backend",
+        "Databases"
+      ]
+    },
+    "Embedded Systems Engineer": {
+      "weights": {
+        "C": 15,
+        "C++": 15,
+        "Microcontrollers": 12,
+        "RTOS": 12
+      },
+      "boosted_families": [
+        "Embedded"
+      ]
+    },
+    "Game Developer": {
+      "weights": {
+        "C++": 15,
+        "C#": 15,
+        "Unity": 12,
+        "Unreal Engine": 12,
+        "3D Math": 10
+      },
+      "boosted_families": [
+        "Game Development",
+        "Graphics"
+      ]
+    }
+  },
+  "industry_domains": {
+    "Healthcare": [
+      "medical",
+      "health",
+      "patient",
+      "clinical",
+      "hospital"
+    ],
+    "FinTech": [
+      "finance",
+      "trading",
+      "crypto",
+      "banking",
+      "payment"
+    ],
+    "EdTech": [
+      "education",
+      "student",
+      "learning",
+      "course"
+    ],
+    "E-Commerce": [
+      "ecommerce",
+      "e-commerce",
+      "shopping",
+      "cart",
+      "retail"
+    ],
+    "IoT": [
+      "iot",
+      "sensor",
+      "embedded",
+      "hardware",
+      "device"
+    ],
+    "Cybersecurity": [
+      "security",
+      "penetration",
+      "encryption",
+      "vulnerability"
+    ],
+    "Enterprise Software": [
+      "enterprise",
+      "b2b",
+      "saas",
+      "erp",
+      "crm"
+    ],
+    "Cloud Platforms": [
+      "cloud",
+      "infrastructure",
+      "aws",
+      "gcp",
+      "azure"
+    ],
+    "Data Engineering": [
+      "pipeline",
+      "etl",
+      "warehouse",
+      "analytics",
+      "big data"
+    ],
+    "Gaming": [
+      "game",
+      "unity",
+      "unreal",
+      "player"
+    ],
+    "Blockchain": [
+      "blockchain",
+      "web3",
+      "smart contract",
+      "ethereum"
+    ]
+  },
+  "families": {
+    "Backend": [
+      "FastAPI",
+      "Flask",
+      "Django",
+      "Express.js",
+      "Spring Boot",
+      "Ruby on Rails",
+      "Node.js",
+      "REST APIs"
+    ],
+    "Frontend": [
+      "React",
+      "Angular",
+      "Vue.js",
+      "Next.js",
+      "HTML/CSS"
+    ],
+    "Databases": [
+      "SQL",
+      "PostgreSQL",
+      "MySQL",
+      "Oracle",
+      "MongoDB",
+      "Redis",
+      "DynamoDB"
+    ],
+    "Cloud": [
+      "AWS",
+      "Azure",
+      "GCP"
+    ],
+    "AI": [
+      "Machine Learning",
+      "Deep Learning",
+      "LLM",
+      "NLP",
+      "Computer Vision",
+      "GenAI",
+      "TensorFlow",
+      "PyTorch"
+    ],
+    "DevOps": [
+      "Docker",
+      "Kubernetes",
+      "Terraform",
+      "Jenkins",
+      "GitHub Actions",
+      "CI/CD"
+    ],
+    "Data Engineering": [
+      "Apache Spark",
+      "Apache Kafka",
+      "Apache Airflow"
+    ]
+  },
+  "categories": {
+    "Programming Languages": {
+      "Python": {
+        "aliases": [
+          "python3",
+          "python 3",
+          "py"
+        ]
+      },
+      "JavaScript": {
+        "aliases": [
+          "js",
+          "es6",
+          "es2015",
+          "ecmascript"
+        ]
+      },
+      "TypeScript": {
+        "aliases": [
+          "ts"
+        ]
+      },
+      "Java": {
+        "aliases": [
+          "java 8",
+          "java 11",
+          "java 17"
+        ]
+      },
+      "C++": {
+        "aliases": [
+          "CPP",
+          "c plus plus",
+          "C Plus Plus",
+          "cpp"
+        ]
+      },
+      "C#": {
+        "aliases": [
+          "csharp",
+          "c sharp"
+        ]
+      },
+      "Go": {
+        "aliases": [
+          "golang",
+          "go language"
+        ]
+      },
+      "Ruby": {
+        "aliases": []
+      },
+      "Kotlin": {
+        "aliases": []
+      },
+      "SQL": {
+        "aliases": [
+          "structured query language",
+          "pl/sql",
+          "plpgsql"
+        ]
+      },
+      "HTML/CSS": {
+        "aliases": [
+          "html",
+          "css",
+          "html5",
+          "css3"
+        ]
+      },
+      "Scala": {
+        "aliases": []
+      },
+      "PHP": {
+        "aliases": [
+          "php7",
+          "php8"
+        ]
+      },
+      "R": {
+        "aliases": [
+          "r language",
+          "r programming"
+        ]
+      },
+      "MATLAB": {
+        "aliases": []
+      },
+      "Bash": {
+        "aliases": [
+          "bash scripting",
+          "shell script",
+          "shell scripting",
+          "zsh"
+        ]
+      }
+    },
+    "Web Frameworks & Libraries": {
+      "FastAPI": {
+        "aliases": [
+          "fast api"
+        ]
+      },
+      "Django": {
+        "aliases": [
+          "django rest framework",
+          "drf"
+        ]
+      },
+      "Flask": {
+        "aliases": []
+      },
+      "Spring Boot": {
+        "aliases": [
+          "springboot"
+        ]
+      },
+      "React": {
+        "aliases": [
+          "reactjs",
+          "react.js",
+          "react js"
+        ]
+      },
+      "Next.js": {
+        "aliases": [
+          "nextjs",
+          "next js"
+        ]
+      },
+      "Vue.js": {
+        "aliases": [
+          "vuejs",
+          "vue js",
+          "vue"
+        ]
+      },
+      "Angular": {
+        "aliases": [
+          "angularjs",
+          "angular.js"
+        ]
+      },
+      "Node.js": {
+        "aliases": [
+          "nodejs",
+          "node js",
+          "node"
+        ]
+      },
+      "Express.js": {
+        "aliases": [
+          "expressjs",
+          "express js",
+          "express"
+        ]
+      },
+      "Ruby on Rails": {
+        "aliases": [
+          "rails",
+          "ror"
+        ]
+      },
+      "Spring": {
+        "aliases": [
+          "spring framework",
+          "spring mvc"
+        ]
+      },
+      "Svelte": {
+        "aliases": [
+          "sveltekit"
+        ]
+      },
+      "Laravel": {
+        "aliases": []
+      }
+    },
+    "Databases": {
+      "PostgreSQL": {
+        "aliases": [
+          "postgres",
+          "psql"
+        ]
+      },
+      "MySQL": {
+        "aliases": [
+          "mariadb"
+        ]
+      },
+      "MongoDB": {
+        "aliases": [
+          "mongo"
+        ]
+      },
+      "Redis": {
+        "aliases": []
+      },
+      "DynamoDB": {
+        "aliases": [
+          "amazon dynamodb"
+        ]
+      },
+      "Oracle": {
+        "aliases": [
+          "oracle db",
+          "oracle database"
+        ]
+      },
+      "Elasticsearch": {
+        "aliases": [
+          "elastic search",
+          "opensearch"
+        ]
+      },
+      "Cassandra": {
+        "aliases": [
+          "apache cassandra"
+        ]
+      },
+      "BigQuery": {
+        "aliases": [
+          "google bigquery"
+        ]
+      },
+      "Snowflake": {
+        "aliases": []
+      },
+      "Neo4j": {
+        "aliases": [
+          "graph database"
+        ]
+      }
+    },
+    "Cloud & DevOps": {
+      "AWS": {
+        "aliases": [
+          "amazon web services",
+          "amazon aws",
+          "aws console",
+          "awsconsole"
+        ]
+      },
+      "GCP": {
+        "aliases": [
+          "google cloud platform",
+          "google cloud"
+        ]
+      },
+      "Azure": {
+        "aliases": [
+          "microsoft azure"
+        ]
+      },
+      "Docker": {
+        "aliases": [
+          "docker containers",
+          "containerization",
+          "containers"
+        ]
+      },
+      "Kubernetes": {
+        "aliases": [
+          "k8s"
+        ]
+      },
+      "Terraform": {
+        "aliases": []
+      },
+      "CI/CD": {
+        "aliases": [
+          "continuous integration",
+          "continuous deployment",
+          "continuous delivery",
+          "gitlab ci",
+          "circleci"
+        ]
+      },
+      "GitHub Actions": {
+        "aliases": [
+          "Github Actions",
+          "GitHub Action"
+        ]
+      },
+      "Jenkins": {
+        "aliases": []
+      },
+      "Linux": {
+        "aliases": [
+          "ubuntu",
+          "centos",
+          "debian"
+        ]
+      },
+      "Git": {
+        "aliases": [
+          "version control"
+        ]
+      },
+      "EC2": {
+        "aliases": [
+          "amazon ec2",
+          "aws ec2",
+          "elastic compute cloud"
+        ]
+      },
+      "S3": {
+        "aliases": [
+          "amazon s3",
+          "aws s3",
+          "simple storage service"
+        ]
+      },
+      "AWS Lambda": {
+        "aliases": [
+          "amazon lambda",
+          "aws lambda functions"
+        ]
+      },
+      "Ansible": {
+        "aliases": []
+      },
+      "Microservices": {
+        "aliases": [
+          "microservice architecture",
+          "service mesh"
+        ]
+      },
+      "DevOps": {
+        "aliases": []
+      }
+    },
+    "APIs & Integration": {
+      "REST APIs": {
+        "aliases": [
+          "restful",
+          "RESTful API",
+          "rest api",
+          "REST API",
+          "rest",
+          "restful apis",
+          "restful api",
+          "http api",
+          "RESTful APIs",
+          "restful services"
+        ]
+      },
+      "GraphQL": {
+        "aliases": [
+          "graph ql"
+        ]
+      },
+      "WebSockets": {
+        "aliases": [
+          "websocket",
+          "ws"
+        ]
+      },
+      "JWT": {
+        "aliases": [
+          "json web token",
+          "jwt auth",
+          "jwt authentication"
+        ]
+      },
+      "Authentication": {
+        "aliases": [
+          "auth",
+          "user authentication",
+          "authentication and authorization",
+          "login authentication",
+          "secure authentication"
+        ]
+      },
+      "Bearer Token": {
+        "aliases": [
+          "bearer auth",
+          "bearer authentication",
+          "bearer tokens"
+        ]
+      },
+      "API Integration": {
+        "aliases": [
+          "third-party api",
+          "third party api",
+          "api integrations"
+        ]
+      },
+      "CRUD": {
+        "aliases": [
+          "crud operations",
+          "create read update delete",
+          "crud api"
+        ]
+      },
+      "API Design": {
+        "aliases": [
+          "api architecture",
+          "api development"
+        ]
+      },
+      "gRPC": {
+        "aliases": []
+      },
+      "Swagger": {
+        "aliases": [
+          "openapi"
+        ]
+      }
+    },
+    "Data Science & ML/AI": {
+      "Machine Learning": {
+        "aliases": [
+          "ml algorithms",
+          "supervised learning",
+          "unsupervised learning"
+        ]
+      },
+      "Deep Learning": {
+        "aliases": [
+          "dl",
+          "neural networks",
+          "neural network"
+        ]
+      },
+      "NLP": {
+        "aliases": [
+          "natural language processing",
+          "text processing"
+        ]
+      },
+      "Computer Vision": {
+        "aliases": [
+          "image processing",
+          "cv"
+        ]
+      },
+      "LLM": {
+        "aliases": [
+          "large language model",
+          "large language models",
+          "language models",
+          "llms"
+        ]
+      },
+      "LangChain": {
+        "aliases": [
+          "lang chain"
+        ]
+      },
+      "RAG": {
+        "aliases": [
+          "retrieval augmented generation"
+        ]
+      },
+      "GenAI": {
+        "aliases": [
+          "generative ai",
+          "gen ai"
+        ]
+      },
+      "OpenAI": {
+        "aliases": [
+          "open ai",
+          "gpt",
+          "gpt-4",
+          "chatgpt"
+        ]
+      },
+      "Gemini API": {
+        "aliases": [
+          "gemini"
+        ]
+      },
+      "TensorFlow": {
+        "aliases": [
+          "tf"
+        ]
+      },
+      "PyTorch": {
+        "aliases": [
+          "torch"
+        ]
+      },
+      "Scikit-learn": {
+        "aliases": [
+          "sklearn",
+          "scikit learn"
+        ]
+      },
+      "Pandas": {
+        "aliases": []
+      },
+      "NumPy": {
+        "aliases": [
+          "numpy arrays"
+        ]
+      },
+      "Matplotlib": {
+        "aliases": [
+          "plotly",
+          "seaborn"
+        ]
+      },
+      "MLOps": {
+        "aliases": [
+          "ml ops"
+        ]
+      }
+    },
+    "CS Fundamentals & Concepts": {
+      "Data Structures and Algorithms": {
+        "aliases": [
+          "data structures & algorithms",
+          "dsa",
+          "ds&a"
+        ]
+      },
+      "Data Structures": {
+        "aliases": [
+          "data structure"
+        ]
+      },
+      "System Design": {
+        "aliases": [
+          "systems design",
+          "high level design",
+          "hld",
+          "lld",
+          "low level design"
+        ]
+      },
+      "Object-Oriented Programming": {
+        "aliases": [
+          "object-oriented design",
+          "oop",
+          "oops",
+          "OOP",
+          "ood",
+          "object oriented programming",
+          "Object Oriented Programming"
+        ]
+      },
+      "Computer Networks": {
+        "aliases": [
+          "networking",
+          "network programming"
+        ]
+      },
+      "Operating Systems": {
+        "aliases": [
+          "os concepts"
+        ]
+      },
+      "Problem Solving": {
+        "aliases": [
+          "Problem-Solving",
+          "ProblemSolving",
+          "analytical skills",
+          "problem-solving"
+        ]
+      },
+      "Algorithms": {
+        "aliases": [
+          "algorithm design"
+        ]
+      },
+      "Distributed Systems": {
+        "aliases": [
+          "distributed computing"
+        ]
+      },
+      "Database Management Systems": {
+        "aliases": [
+          "dbms",
+          "rdbms"
+        ]
+      },
+      "Design Patterns": {
+        "aliases": [
+          "software design patterns"
+        ]
+      },
+      "Competitive Programming": {
+        "aliases": [
+          "competitive coding",
+          "cp"
+        ]
+      },
+      "Unit Testing": {
+        "aliases": [
+          "tdd",
+          "test driven development",
+          "unit tests"
+        ]
+      },
+      "Test-Driven Development": {
+        "aliases": []
+      }
+    },
+    "AI & Machine Learning": {
+      "LLM": {
+        "aliases": [
+          "Large Language Models",
+          "Large Language Model"
+        ]
+      },
+      "Prompt Engineering": {
+        "aliases": []
+      },
+      "OpenAI": {
+        "aliases": [
+          "OpenAI API",
+          "GPT-3",
+          "GPT-4"
+        ]
+      },
+      "RAG": {
+        "aliases": [
+          "Retrieval-Augmented Generation",
+          "Retrieval Augmented Generation"
+        ]
+      },
+      "Vector Databases": {
+        "aliases": [
+          "Vector DB",
+          "Pinecone",
+          "ChromaDB",
+          "FAISS",
+          "Milvus"
+        ]
+      },
+      "LangChain": {
+        "aliases": []
+      },
+      "HuggingFace": {
+        "aliases": [
+          "Hugging Face",
+          "transformers"
+        ]
+      },
+      "Gemini API": {
+        "aliases": [
+          "gemini",
+          "google gemini",
+          "google gemini api",
+          "googlegeminiapi"
+        ]
+      }
+    },
+    "Embedded & IoT": {
+      "C": {
+        "aliases": [
+          "c programming",
+          "c language"
+        ]
+      },
+      "Microcontrollers": {
+        "aliases": [
+          "MCU",
+          "Arduino",
+          "ESP32",
+          "STM32"
+        ]
+      },
+      "RTOS": {
+        "aliases": [
+          "Real-Time Operating System",
+          "FreeRTOS"
+        ]
+      },
+      "IoT": {
+        "aliases": [
+          "Internet of Things"
+        ]
+      }
+    },
+    "Additional Tools & Platforms": {
+      "Tailwind CSS": {
+        "aliases": [
+          "tailwind",
+          "tailwindcss"
+        ]
+      },
+      "Bootstrap": {
+        "aliases": []
+      },
+      "Streamlit": {
+        "aliases": []
+      },
+      "SQLite": {
+        "aliases": []
+      },
+      "Firebase": {
+        "aliases": []
+      },
+      "Supabase": {
+        "aliases": []
+      },
+      "Nginx": {
+        "aliases": []
+      },
+      "OAuth": {
+        "aliases": [
+          "oauth2",
+          "oauth 2.0"
+        ]
+      },
+      "Twilio API": {
+        "aliases": [
+          "twilio",
+          "twilioapi"
+        ]
+      },
+      "Claude API": {
+        "aliases": [
+          "anthropic"
+        ]
+      },
+      "Weaviate": {
+        "aliases": []
+      },
+      "Chroma": {
+        "aliases": []
+      },
+      "GitHub": {
+        "aliases": []
+      },
+      "GitLab": {
+        "aliases": []
+      },
+      "Postman": {
+        "aliases": []
+      },
+      "Flutter": {
+        "aliases": []
+      },
+      "React Native": {
+        "aliases": []
+      },
+      "Swift": {
+        "aliases": [
+          "swiftui"
+        ]
+      },
+      "Rust": {
+        "aliases": [
+          "rust-lang"
+        ]
+      },
+      "Jira": {
+        "aliases": []
+      },
+      "Figma": {
+        "aliases": []
+      },
+      "Selenium": {
+        "aliases": []
+      },
+      "Jest": {
+        "aliases": []
+      },
+      "Pytest": {
+        "aliases": []
+      },
+      "JUnit": {
+        "aliases": []
+      },
+      "Cypress": {
+        "aliases": []
+      },
+      "Tableau": {
+        "aliases": []
+      },
+      "Power BI": {
+        "aliases": [
+          "powerbi"
+        ]
+      }
+    },
+    "Domain & Product Skills": {
+      "Real-time Systems": {
+        "aliases": [
+          "real-time",
+          "realtime",
+          "real time systems",
+          "real-time system"
+        ]
+      },
+      "Cloud Deployment": {
+        "aliases": [
+          "cloud deployment",
+          "deployed to cloud",
+          "cloud hosting",
+          "cloud deploy"
+        ]
+      },
+      "Resume Parsing": {
+        "aliases": [
+          "resume parsing",
+          "parsing resumes",
+          "cv parsing"
+        ]
+      },
+      "Data Visualization": {
+        "aliases": [
+          "data viz",
+          "dashboards",
+          "dashboard visualization"
+        ]
+      },
+      "Agile": {
+        "aliases": [
+          "agile development",
+          "agile methodology"
+        ]
+      },
+      "Scrum": {
+        "aliases": [
+          "scrum master"
+        ]
+      }
+    },
+    "Data Engineering": {
+      "Apache Spark": {
+        "aliases": [
+          "spark",
+          "pyspark"
+        ]
+      },
+      "Apache Kafka": {
+        "aliases": [
+          "kafka"
+        ]
+      },
+      "Apache Airflow": {
+        "aliases": [
+          "airflow"
+        ]
+      }
+    }
+  },
+  "relationships": [
+    {
+      "source": "Gemini API",
+      "target": "LLM",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "OpenAI",
+      "target": "LLM",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Docker",
+      "target": "CI/CD",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "FastAPI",
+      "target": "Python",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Django",
+      "target": "Python",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Flask",
+      "target": "Python",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "React",
+      "target": "JavaScript",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Angular",
+      "target": "TypeScript",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Vue.js",
+      "target": "JavaScript",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Next.js",
+      "target": "React",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Express.js",
+      "target": "Node.js",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Spring Boot",
+      "target": "Java",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "GitHub Actions",
+      "target": "CI/CD",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Jenkins",
+      "target": "CI/CD",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "PostgreSQL",
+      "target": "SQL",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "MySQL",
+      "target": "SQL",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Oracle",
+      "target": "SQL",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "Pandas",
+      "target": "Python",
+      "type": "library_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "NumPy",
+      "target": "Python",
+      "type": "library_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "Scikit-learn",
+      "target": "Python",
+      "type": "library_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "TensorFlow",
+      "target": "Python",
+      "type": "library_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "PyTorch",
+      "target": "Python",
+      "type": "library_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "FastAPI",
+      "target": "REST APIs",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "FastAPI",
+      "target": "JWT",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.7
+    },
+    {
+      "source": "JWT",
+      "target": "Authentication",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "OAuth",
+      "target": "Authentication",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "Kubernetes",
+      "target": "Docker",
+      "type": "orchestrates",
+      "relation_class": "hierarchical",
+      "weight": 0.75
+    },
+    {
+      "source": "Gemini API",
+      "target": "LLM",
+      "type": "implements",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    },
+    {
+      "source": "LLM",
+      "target": "GenAI",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "TensorFlow",
+      "target": "Machine Learning",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "PyTorch",
+      "target": "Machine Learning",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "Data Structures",
+      "target": "Data Structures and Algorithms",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "JWT",
+      "target": "OAuth",
+      "type": "sibling_of",
+      "relation_class": "sibling",
+      "weight": 0.85
+    },
+    {
+      "source": "JWT",
+      "target": "Bearer Token",
+      "type": "sibling_of",
+      "relation_class": "sibling",
+      "weight": 0.85
+    },
+    {
+      "source": "OAuth",
+      "target": "Bearer Token",
+      "type": "sibling_of",
+      "relation_class": "sibling",
+      "weight": 0.85
+    },
+    {
+      "source": "Bearer Token",
+      "target": "Authentication",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "EC2",
+      "target": "AWS",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "S3",
+      "target": "AWS",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "AWS Lambda",
+      "target": "AWS",
+      "type": "belongs_to",
+      "relation_class": "hierarchical",
+      "weight": 0.8
+    },
+    {
+      "source": "AWS",
+      "target": "Cloud Deployment",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "Docker",
+      "target": "Cloud Deployment",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "Kubernetes",
+      "target": "Cloud Deployment",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "Gemini API",
+      "target": "Resume Parsing",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.55
+    },
+    {
+      "source": "OpenAI",
+      "target": "Resume Parsing",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.55
+    },
+    {
+      "source": "Gemini API",
+      "target": "API Integration",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "OpenAI",
+      "target": "API Integration",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "WebSockets",
+      "target": "Real-time Systems",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.9
+    },
+    {
+      "source": "REST APIs",
+      "target": "CRUD",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.6
+    },
+    {
+      "source": "MongoDB",
+      "target": "CRUD",
+      "type": "used_for",
+      "relation_class": "hierarchical",
+      "weight": 0.55
+    },
+    {
+      "source": "Ruby on Rails",
+      "target": "Ruby",
+      "type": "framework_of",
+      "relation_class": "hierarchical",
+      "weight": 0.95
+    }
+  ]
+}

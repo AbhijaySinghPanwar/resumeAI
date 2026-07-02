@@ -26,6 +26,7 @@ class ReportRepository:
         ats_score: float,
         ats_breakdown: dict,
         suggestions: Optional[list] = None,
+        commit: bool = True,
     ) -> ATSReport:
         report = ATSReport(
             resume_id=resume_id,
@@ -34,8 +35,11 @@ class ReportRepository:
             suggestions=json.dumps(suggestions or []),
         )
         self.db.add(report)
-        self.db.commit()
-        self.db.refresh(report)
+        if commit:
+            self.db.commit()
+            self.db.refresh(report)
+        else:
+            self.db.flush()
         logger.info("ATSReport saved: id=%d resume_id=%d score=%.1f", report.id, resume_id, ats_score)
         return report
 
@@ -88,6 +92,7 @@ class ReportRepository:
         missing_skills: list,
         learning_roadmap: Optional[dict] = None,
         job_title: Optional[str] = None,
+        commit: bool = True,
     ) -> JDReport:
         report = JDReport(
             resume_id=resume_id,
@@ -99,8 +104,11 @@ class ReportRepository:
             job_title=job_title,
         )
         self.db.add(report)
-        self.db.commit()
-        self.db.refresh(report)
+        if commit:
+            self.db.commit()
+            self.db.refresh(report)
+        else:
+            self.db.flush()
         logger.info("JDReport saved: id=%d resume_id=%d score=%.1f", report.id, resume_id, match_score)
         return report
 

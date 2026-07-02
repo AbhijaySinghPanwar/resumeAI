@@ -1,5 +1,5 @@
 """
-matching/gap_analyzer.py — Skill Gap Analyzer (Phase 4.2 + hotfix).
+matching/gap_analyzer.py — Skill Gap Analyzer (Phase 4.2 + hotfix + ontology wiring).
 
 Fixes:
 - Scans other_section.blocks (catches Strengths & Interests, etc.)
@@ -8,6 +8,24 @@ Fixes:
 - Node.js → JavaScript inference
 - All 12 resume sections covered
 - raw_lines fallback for pre-patch stored parses
+
+Ontology wiring (see resumeai/ontology/registry.py):
+- The old local SKILL_ALIASES / SKILL_IMPLICATIONS dicts are gone. Alias
+  normalization now goes through the shared registry (single source of
+  truth, same one jd_parser.py and extractors/projects.py use).
+- Skill-to-skill matching now has an explicit relationship-graph tier
+  between exact/alias matching and fuzzy string matching: two canonical
+  skills that are connected in the ontology's relationship graph (e.g.
+  JWT -> Authentication, EC2 -> AWS) match at that tier, before falling
+  through to fuzzy matching and then ONNX semantic similarity. This tier
+  is O(1) (a precomputed closure lookup), so it's essentially free and
+  actually *reduces* how often the (much more expensive) embedding path
+  gets hit.
+- Inferred project/experience capabilities (extractors/projects.py's
+  `inferred_capabilities`, e.g. "Authentication" inferred from "implemented
+  login using JWT") are now folded into the resume's skill evidence -- this
+  data was already being computed but was previously never read by the
+  matcher.
 """
 from __future__ import annotations
 
@@ -15,51 +33,39 @@ from typing import Dict, Any, List, Set
 from rapidfuzz import fuzz
 
 from .schemas import SkillGapResult
-from .jd_parser import extract_skills_from_text, normalize_skill, _ALIAS_TO_CANONICAL
+from .jd_parser import extract_skills_from_text, normalize_skill
+from resumeai.ontology.registry import get_registry
 
+_registry = get_registry()
 
-# ── Constants ─────────────────────────────────────────────────────────────────
-SKILL_ALIASES = {
-    "version control": "git",
-    "dsa": "data structures",
-    "data structure and algorithms": "data structures",
-    "data structures and algorithms": "data structures",
-    "rest api": "rest apis",
-    "api development": "rest apis",
-    "backend api": "rest apis",
-    "js": "javascript",
-    "nodejs": "node.js",
-    "problem-solving": "problem solving",
-    "ai": "artificial intelligence",
-    "machine learning": "artificial intelligence",
-    "aws console": "aws",
-}
+# Relationship-graph match tiers (see registry._build_closure). Chosen so:
+#   - strong forward-hierarchical edges (child implies parent, e.g. JWT->
+#     Authentication, weight ~0.9) and sibling edges (JWT<->OAuth, ~0.85)
+#     count as a match;
+#   - weak reverse-hierarchical edges (generic "Authentication" on its own
+#     implying a *specific* mechanism like JWT, weight ~0.45) do NOT count
+#     as a full match -- this is the precision guardrail from the
+#     architecture review: a JD asking for one specific technology shouldn't
+#     get full credit from a resume that only shows a related-but-different
+#     one.
+_RELATIONSHIP_MATCH_THRESHOLD = 0.55
+# Family-level match (lowest-precision tier, e.g. React & Vue.js share the
+# "Frontend" family) is intentionally NOT used as a boolean match source
+# here -- it's too coarse to safely equate two different frameworks. It's
+# reserved for future partial-credit/recommendation use, not hard matching.
 
-# Skills that imply other skills (e.g. knowing MySQL means you know SQL)
-SKILL_IMPLICATIONS: Dict[str, List[str]] = {
-    "MySQL":        ["SQL"],
-    "PostgreSQL":   ["SQL"],
-    "SQLite":       ["SQL"],
-    "Oracle":       ["SQL"],
-    "MariaDB":      ["SQL"],
-    "Node.js":      ["JavaScript"],
-    "Express.js":   ["Node.js", "JavaScript"],
-    "Next.js":      ["React", "JavaScript"],
-    "React":        ["JavaScript"],
-    "Angular":      ["JavaScript", "TypeScript"],
-    "Vue.js":       ["JavaScript"],
-    "Django":       ["Python"],
-    "Flask":        ["Python"],
-    "FastAPI":      ["Python"],
-    "PyTorch":      ["Python"],
-    "TensorFlow":   ["Python"],
-    "Scikit-learn": ["Python"],
-    "Pandas":       ["Python"],
-    "NumPy":        ["Python"],
-    "Spring Boot":  ["Java"],
-    "Ruby on Rails": ["Ruby"],
-    "Laravel":      ["PHP"],
-}
+# Embedding-similarity threshold for the last-resort semantic match tier
+# (only reached for JD skills that fail exact/alias/relationship-graph/fuzzy
+# matching -- see _is_match and generate_skill_gap below). Kept at the
+# original 0.75 value: resumeai/matching/eval_threshold.py implements the
+# precision/recall/F1 sweep methodology to measure a better value against
+# real labeled data, but that script requires downloading the ONNX model
+# (network access to huggingface.co), which was not available in the
+# environment this change was implemented in. Run
+# `python -m resumeai.matching.eval_threshold` in an environment with model
+# access before adjusting this constant -- see that file's docstring for
+# the full methodology and the labeled-dataset caveat.
+SKILL_SEMANTIC_THRESHOLD = 0.75
 
 GENERIC_WORDS = {
     "backend", "developer", "engineer", "intern", "requirements",
@@ -69,9 +75,10 @@ GENERIC_WORDS = {
 
 
 def _norm(skill: str) -> str:
-    """Lowercase + strip + manual alias lookup."""
+    """Lowercase + strip + ontology alias lookup (delegates to the shared registry)."""
     s = skill.lower().strip()
-    return SKILL_ALIASES.get(s, s)
+    canonical = _registry.normalize_skill(s)
+    return canonical.lower() if canonical else s
 
 
 def _scan_text(*parts) -> Set[str]:
@@ -82,13 +89,23 @@ def _scan_text(*parts) -> Set[str]:
 
 def _expand_with_implications(found: Set[str]) -> Set[str]:
     """
-    Expand a skill set with implied skills.
-    e.g. MySQL → add SQL; Node.js → add JavaScript.
+    Expand a skill set with implied (strong forward-hierarchical) skills.
+    e.g. MySQL → add SQL; Node.js → add JavaScript; JWT → add Authentication.
+    Uses the same precomputed relationship closure as the match-time
+    relationship-graph tier, so this list never drifts out of sync with it.
     """
     implied: Set[str] = set()
     for skill in list(found):
-        for implied_skill in SKILL_IMPLICATIONS.get(skill, []):
-            implied.add(implied_skill)
+        canonical = _registry.normalize_skill(skill)
+        for related_skill, (weight, rclass) in _registry.closure_for(canonical).items():
+            if rclass == "hierarchical" and weight >= _RELATIONSHIP_MATCH_THRESHOLD:
+                implied.add(related_skill)
+            elif rclass == "sibling" and weight >= _RELATIONSHIP_MATCH_THRESHOLD:
+                # Siblings (JWT/OAuth/Bearer Token) don't imply each other as
+                # literal possessions, but they DO all imply their shared
+                # parent (handled by the hierarchical edges above); nothing
+                # additional to add here.
+                continue
     return found | implied
 
 
@@ -157,6 +174,13 @@ def extract_all_resume_skills(parsed_resume: Dict[str, Any]) -> Set[str]:
         if raw_lines:
             raw_text = " ".join(raw_lines)
             found.update(extract_skills_from_text(raw_text))
+
+        # Rule-engine-inferred capabilities (e.g. "implemented login using
+        # JWT" -> "Authentication") -- computed by extractors/projects.py
+        # but previously discarded before reaching the matcher.
+        for cap in (proj.get("inferred_capabilities", []) or []):
+            if cap:
+                found.add(cap)
 
     # ── 3. Experience ─────────────────────────────────────────────────────
     for exp in (parsed_resume.get("experience", []) or []):
@@ -281,13 +305,21 @@ def extract_all_resume_skills(parsed_resume: Dict[str, Any]) -> Set[str]:
 
 def _is_match(jd_skill: str, resume_skills: Set[str], resume_skills_norm: Set[str]) -> bool:
     """
-    Check if a JD skill matches any resume skill via:
+    Check if a JD skill matches any resume skill via, in ascending cost order:
     1. Exact string match (raw)
     2. Exact normalized/alias match
-    3. Fuzzy string matching (>=82 token sort ratio)
+    3. Relationship-graph match (O(1) precomputed closure lookup -- e.g.
+       JD wants "Authentication", resume has "JWT"; JD wants "EC2", resume
+       has "AWS")
+    4. Fuzzy string matching (>=82 token sort ratio)
+    5. Semantic similarity match (moved to bulk operation in generate_skill_gap,
+       only reached for skills that fail all of the above -- steps 1-4 resolve
+       the large majority of real matches at near-zero cost, so the
+       relatively expensive embedding path is only hit for genuine long tail)
     """
     raw_jd = jd_skill.strip()
     jd_norm = _norm(jd_skill)
+    jd_canonical = _registry.normalize_skill(jd_skill)
 
     # 1. Raw exact match
     if raw_jd in resume_skills:
@@ -297,21 +329,30 @@ def _is_match(jd_skill: str, resume_skills: Set[str], resume_skills_norm: Set[st
     if jd_norm in resume_skills_norm:
         return True
 
-    # 3. Fuzzy match on normalized strings (lowered threshold: 82)
+    # 3. Relationship-graph match (see module docstring for the precision
+    # rationale behind _RELATIONSHIP_MATCH_THRESHOLD).
+    #
+    # IMPORTANT: the lookup direction matters. We ask "starting from what the
+    # candidate actually HAS (resume_skill), does its closure reach the JD's
+    # requirement (jd_canonical), and at what confidence?" -- not the other
+    # way around. This is what makes the asymmetric hierarchical weighting
+    # work as intended: resume=JWT / JD=Authentication (generic) matches
+    # strongly (child evidence -> parent requirement, ~0.9), while
+    # resume=Python / JD=Django (specific) does NOT auto-match just because
+    # Django's own closure happens to reach Python at full weight.
+    for resume_skill in resume_skills:
+        resume_canonical = _registry.normalize_skill(resume_skill)
+        hit = _registry.closure_for(resume_canonical).get(jd_canonical)
+        if hit and hit[0] >= _RELATIONSHIP_MATCH_THRESHOLD:
+            return True
+
+    # 4. Fuzzy match on normalized strings (lowered threshold: 82)
     for rs_norm in resume_skills_norm:
         score = fuzz.token_sort_ratio(jd_norm, rs_norm)
         if score >= 82:
             return True
 
-    # 4. Semantic similarity match (only when embeddings available)
-    try:
-        from .embedding_engine import semantic_similarity, is_available
-        if is_available():
-            for rs in resume_skills:
-                if semantic_similarity(raw_jd, rs) >= 0.75:
-                    return True
-    except Exception:
-        pass
+    # 5. Semantic similarity match moved to bulk operation in generate_skill_gap
 
     return False
 
@@ -319,6 +360,7 @@ def _is_match(jd_skill: str, resume_skills: Set[str], resume_skills_norm: Set[st
 def generate_skill_gap(
     parsed_resume: Dict[str, Any],
     parsed_jd: Any,
+    cache: dict = None,
 ) -> SkillGapResult:
     """Compute skill gap between a parsed resume and a parsed JD."""
     if isinstance(parsed_jd, dict):
@@ -344,17 +386,73 @@ def generate_skill_gap(
         benchmark_skills = required
         is_preferred_only = False
 
+    unmatched_benchmark = []
     for jd_skill in benchmark_skills:
         if _is_match(jd_skill, resume_skills_raw, resume_skills_norm):
             matched.append(jd_skill)
         else:
-            missing.append(jd_skill)
+            unmatched_benchmark.append(jd_skill)
+
+    # Batched Semantic Matching
+    if unmatched_benchmark:
+        try:
+            from .embedding_engine import is_available, batch_encode_with_cache, cosine_similarity_matrix
+            if is_available() and cache is not None:
+                jd_vecs = batch_encode_with_cache(unmatched_benchmark, cache)
+                rs_list = list(resume_skills_raw)
+                if rs_list:
+                    rs_vecs = batch_encode_with_cache(rs_list, cache)
+                    sim_matrix = cosine_similarity_matrix(jd_vecs, rs_vecs)
+                    
+                    for i, jd_skill in enumerate(unmatched_benchmark):
+                        if sim_matrix[i].max() >= SKILL_SEMANTIC_THRESHOLD:
+                            matched.append(jd_skill)
+                        else:
+                            missing.append(jd_skill)
+                            
+                    import gc
+                    del jd_vecs
+                    del rs_vecs
+                    del sim_matrix
+                    gc.collect()
+                else:
+                    missing.extend(unmatched_benchmark)
+            else:
+                missing.extend(unmatched_benchmark)
+        except Exception:
+            missing.extend(unmatched_benchmark)
 
     recommended: List[str] = []
     if not is_preferred_only:
+        unmatched_pref = []
         for pref_skill in preferred:
             if not _is_match(pref_skill, resume_skills_raw, resume_skills_norm):
-                recommended.append(pref_skill)
+                unmatched_pref.append(pref_skill)
+                
+        if unmatched_pref:
+            try:
+                from .embedding_engine import is_available, batch_encode_with_cache, cosine_similarity_matrix
+                if is_available() and cache is not None:
+                    pref_vecs = batch_encode_with_cache(unmatched_pref, cache)
+                    rs_list = list(resume_skills_raw)
+                    if rs_list:
+                        rs_vecs = batch_encode_with_cache(rs_list, cache)
+                        sim_matrix = cosine_similarity_matrix(pref_vecs, rs_vecs)
+                        
+                        for i, pref_skill in enumerate(unmatched_pref):
+                            if sim_matrix[i].max() < SKILL_SEMANTIC_THRESHOLD:
+                                recommended.append(pref_skill)
+                        import gc
+                        del pref_vecs
+                        del rs_vecs
+                        del sim_matrix
+                        gc.collect()
+                    else:
+                        recommended.extend(unmatched_pref)
+                else:
+                    recommended.extend(unmatched_pref)
+            except Exception:
+                recommended.extend(unmatched_pref)
 
     total = len(benchmark_skills)
     match_pct = round((len(matched) / total * 100), 1) if total > 0 else 0.0

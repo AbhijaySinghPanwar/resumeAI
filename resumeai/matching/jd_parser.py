@@ -1,5 +1,5 @@
 """
-matching/jd_parser.py — Job Description Parser (Phase 4.2 + hotfix).
+matching/jd_parser.py — Job Description Parser (Phase 4.2 + hotfix + ontology wiring).
 
 Fixes in this version:
   - Section headers now match "Required Skills", "Preferred Skills", "Nice to Have"
@@ -9,181 +9,36 @@ Fixes in this version:
   - OR alternatives ("Django or FastAPI") counted as one requirement group.
   - Inline preferred signals ("preferred", "nice to have") routed to preferred_skills.
   - Domain classification uses token-based matching.
+  - Skill vocabulary (CANONICAL_SKILLS / aliases) now lives in
+    resumeai/ontology/skill_ontology.json, the single source of truth shared
+    with the resume-side extractor (extractors/projects.py) and the
+    relationship-graph matcher (gap_analyzer.py). This module no longer
+    defines its own skill dictionary -- see resumeai/ontology/registry.py.
 """
 from __future__ import annotations
 
 import re
 from typing import List, Dict, Set, Optional, Tuple
 from .schemas import ParsedJD
+from resumeai.ontology.registry import get_registry
 
+_registry = get_registry()
 
-# ── CANONICAL SKILLS ──────────────────────────────────────────────────────────
-CANONICAL_SKILLS: List[tuple] = [
-    # CS Fundamentals
-    ("Data Structures and Algorithms", ["data structures and algorithms", "data structures & algorithms", "dsa"]),
-    ("Data Structures", ["data structures", "data structure"]),
-    ("Algorithms", ["algorithms", "algorithm design"]),
-    ("Problem Solving", ["problem solving", "problem-solving", "analytical skills"]),
-    ("System Design", ["system design", "systems design", "high level design", "hld", "lld", "low level design"]),
-    ("Object-Oriented Programming", ["object-oriented programming", "object oriented programming", "oop", "oops",
-                                     "object-oriented design", "ood"]),
-    ("Distributed Systems", ["distributed systems", "distributed computing"]),
-    ("Operating Systems", ["operating systems", "os concepts"]),
-    ("Computer Networks", ["computer networks", "networking", "network programming"]),
-    ("Database Management Systems", ["database management systems", "dbms", "rdbms"]),
-    ("Design Patterns", ["design patterns", "software design patterns"]),
-    ("Competitive Programming", ["competitive programming", "cp", "competitive coding"]),
-    ("Unit Testing", ["unit testing", "unit tests", "test driven development", "tdd"]),
-    ("API Design", ["api design", "api development", "api architecture"]),
-    # Programming Languages
-    ("Python", ["python", "python3", "python 3"]),
-    ("JavaScript", ["javascript", "js", "es6", "es2015", "ecmascript"]),
-    ("TypeScript", ["typescript", "ts"]),
-    ("Java", ["java", "java 8", "java 11", "java 17"]),
-    ("C++", ["c++", "cpp", "c plus plus"]),
-    ("C", ["c programming", "c language"]),
-    ("C#", ["c#", "csharp", "c sharp"]),
-    ("Go", ["golang", "go language"]),
-    ("Rust", ["rust", "rust-lang"]),
-    ("Ruby", ["ruby"]),
-    ("Kotlin", ["kotlin"]),
-    ("Swift", ["swift", "swiftui"]),
-    ("Scala", ["scala"]),
-    ("PHP", ["php", "php7", "php8"]),
-    ("R", ["r programming", "r language"]),
-    ("MATLAB", ["matlab"]),
-    ("Bash", ["bash", "bash scripting", "shell scripting", "shell script", "zsh"]),
-    ("SQL", ["sql", "structured query language", "pl/sql", "plpgsql"]),
-    ("HTML/CSS", ["html", "css", "html5", "css3", "html/css"]),
-    # Web Frameworks
-    ("FastAPI", ["fastapi", "fast api"]),
-    ("Django", ["django", "django rest framework", "drf"]),
-    ("Flask", ["flask"]),
-    ("Spring Boot", ["spring boot", "springboot"]),
-    ("Spring", ["spring framework", "spring mvc"]),
-    ("React", ["react", "reactjs", "react.js", "react js"]),
-    ("Next.js", ["next.js", "nextjs", "next js"]),
-    ("Vue.js", ["vue.js", "vuejs", "vue js", "vue"]),
-    ("Angular", ["angular", "angularjs", "angular.js"]),
-    ("Node.js", ["node.js", "nodejs", "node js"]),
-    ("Express.js", ["express.js", "expressjs", "express js", "express"]),
-    ("Svelte", ["svelte", "sveltekit"]),
-    ("Ruby on Rails", ["ruby on rails", "rails", "ror"]),
-    ("Laravel", ["laravel"]),
-    # Databases
-    ("PostgreSQL", ["postgresql", "postgres", "psql"]),
-    ("MySQL", ["mysql", "mariadb"]),
-    ("MongoDB", ["mongodb", "mongo"]),
-    ("Redis", ["redis"]),
-    ("SQLite", ["sqlite"]),
-    ("Elasticsearch", ["elasticsearch", "elastic search", "opensearch"]),
-    ("Cassandra", ["cassandra", "apache cassandra"]),
-    ("DynamoDB", ["dynamodb", "amazon dynamodb"]),
-    ("BigQuery", ["bigquery", "google bigquery"]),
-    ("Snowflake", ["snowflake"]),
-    ("Neo4j", ["neo4j", "graph database"]),
-    ("Oracle", ["oracle", "oracle db", "oracle database"]),
-    # Cloud & DevOps
-    ("AWS", ["aws", "amazon web services", "amazon aws"]),
-    ("GCP", ["gcp", "google cloud platform", "google cloud"]),
-    ("Azure", ["azure", "microsoft azure"]),
-    ("Docker", ["docker", "docker containers", "containerization"]),
-    ("Kubernetes", ["kubernetes", "k8s"]),
-    ("Terraform", ["terraform"]),
-    ("Ansible", ["ansible"]),
-    ("CI/CD", ["ci/cd", "continuous integration", "continuous deployment", "continuous delivery",
-               "github actions", "gitlab ci", "jenkins", "circleci"]),
-    ("GitHub Actions", ["github actions"]),
-    ("Jenkins", ["jenkins"]),
-    ("Nginx", ["nginx"]),
-    ("Linux", ["linux", "ubuntu", "centos", "debian"]),
-    ("Git", ["git", "version control"]),
-    ("GitHub", ["github"]),
-    ("GitLab", ["gitlab"]),
-    # APIs & Integration
-    ("REST APIs", ["rest apis", "rest api", "restful api", "restful apis", "restful",
-                   "rest", "http api", "restful services"]),
-    ("GraphQL", ["graphql", "graph ql"]),
-    ("gRPC", ["grpc"]),
-    ("WebSockets", ["websockets", "websocket", "ws"]),
-    ("OAuth", ["oauth", "oauth2", "oauth 2.0"]),
-    ("JWT", ["jwt", "json web token", "jwt authentication", "jwt auth"]),
-    # Data Science & ML/AI
-    ("Machine Learning", ["machine learning", "ml algorithms", "supervised learning", "unsupervised learning"]),
-    ("Deep Learning", ["deep learning", "dl", "neural networks", "neural network"]),
-    ("NLP", ["nlp", "natural language processing", "text processing"]),
-    ("Computer Vision", ["computer vision", "image processing", "cv"]),
-    ("LLM", ["llm", "large language model", "large language models", "language models"]),
-    ("LangChain", ["langchain", "lang chain"]),
-    ("RAG", ["rag", "retrieval augmented generation"]),
-    ("GenAI", ["genai", "generative ai", "gen ai"]),
-    ("OpenAI", ["openai", "open ai", "gpt", "gpt-4", "chatgpt"]),
-    ("Hugging Face", ["hugging face", "huggingface", "transformers"]),
-    ("TensorFlow", ["tensorflow", "tf"]),
-    ("PyTorch", ["pytorch", "torch"]),
-    ("Scikit-learn", ["scikit-learn", "sklearn", "scikit learn"]),
-    ("Pandas", ["pandas"]),
-    ("NumPy", ["numpy", "numpy arrays"]),
-    ("Matplotlib", ["matplotlib", "seaborn", "plotly"]),
-    ("Apache Spark", ["apache spark", "pyspark", "spark"]),
-    ("Apache Kafka", ["apache kafka", "kafka"]),
-    ("Apache Airflow", ["apache airflow", "airflow"]),
-    # Tools & Testing
-    ("Postman", ["postman"]),
-    ("Swagger", ["swagger", "openapi"]),
-    ("Jira", ["jira"]),
-    ("Figma", ["figma"]),
-    ("Selenium", ["selenium"]),
-    ("Jest", ["jest"]),
-    ("Pytest", ["pytest"]),
-    ("JUnit", ["junit"]),
-    ("Cypress", ["cypress"]),
-    ("Tableau", ["tableau"]),
-    ("Power BI", ["power bi", "powerbi"]),
-    # Methodologies
-    ("Agile", ["agile", "agile methodology", "agile development"]),
-    ("Scrum", ["scrum", "scrum master"]),
-    ("Microservices", ["microservices", "microservice architecture", "service mesh"]),
-    ("Test-Driven Development", ["test-driven development", "tdd", "test driven development"]),
-    ("DevOps", ["devops"]),
-    ("MLOps", ["mlops", "ml ops"]),
-]
-
-# Build lookup structures
-_ALIAS_TO_CANONICAL: Dict[str, str] = {}
-for canonical, aliases in CANONICAL_SKILLS:
-    for alias in aliases:
-        _ALIAS_TO_CANONICAL[alias.lower()] = canonical
-
-_ALL_ALIASES_SORTED = sorted(
-    _ALIAS_TO_CANONICAL.items(),
-    key=lambda x: len(x[0]),
-    reverse=True,
-)
+# Kept for backward compatibility with any external code importing this name
+# directly (e.g. gap_analyzer.py's historical import). Prefer
+# resumeai.ontology.registry.get_registry().alias_to_canonical_map() in new code.
+_ALIAS_TO_CANONICAL: Dict[str, str] = _registry.alias_to_canonical_map()
 
 
 def normalize_skill(raw: str) -> str:
-    return _ALIAS_TO_CANONICAL.get(raw.strip().lower(), raw.strip())
+    return _registry.normalize_skill(raw)
 
 
 def extract_skills_from_text(text: str) -> List[str]:
-    """Extract canonical skills from freeform text using phrase-first matching."""
-    if not text:
-        return []
-    text_lower = text.lower()
-    found: Set[str] = set()
-    consumed_spans: List[tuple] = []
-
-    for alias, canonical in _ALL_ALIASES_SORTED:
-        pattern = r"(?<![a-zA-Z0-9/\-])" + re.escape(alias) + r"(?![a-zA-Z0-9/\-])"
-        for m in re.finditer(pattern, text_lower):
-            start, end = m.start(), m.end()
-            overlaps = any(s < end and start < e for s, e in consumed_spans)
-            if not overlaps:
-                found.add(canonical)
-                consumed_spans.append((start, end))
-
-    return sorted(found)
+    """Extract canonical skills from freeform text using phrase-first matching.
+    Delegates to the shared ontology registry so JD-side and resume-side
+    extraction always use the identical vocabulary."""
+    return _registry.extract_skills_from_text(text)
 
 
 # ── Domain classification ─────────────────────────────────────────────────────

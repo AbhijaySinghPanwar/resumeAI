@@ -69,8 +69,8 @@ class ProjectEnhancer:
         description = description.strip()
 
         if not self._gemini.is_available:
-            logger.warning("Gemini unavailable — returning fallback project descriptions")
-            return self._fallback(project_name, description)
+            logger.warning("AI Provider: fallback - Reason: Gemini unavailable")
+            return self._fallback(project_name, description, reason=self._gemini._init_error or "Gemini unavailable")
 
         prompt = PROMPT_TEMPLATE.format(
             project_name=project_name,
@@ -84,16 +84,20 @@ class ProjectEnhancer:
                 if key not in result or not result[key]:
                     result[key] = description
 
+            result["provider"] = "gemini"
+            result["fallback"] = False
+            result["reason"] = None
             return result
 
         except json.JSONDecodeError as exc:
             logger.error("ProjectEnhancer JSON parse error: %s", exc)
-            return self._fallback(project_name, description)
+            logger.warning("AI Provider: fallback - Reason: JSON Parse Error")
+            return self._fallback(project_name, description, reason="JSON Parse Error")
         except Exception as exc:
             logger.error("ProjectEnhancer error: %s", exc)
             raise
 
-    def _fallback(self, project_name: str, description: str) -> dict:
+    def _fallback(self, project_name: str, description: str, reason: str = "Unknown error") -> dict:
         return {
             "ats_version": (
                 f"Developed {project_name}: {description} "
@@ -107,4 +111,7 @@ class ProjectEnhancer:
                 f"Built {project_name} to solve a real-world problem, "
                 "delivering measurable value to end users."
             ),
+            "provider": "fallback",
+            "fallback": True,
+            "reason": reason
         }

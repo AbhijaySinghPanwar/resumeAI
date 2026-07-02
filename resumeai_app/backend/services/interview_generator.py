@@ -142,8 +142,8 @@ class InterviewGenerator:
         summary = _summarize_resume(resume_data)
 
         if not self._gemini.is_available:
-            logger.warning("Gemini unavailable — returning fallback interview questions")
-            return self._fallback(summary)
+            logger.warning("AI Provider: fallback - Reason: Gemini unavailable")
+            return self._fallback(summary, reason=self._gemini._init_error or "Gemini unavailable")
 
         prompt = PROMPT_TEMPLATE.format(
             job_description=job_description.strip(),
@@ -159,16 +159,20 @@ class InterviewGenerator:
                 if key not in result or not isinstance(result[key], list):
                     result[key] = []
 
+            result["provider"] = "gemini"
+            result["fallback"] = False
+            result["reason"] = None
             return result
 
         except json.JSONDecodeError as exc:
             logger.error("InterviewGenerator JSON parse error: %s", exc)
-            return self._fallback(summary)
+            logger.warning("AI Provider: fallback - Reason: JSON Parse Error")
+            return self._fallback(summary, reason="JSON Parse Error")
         except Exception as exc:
             logger.error("InterviewGenerator error: %s", exc)
             raise
 
-    def _fallback(self, summary: Dict[str, str]) -> dict:
+    def _fallback(self, summary: Dict[str, str], reason: str = "Unknown error") -> dict:
         name = summary.get("name", "you")
         skills = summary.get("skills", "your skills")
         
@@ -196,4 +200,7 @@ class InterviewGenerator:
                 _make_q("Tell me about a time when you had to deliver a project under a tight deadline.", "Medium"),
                 _make_q("Describe a situation where you disagreed with a teammate's technical decision.", "Hard"),
             ],
+            "provider": "fallback",
+            "fallback": True,
+            "reason": reason
         }

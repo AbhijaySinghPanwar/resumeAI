@@ -376,3 +376,114 @@ def test_ml_jd_different_from_backend_jd():
     # Backend resume should score higher on backend JD than ML JD
     assert backend_result.match_score >= ml_result.match_score - 20, \
         "Backend resume should score at least comparably on backend JD"
+
+
+# ── Ontology wiring regression tests ─────────────────────────────────────────
+# Covers the exact failure modes described in semantic_matching_audit.md:
+# JD requirements that used to vanish entirely (never extracted, so never
+# scored as matched OR missing) because the JD-side vocabulary was narrower
+# than the resume-side vocabulary.
+
+BACKEND_JD_WITH_AUTH_AND_GEMINI = """
+Backend Software Engineer
+
+Required Skills:
+- Python
+- FastAPI
+- REST APIs
+- Authentication (JWT / OAuth)
+- PostgreSQL
+- Git and GitHub
+- Gemini API
+
+Responsibilities:
+- Implement secure authentication using JWT
+- Integrate Gemini API for resume parsing features
+"""
+
+RESUME_WITH_JWT_AND_GEMINI = {
+    "summary": "Backend engineer.",
+    "experience": [],
+    "projects": [
+        {
+            "name": "AI Resume Assistant",
+            "description": "Backend service that parses resumes using the Gemini API.",
+            "technologies": ["Python", "Gemini API"],
+            "bullets": ["Implemented login using JWT for secure authentication"],
+            "raw_lines": [],
+        }
+    ],
+    "skills": {
+        "flat_list": ["Python", "FastAPI", "PostgreSQL", "Git", "GitHub", "JWT"],
+        "categories": [],
+    },
+    "certifications": [],
+    "achievements": [],
+    "leadership": [],
+    "education": [],
+}
+
+
+def test_jd_extracts_authentication_requirement():
+    """'Authentication (JWT / OAuth)' must produce Authentication/JWT/OAuth
+    as actual required skills, not silently disappear from required_skills."""
+    parsed = parse_job_description(BACKEND_JD_WITH_AUTH_AND_GEMINI)
+    assert "Authentication" in parsed.required_skills
+    assert "JWT" in parsed.required_skills
+    assert "OAuth" in parsed.required_skills
+
+
+def test_jd_extracts_gemini_api_requirement():
+    """'Gemini API' must be extracted from the JD -- this was completely
+    missing from the JD-side vocabulary before the ontology consolidation."""
+    parsed = parse_job_description(BACKEND_JD_WITH_AUTH_AND_GEMINI)
+    assert "Gemini API" in parsed.required_skills
+
+
+def test_resume_with_jwt_satisfies_generic_authentication_requirement():
+    """A resume with JWT evidence should satisfy a JD asking generically for
+    Authentication (relationship-graph match), and Gemini API usage in a
+    project should satisfy a literal 'Gemini API' requirement."""
+    parsed_jd = parse_job_description(BACKEND_JD_WITH_AUTH_AND_GEMINI)
+    result = generate_skill_gap(RESUME_WITH_JWT_AND_GEMINI, parsed_jd, cache=None)
+    assert "Authentication" in result.matched_skills
+    assert "JWT" in result.matched_skills
+    assert "Gemini API" in result.matched_skills
+    assert "Python" in result.matched_skills
+    assert "FastAPI" in result.matched_skills
+
+
+def test_specific_requirement_not_over_credited_by_generic_evidence():
+    """Precision guardrail: a JD asking for a *specific* framework (Django)
+    should NOT be satisfied just because the resume shows the generic
+    parent language (Python) -- see architecture_review.md §2.2."""
+    jd = parse_job_description("Required Skills:\n- JWT\n- Django\n")
+    resume = {
+        "summary": "", "experience": [], "projects": [],
+        "skills": {"flat_list": ["Python", "OAuth"], "categories": []},
+        "certifications": [], "achievements": [], "leadership": [], "education": [],
+    }
+    result = generate_skill_gap(resume, jd, cache=None)
+    # OAuth is a sibling of JWT under Authentication -> should match.
+    assert "JWT" in result.matched_skills
+    # Python alone is too generic to imply Django specifically -> should NOT match.
+    assert "Django" not in result.matched_skills
+    assert "Django" in result.missing_skills
+
+
+def test_ec2_s3_lambda_extracted_and_related_to_aws():
+    """Cloud service acronyms (EC2/S3/Lambda) must be extractable, and a
+    resume showing generic AWS experience should relate to them via the
+    ontology's hierarchical (belongs_to) relationship."""
+    parsed = extract_skills_from_text("Cloud experience with AWS Console, EC2, S3, AWS Lambda")
+    assert "EC2" in parsed
+    assert "S3" in parsed
+    assert "AWS Lambda" in parsed
+    assert "AWS" in parsed
+
+
+def test_crud_and_realtime_and_iot_extracted():
+    """Terms that were completely absent from the old CANONICAL_SKILLS list."""
+    assert "CRUD" in extract_skills_from_text("CRUD operations and real-time systems with WebSockets")
+    assert "Real-time Systems" in extract_skills_from_text("real-time systems with WebSockets")
+    assert "IoT" in extract_skills_from_text("Built an IoT monitoring system with ESP32 sensors")

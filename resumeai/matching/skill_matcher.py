@@ -46,6 +46,7 @@ def _compute_skill_score(
     parsed_resume: Dict[str, Any],
     parsed_jd: ParsedJD,
     debug: Dict,
+    cache: dict = None,
 ) -> Optional[float]:
     """Skill overlap score 0-100 with partial credit for preferred."""
     required = list(getattr(parsed_jd, "required_skills", []))
@@ -55,7 +56,7 @@ def _compute_skill_score(
         debug["skill_match_note"] = "No skills extracted from JD — skill match is N/A."
         return None
 
-    gap = generate_skill_gap(parsed_resume, parsed_jd)
+    gap = generate_skill_gap(parsed_resume, parsed_jd, cache=cache)
     matched_count = len(gap.matched_skills)
     total_required = len(required)
 
@@ -174,6 +175,7 @@ def _compute_semantic_score(
     parsed_resume: Dict[str, Any],
     parsed_jd: ParsedJD,
     debug: Dict,
+    cache: dict = None,
 ) -> float:
     """
     Semantic similarity score 0-100 using MiniLM embeddings.
@@ -205,7 +207,7 @@ def _compute_semantic_score(
         from .embedding_engine import max_similarity_scores, is_available
         if not is_available():
             raise RuntimeError("Embedding model not loaded")
-        scores = max_similarity_scores(query_texts, resume_snippets)
+        scores = max_similarity_scores(query_texts, resume_snippets, cache=cache)
         if not scores:
             raise ValueError("empty scores")
         avg_sim = sum(scores) / len(scores)
@@ -444,15 +446,19 @@ class SkillMatcher:
         parsed_resume: Dict[str, Any],
         parsed_jd: ParsedJD,
     ) -> MatchResult:
+        import gc
         debug: Dict = {}
+        
+        # Per-request embedding cache
+        cache = {}
 
         # ── Skill gap ────────────────────────────────────────────────────
-        gap = generate_skill_gap(parsed_resume, parsed_jd)
+        gap = generate_skill_gap(parsed_resume, parsed_jd, cache=cache)
         resume_skills_all = sorted(extract_all_resume_skills(parsed_resume))
 
         # ── Component scores ─────────────────────────────────────────────
-        skill_score  = _compute_skill_score(parsed_resume, parsed_jd, debug)
-        sem_score    = _compute_semantic_score(parsed_resume, parsed_jd, debug)
+        skill_score  = _compute_skill_score(parsed_resume, parsed_jd, debug, cache=cache)
+        sem_score    = _compute_semantic_score(parsed_resume, parsed_jd, debug, cache=cache)
         exp_score    = _compute_experience_score(parsed_resume, parsed_jd)
         edu_score    = _compute_education_score(parsed_resume, parsed_jd)
 
@@ -529,7 +535,7 @@ class SkillMatcher:
             "semantic_note":     debug.get("semantic_note", ""),
         }
 
-        return MatchResult(
+        result = MatchResult(
             match_score=overall,
             match_grade=_score_to_grade(overall),
             component_scores=ComponentScores(
@@ -544,3 +550,9 @@ class SkillMatcher:
             recommended_learning=roadmap,
             debug_info=debug_info,
         )
+        
+        # Clean up per-request memory
+        del cache
+        gc.collect()
+        
+        return result

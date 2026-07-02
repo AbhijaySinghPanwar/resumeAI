@@ -17,6 +17,8 @@ import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from resumeai.extractors._continuation import is_continuation, is_link_label_line
+from resumeai.extractors.project_rules import infer_capabilities_from_text
+from resumeai.ontology.registry import get_registry
 
 # ── Regex helpers ─────────────────────────────────────────────────────────────
 URL_RE        = re.compile(r"https?://[^\s>|]+", re.IGNORECASE)
@@ -98,6 +100,20 @@ TECH_NORMALIZE: Dict[str, str] = {
     "html": "HTML", "css": "CSS", "html/css": "HTML/CSS",
     "sql": "SQL",
 }
+
+# Supplement (does not override) TECH_NORMALIZE with any alias the shared
+# ontology registry knows about that isn't already covered above. This is
+# how new skills (Authentication, Bearer Token, CRUD, EC2, S3, AWS Lambda,
+# Real-time Systems, Cloud Deployment, API Integration, Resume Parsing,
+# etc.) become resume-extractable without hand-editing this dict again --
+# add them once to resumeai/ontology/skill_ontology.json and every module
+# that reads from the registry picks them up automatically. Existing
+# entries above are left untouched so current canonical-name output (e.g.
+# "React.js" instead of the ontology's "React") doesn't change and doesn't
+# risk any downstream behavior that depends on the historical casing.
+for _alias, _canonical in get_registry().alias_to_canonical_map().items():
+    TECH_NORMALIZE.setdefault(_alias, _canonical)
+del _alias, _canonical
 
 # ── Technology → implied capabilities ─────────────────────────────────────────
 TECH_IMPLIES: Dict[str, List[str]] = {
@@ -351,24 +367,24 @@ def _score_complexity(techs: List[str], bullets: List[str]) -> int:
     return min(100, score)
 
 
-def _infer_capabilities(techs: List[str], bullets: List[str]) -> List[str]:
+def _infer_capabilities(techs: List[str], bullets: List[str], description: str = "") -> List[str]:
+    """
+    Infer capabilities from (a) the project's declared tech stack via
+    TECH_IMPLIES, and (b) a rule engine over the actual description/bullet
+    text (project_rules.py) that requires technology/action co-occurrence
+    rather than bare keyword presence -- e.g. "implemented login using JWT"
+    infers Authentication without needing the literal word "authentication"
+    anywhere, but a stray mention of "api" alone no longer over-triggers
+    "API Development" the way the previous single-keyword check did.
+    """
     caps: Set[str] = set()
     for tech in techs:
         for cap in TECH_IMPLIES.get(tech, []):
             caps.add(cap)
-    all_text = " ".join(bullets).lower()
-    if "real-time" in all_text or "realtime" in all_text or "websocket" in all_text:
-        caps.add("Real-time Systems")
-    if "authentication" in all_text or "login" in all_text or "jwt" in all_text:
-        caps.add("Authentication")
-    if "dashboard" in all_text or "visualization" in all_text:
-        caps.add("Data Visualization")
-    if "api" in all_text:
-        caps.add("API Development")
-    if "deploy" in all_text or "cloud" in all_text:
-        caps.add("Cloud Deployment")
-    if "test" in all_text:
-        caps.add("Testing")
+
+    all_text = " ".join(filter(None, [description] + list(bullets)))
+    caps.update(infer_capabilities_from_text(all_text))
+
     return sorted(caps)
 
 
@@ -601,7 +617,7 @@ def _parse_single_project(group: List[str]) -> Optional[Dict[str, Any]]:
     # Build description
     description = " ".join(description_parts).strip() if description_parts else (bullets[0] if bullets else None)
 
-    inferred_capabilities = _infer_capabilities(technologies, bullets)
+    inferred_capabilities = _infer_capabilities(technologies, bullets, description or "")
     domain                = _classify_domain(technologies)
     complexity            = _score_complexity(technologies, bullets)
     skill_evidence        = _build_skill_evidence(technologies, name or "", bullets, group)

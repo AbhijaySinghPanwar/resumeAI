@@ -249,29 +249,34 @@
   <script src="shared.js"></script>
   <script>
     // ── Check Gemini status on load ───────────────────────────────────────────────
+    function updateAIStatusFromResponse(d) {
+      const badge = document.getElementById('aiStatusBadge');
+      if (d.provider === 'gemini' && d.available !== false) {
+        badge.className = 'ai-status-badge ready';
+        badge.innerHTML = '<span class="status-dot dot-green"></span> Gemini Ready';
+        clearAlert('interviewError');
+      } else if (d.provider === 'fallback' || d.fallback) {
+        badge.className = 'ai-status-badge fallback';
+        badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
+        
+        let msg = 'AI Assistant is temporarily using fallback mode.';
+        if (d.reason) msg += ' Reason: ' + d.reason;
+        
+        if (d.error_code === 'PERMISSION_DENIED' || (d.reason && (d.reason.includes('API key') || d.reason.includes('PERMISSION_DENIED') || d.reason.includes('403')))) {
+          msg = 'The configured Gemini API key has been revoked or is invalid. Please configure a new API key.';
+        } else if (d.error_code === 'NOT_CONFIGURED') {
+          msg = 'Gemini API key has not been configured.';
+        }
+        
+        showAlert('interviewError', '⚠ ' + msg, 'info');
+      }
+    }
+
     async function checkAIStatus() {
       try {
         const r = await fetch(`${API}/ai/status`);
         const d = await r.json();
-        const badge = document.getElementById('aiStatusBadge');
-        if (d.available) {
-          badge.className = 'ai-status-badge ready';
-          badge.innerHTML = `<span class="status-dot dot-green"></span> ${d.active_model.split('/')[1] || 'Gemini Ready'}`;
-        } else {
-          badge.className = 'ai-status-badge fallback';
-          badge.innerHTML = '<span class="status-dot dot-amber"></span> Fallback Mode';
-          
-          let msg = 'Unable to initialize the AI service.';
-          if (d.error_code === 'PERMISSION_DENIED') {
-            msg = 'The configured Gemini API key has been revoked or is invalid. Please configure a new API key.';
-          } else if (d.error_code === 'NOT_CONFIGURED') {
-            msg = 'Gemini API key has not been configured.';
-          } else if (d.error_code === 'INIT_FAILED') {
-            msg = 'AI Assistant is temporarily unavailable because the configured Gemini API key is invalid.';
-          }
-          
-          showAlert('interviewError', '⚠ ' + msg, 'info');
-        }
+        updateAIStatusFromResponse(d);
       } catch (_) {}
     }
     checkAIStatus();
@@ -377,12 +382,10 @@
         });
         if (!r.ok) {
           const err = await r.json().catch(() => ({}));
-          if (err.provider === 'Gemini' || err.fallback) {
-            throw new Error("AI Assistant is currently unavailable because the configured Gemini API key is invalid or has been revoked.");
-          }
-          throw new Error(err.detail || `HTTP ${r.status}`);
+          throw new Error(err.detail || err.error_message || err.reason || `HTTP ${r.status}`);
         }
         const d = await r.json();
+        updateAIStatusFromResponse(d);
         renderQuestions('technicalList',  d.technical_questions);
         renderQuestions('projectList',    d.project_questions);
         renderQuestions('behavioralList', d.behavioral_questions);

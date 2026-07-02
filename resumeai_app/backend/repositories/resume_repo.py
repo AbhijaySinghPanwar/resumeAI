@@ -24,6 +24,7 @@ class ResumeRepository:
         filename: str,
         parsed_json: dict,
         ats_score: Optional[float] = None,
+        commit: bool = True,
     ) -> Resume:
         resume = Resume(
             user_id=user_id,
@@ -32,8 +33,12 @@ class ResumeRepository:
             ats_score=ats_score,
         )
         self.db.add(resume)
-        self.db.commit()
-        self.db.refresh(resume)
+        if commit:
+            self.db.commit()
+            self.db.refresh(resume)
+        else:
+            self.db.flush()
+            
         logger.info("Resume saved: id=%d user_id=%d filename=%s", resume.id, user_id, filename)
         return resume
 

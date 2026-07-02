@@ -73,8 +73,8 @@ class BulletImprover:
         context_label = "project description" if context == "project" else "work experience"
 
         if not self._gemini.is_available:
-            logger.warning("Gemini unavailable — returning fallback bullet variants")
-            return self._fallback(bullet)
+            logger.warning("AI Provider: fallback - Reason: Gemini unavailable")
+            return self._fallback(bullet, reason=self._gemini._init_error or "Gemini unavailable")
 
         prompt = PROMPT_TEMPLATE.format(bullet=bullet, context=context, context_label=context_label)
         try:
@@ -86,20 +86,27 @@ class BulletImprover:
                 if key not in result or not result[key]:
                     result[key] = bullet
 
+            result["provider"] = "gemini"
+            result["fallback"] = False
+            result["reason"] = None
             return result
 
         except json.JSONDecodeError as exc:
             logger.error("BulletImprover JSON parse error: %s", exc)
-            return self._fallback(bullet)
+            logger.warning("AI Provider: fallback - Reason: JSON Parse Error")
+            return self._fallback(bullet, reason="JSON Parse Error")
         except Exception as exc:
             logger.error("BulletImprover error: %s", exc)
             raise
 
-    def _fallback(self, bullet: str) -> dict:
+    def _fallback(self, bullet: str, reason: str = "Unknown error") -> dict:
         """Return basic variants when Gemini is unavailable."""
         words = bullet.strip().rstrip(".")
         return {
             "ats_version": f"Developed and implemented {words.lower()} with measurable impact.",
             "professional_version": f"Led {words.lower()}, delivering results aligned with organizational goals.",
             "concise_version": words[:60] + ("…" if len(words) > 60 else ""),
+            "provider": "fallback",
+            "fallback": True,
+            "reason": reason
         }

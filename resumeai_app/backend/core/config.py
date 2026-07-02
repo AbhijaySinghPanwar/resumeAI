@@ -13,7 +13,7 @@ from __future__ import annotations
 import secrets
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from pydantic import model_validator, Field
 
 class Settings(BaseSettings):
     """
@@ -30,12 +30,12 @@ class Settings(BaseSettings):
 
     # ── Application ───────────────────────────────────────────────────────────
     APP_NAME: str = "ResumeAI"
-    APP_VERSION: str = "4.0.0"
+    APP_VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"        # development | staging | production
     DEBUG: bool = True
 
     # ── Security ──────────────────────────────────────────────────────────────
-    SECRET_KEY: str = secrets.token_hex(32)   # Override in production!
+    SECRET_KEY: str = Field(default="")   # Must be overridden in production
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60 * 24 * 7    # 7 days
 
@@ -53,5 +53,21 @@ class Settings(BaseSettings):
     # ── Export ────────────────────────────────────────────────────────────────
     EXPORT_TEMP_DIR: str = "/tmp/resumeai_exports"
 
+    # ── ML Engines ────────────────────────────────────────────────────────────
+    EMBEDDING_ENGINE: str = "onnx"  # "onnx" or "pytorch"
+
+    @model_validator(mode="after")
+    def validate_settings(self) -> Settings:
+        if self.ENVIRONMENT == "production":
+            self.DEBUG = False
+            if not self.SECRET_KEY:
+                raise ValueError("SECRET_KEY must be explicitly configured in production!")
+            if not self.ALLOWED_ORIGINS or self.ALLOWED_ORIGINS == ["*"]:
+                raise ValueError("ALLOWED_ORIGINS must be explicitly configured in production (cannot be ['*']).")
+        else:
+            if not self.SECRET_KEY:
+                import secrets
+                self.SECRET_KEY = secrets.token_hex(32)
+        return self
 
 settings = Settings()
